@@ -1,0 +1,71 @@
+reg no
+chassis no
+current owener
+engine no
+cc
+type
+fuel
+model
+year
+country
+
+date of first reg
+old owners
+insurence date
+eco test
+lisine
+
+spec
+
+
+
+bike
+
+head light
+break light
+parking light
+urn light
+side mirrors
+main stand
+side stand
+
+kick start
+self start
+
+
+transmission
+fuel tank lit
+reserve
+suspension
+silencer
+battery
+engine condition
+
+
+oil levels
+break levels
+air filter
+
+horn
+spockets
+chains
+
+
+
+
+tyres
+tube/tubeless
+
+
+
+
+
+sun wiser
+fuel meter
+speed meter
+trip meter
+battry meter
+rpm
+AC
+
+

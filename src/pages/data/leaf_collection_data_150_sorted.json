@@ -1,0 +1,1503 @@
+[
+  {
+    "supplier_id": "SUP005",
+    "date": "2025-05-01",
+    "leaf_type": "Super",
+    "full_kg": 113.2,
+    "gross": 120.0,
+    "net_kg": 108.4,
+    "bag_kg": 8.6,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP035",
+    "date": "2025-05-01",
+    "leaf_type": "Normal",
+    "full_kg": 87.9,
+    "gross": 91.6,
+    
+    "net_kg": 83.5,
+    "bag_kg": 6.2,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP045",
+    "date": "2025-05-01",
+    "leaf_type": "Normal",
+    "full_kg": 143.8,
+    "gross": 147.5,
+    "net_kg": 142.6,
+    "bag_kg": 6.6,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP056",
+    "date": "2025-05-01",
+    "leaf_type": "Normal",
+    "full_kg": 100.1,
+    "gross": 107.2,
+    "net_kg": 95.6,
+    "bag_kg": 8.8,
+    "line": "MT"
+  },
+  {
+    "supplier_id": "SUP067",
+    "date": "2025-05-01",
+    "leaf_type": "Super",
+    "full_kg": 89.1,
+    "gross": 91.3,
+    "net_kg": 86.4,
+    "bag_kg": 5.4,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP124",
+    "date": "2025-05-01",
+    "leaf_type": "Normal",
+    "full_kg": 140.7,
+    "gross": 145.1,
+    "net_kg": 138.0,
+    "bag_kg": 5.7,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP127",
+    "date": "2025-05-01",
+    "leaf_type": "Normal",
+    "full_kg": 110.1,
+    "gross": 118.1,
+    "net_kg": 108.5,
+    "bag_kg": 7.1,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP128",
+    "date": "2025-05-01",
+    "leaf_type": "Normal",
+    "full_kg": 128.2,
+    "gross": 135.5,
+    "net_kg": 123.5,
+    "bag_kg": 7.5,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP139",
+    "date": "2025-05-01",
+    "leaf_type": "Normal",
+    "full_kg": 128.7,
+    "gross": 133.6,
+    "net_kg": 123.8,
+    "bag_kg": 6.2,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP146",
+    "date": "2025-05-01",
+    "leaf_type": "Normal",
+    "full_kg": 124.0,
+    "gross": 127.1,
+    "net_kg": 121.0,
+    "bag_kg": 6.4,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP001",
+    "date": "2025-05-02",
+    "leaf_type": "Super",
+    "full_kg": 148.0,
+    "gross": 153.6,
+    "net_kg": 143.0,
+    "bag_kg": 5.5,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP004",
+    "date": "2025-05-02",
+    "leaf_type": "Super",
+    "full_kg": 140.1,
+    "gross": 143.4,
+    "net_kg": 136.1,
+    "bag_kg": 7.8,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP053",
+    "date": "2025-05-02",
+    "leaf_type": "Super",
+    "full_kg": 125.3,
+    "gross": 130.4,
+    "net_kg": 124.0,
+    "bag_kg": 6.2,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP097",
+    "date": "2025-05-02",
+    "leaf_type": "Super",
+    "full_kg": 119.1,
+    "gross": 126.6,
+    "net_kg": 117.0,
+    "bag_kg": 7.5,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP111",
+    "date": "2025-05-02",
+    "leaf_type": "Super",
+    "full_kg": 132.9,
+    "gross": 139.3,
+    "net_kg": 128.4,
+    "bag_kg": 6.0,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP123",
+    "date": "2025-05-02",
+    "leaf_type": "Super",
+    "full_kg": 129.6,
+    "gross": 136.7,
+    "net_kg": 125.5,
+    "bag_kg": 7.5,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP130",
+    "date": "2025-05-02",
+    "leaf_type": "Super",
+    "full_kg": 135.5,
+    "gross": 141.8,
+    "net_kg": 132.0,
+    "bag_kg": 8.4,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP134",
+    "date": "2025-05-02",
+    "leaf_type": "Normal",
+    "full_kg": 147.4,
+    "gross": 150.4,
+    "net_kg": 143.3,
+    "bag_kg": 6.1,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP003",
+    "date": "2025-05-03",
+    "leaf_type": "Normal",
+    "full_kg": 147.5,
+    "gross": 155.4,
+    "net_kg": 145.8,
+    "bag_kg": 5.9,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP022",
+    "date": "2025-05-03",
+    "leaf_type": "Normal",
+    "full_kg": 144.7,
+    "gross": 147.7,
+    "net_kg": 141.7,
+    "bag_kg": 5.9,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP036",
+    "date": "2025-05-03",
+    "leaf_type": "Super",
+    "full_kg": 89.4,
+    "gross": 94.3,
+    "net_kg": 85.6,
+    "bag_kg": 6.2,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP077",
+    "date": "2025-05-03",
+    "leaf_type": "Super",
+    "full_kg": 144.2,
+    "gross": 147.4,
+    "net_kg": 140.7,
+    "bag_kg": 6.0,
+    "line": "MT"
+  },
+  {
+    "supplier_id": "SUP096",
+    "date": "2025-05-03",
+    "leaf_type": "Super",
+    "full_kg": 132.2,
+    "gross": 137.4,
+    "net_kg": 130.8,
+    "bag_kg": 7.9,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP103",
+    "date": "2025-05-03",
+    "leaf_type": "Super",
+    "full_kg": 102.9,
+    "gross": 109.4,
+    "net_kg": 101.3,
+    "bag_kg": 7.9,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP104",
+    "date": "2025-05-03",
+    "leaf_type": "Normal",
+    "full_kg": 140.4,
+    "gross": 145.9,
+    "net_kg": 136.1,
+    "bag_kg": 6.0,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP110",
+    "date": "2025-05-03",
+    "leaf_type": "Normal",
+    "full_kg": 106.8,
+    "gross": 113.4,
+    "net_kg": 105.1,
+    "bag_kg": 6.4,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP115",
+    "date": "2025-05-03",
+    "leaf_type": "Normal",
+    "full_kg": 140.4,
+    "gross": 142.6,
+    "net_kg": 138.4,
+    "bag_kg": 6.1,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP145",
+    "date": "2025-05-03",
+    "leaf_type": "Super",
+    "full_kg": 118.3,
+    "gross": 125.8,
+    "net_kg": 116.7,
+    "bag_kg": 5.7,
+    "line": "MT"
+  },
+  {
+    "supplier_id": "SUP147",
+    "date": "2025-05-03",
+    "leaf_type": "Super",
+    "full_kg": 109.6,
+    "gross": 112.0,
+    "net_kg": 105.5,
+    "bag_kg": 7.4,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP027",
+    "date": "2025-05-04",
+    "leaf_type": "Super",
+    "full_kg": 89.8,
+    "gross": 93.1,
+    "net_kg": 88.3,
+    "bag_kg": 7.0,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP031",
+    "date": "2025-05-04",
+    "leaf_type": "Super",
+    "full_kg": 114.9,
+    "gross": 122.6,
+    "net_kg": 112.8,
+    "bag_kg": 5.4,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP038",
+    "date": "2025-05-04",
+    "leaf_type": "Normal",
+    "full_kg": 122.1,
+    "gross": 130.0,
+    "net_kg": 118.4,
+    "bag_kg": 6.8,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP049",
+    "date": "2025-05-04",
+    "leaf_type": "Normal",
+    "full_kg": 112.6,
+    "gross": 118.2,
+    "net_kg": 109.2,
+    "bag_kg": 5.3,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP064",
+    "date": "2025-05-04",
+    "leaf_type": "Super",
+    "full_kg": 112.5,
+    "gross": 117.9,
+    "net_kg": 107.6,
+    "bag_kg": 6.9,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP068",
+    "date": "2025-05-04",
+    "leaf_type": "Super",
+    "full_kg": 107.5,
+    "gross": 112.3,
+    "net_kg": 104.8,
+    "bag_kg": 5.3,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP071",
+    "date": "2025-05-04",
+    "leaf_type": "Super",
+    "full_kg": 107.1,
+    "gross": 110.1,
+    "net_kg": 105.5,
+    "bag_kg": 7.2,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP080",
+    "date": "2025-05-04",
+    "leaf_type": "Normal",
+    "full_kg": 105.6,
+    "gross": 110.5,
+    "net_kg": 103.1,
+    "bag_kg": 5.5,
+    "line": "MT"
+  },
+  {
+    "supplier_id": "SUP125",
+    "date": "2025-05-04",
+    "leaf_type": "Normal",
+    "full_kg": 91.6,
+    "gross": 94.5,
+    "net_kg": 87.1,
+    "bag_kg": 7.1,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP150",
+    "date": "2025-05-04",
+    "leaf_type": "Super",
+    "full_kg": 128.4,
+    "gross": 131.4,
+    "net_kg": 126.5,
+    "bag_kg": 6.0,
+    "line": "MT"
+  },
+  {
+    "supplier_id": "SUP006",
+    "date": "2025-05-05",
+    "leaf_type": "Normal",
+    "full_kg": 144.6,
+    "gross": 151.3,
+    "net_kg": 142.8,
+    "bag_kg": 5.2,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP012",
+    "date": "2025-05-05",
+    "leaf_type": "Super",
+    "full_kg": 85.6,
+    "gross": 90.7,
+    "net_kg": 84.1,
+    "bag_kg": 6.2,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP020",
+    "date": "2025-05-05",
+    "leaf_type": "Normal",
+    "full_kg": 114.7,
+    "gross": 122.3,
+    "net_kg": 111.4,
+    "bag_kg": 5.7,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP021",
+    "date": "2025-05-05",
+    "leaf_type": "Normal",
+    "full_kg": 138.9,
+    "gross": 146.8,
+    "net_kg": 134.3,
+    "bag_kg": 8.6,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP028",
+    "date": "2025-05-05",
+    "leaf_type": "Super",
+    "full_kg": 147.6,
+    "gross": 151.0,
+    "net_kg": 145.2,
+    "bag_kg": 5.3,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP030",
+    "date": "2025-05-05",
+    "leaf_type": "Normal",
+    "full_kg": 106.1,
+    "gross": 112.5,
+    "net_kg": 102.8,
+    "bag_kg": 8.9,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP148",
+    "date": "2025-05-05",
+    "leaf_type": "Normal",
+    "full_kg": 121.0,
+    "gross": 126.4,
+    "net_kg": 118.2,
+    "bag_kg": 7.8,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP025",
+    "date": "2025-05-06",
+    "leaf_type": "Normal",
+    "full_kg": 127.1,
+    "gross": 134.1,
+    "net_kg": 122.5,
+    "bag_kg": 5.9,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP029",
+    "date": "2025-05-06",
+    "leaf_type": "Super",
+    "full_kg": 102.9,
+    "gross": 110.3,
+    "net_kg": 100.3,
+    "bag_kg": 6.6,
+    "line": "NG"
+  },
+  {
+    "supplier_id": "SUP047",
+    "date": "2025-05-06",
+    "leaf_type": "Super",
+    "full_kg": 111.4,
+    "gross": 116.0,
+    "net_kg": 106.9,
+    "bag_kg": 8.7,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP083",
+    "date": "2025-05-06",
+    "leaf_type": "Super",
+    "full_kg": 148.4,
+    "gross": 156.3,
+    "net_kg": 144.5,
+    "bag_kg": 7.3,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP120",
+    "date": "2025-05-06",
+    "leaf_type": "Super",
+    "full_kg": 92.7,
+    "gross": 94.9,
+    "net_kg": 90.4,
+    "bag_kg": 7.0,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP132",
+    "date": "2025-05-06",
+    "leaf_type": "Normal",
+    "full_kg": 131.2,
+    "gross": 137.7,
+    "net_kg": 127.8,
+    "bag_kg": 8.2,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP137",
+    "date": "2025-05-06",
+    "leaf_type": "Super",
+    "full_kg": 139.2,
+    "gross": 142.0,
+    "net_kg": 138.0,
+    "bag_kg": 8.1,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP007",
+    "date": "2025-05-07",
+    "leaf_type": "Super",
+    "full_kg": 102.6,
+    "gross": 108.6,
+    "net_kg": 99.8,
+    "bag_kg": 8.3,
+    "line": "MT"
+  },
+  {
+    "supplier_id": "SUP037",
+    "date": "2025-05-07",
+    "leaf_type": "Super",
+    "full_kg": 104.4,
+    "gross": 111.1,
+    "net_kg": 99.9,
+    "bag_kg": 7.5,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP063",
+    "date": "2025-05-07",
+    "leaf_type": "Normal",
+    "full_kg": 148.2,
+    "gross": 150.9,
+    "net_kg": 146.3,
+    "bag_kg": 5.3,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP074",
+    "date": "2025-05-07",
+    "leaf_type": "Normal",
+    "full_kg": 122.5,
+    "gross": 128.8,
+    "net_kg": 121.3,
+    "bag_kg": 7.5,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP076",
+    "date": "2025-05-07",
+    "leaf_type": "Normal",
+    "full_kg": 86.9,
+    "gross": 92.9,
+    "net_kg": 84.3,
+    "bag_kg": 6.2,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP016",
+    "date": "2025-05-08",
+    "leaf_type": "Normal",
+    "full_kg": 128.1,
+    "gross": 133.3,
+    "net_kg": 123.2,
+    "bag_kg": 6.0,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP018",
+    "date": "2025-05-08",
+    "leaf_type": "Super",
+    "full_kg": 99.9,
+    "gross": 102.6,
+    "net_kg": 97.9,
+    "bag_kg": 5.1,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP043",
+    "date": "2025-05-08",
+    "leaf_type": "Normal",
+    "full_kg": 113.2,
+    "gross": 117.9,
+    "net_kg": 110.9,
+    "bag_kg": 8.7,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP044",
+    "date": "2025-05-08",
+    "leaf_type": "Super",
+    "full_kg": 144.3,
+    "gross": 148.0,
+    "net_kg": 140.8,
+    "bag_kg": 5.6,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP059",
+    "date": "2025-05-08",
+    "leaf_type": "Super",
+    "full_kg": 95.5,
+    "gross": 100.1,
+    "net_kg": 93.1,
+    "bag_kg": 6.1,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP066",
+    "date": "2025-05-08",
+    "leaf_type": "Super",
+    "full_kg": 117.9,
+    "gross": 122.8,
+    "net_kg": 113.7,
+    "bag_kg": 8.5,
+    "line": "NG"
+  },
+  {
+    "supplier_id": "SUP079",
+    "date": "2025-05-08",
+    "leaf_type": "Super",
+    "full_kg": 91.8,
+    "gross": 95.4,
+    "net_kg": 90.6,
+    "bag_kg": 7.6,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP090",
+    "date": "2025-05-08",
+    "leaf_type": "Normal",
+    "full_kg": 108.1,
+    "gross": 114.3,
+    "net_kg": 106.8,
+    "bag_kg": 8.5,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP095",
+    "date": "2025-05-08",
+    "leaf_type": "Normal",
+    "full_kg": 106.0,
+    "gross": 111.1,
+    "net_kg": 102.9,
+    "bag_kg": 7.9,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP106",
+    "date": "2025-05-08",
+    "leaf_type": "Normal",
+    "full_kg": 111.6,
+    "gross": 119.4,
+    "net_kg": 110.3,
+    "bag_kg": 8.2,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP108",
+    "date": "2025-05-08",
+    "leaf_type": "Super",
+    "full_kg": 83.3,
+    "gross": 86.2,
+    "net_kg": 80.3,
+    "bag_kg": 8.2,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP114",
+    "date": "2025-05-08",
+    "leaf_type": "Super",
+    "full_kg": 123.6,
+    "gross": 127.0,
+    "net_kg": 118.9,
+    "bag_kg": 8.9,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP010",
+    "date": "2025-05-09",
+    "leaf_type": "Normal",
+    "full_kg": 135.1,
+    "gross": 142.7,
+    "net_kg": 130.8,
+    "bag_kg": 6.0,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP039",
+    "date": "2025-05-09",
+    "leaf_type": "Normal",
+    "full_kg": 121.1,
+    "gross": 126.4,
+    "net_kg": 117.3,
+    "bag_kg": 7.3,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP075",
+    "date": "2025-05-09",
+    "leaf_type": "Super",
+    "full_kg": 135.1,
+    "gross": 139.2,
+    "net_kg": 132.8,
+    "bag_kg": 6.4,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP087",
+    "date": "2025-05-09",
+    "leaf_type": "Super",
+    "full_kg": 84.5,
+    "gross": 87.7,
+    "net_kg": 80.4,
+    "bag_kg": 9.0,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP098",
+    "date": "2025-05-09",
+    "leaf_type": "Normal",
+    "full_kg": 118.5,
+    "gross": 122.3,
+    "net_kg": 116.6,
+    "bag_kg": 8.2,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP099",
+    "date": "2025-05-09",
+    "leaf_type": "Super",
+    "full_kg": 132.2,
+    "gross": 134.8,
+    "net_kg": 131.1,
+    "bag_kg": 7.8,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP117",
+    "date": "2025-05-09",
+    "leaf_type": "Super",
+    "full_kg": 100.9,
+    "gross": 103.0,
+    "net_kg": 96.9,
+    "bag_kg": 7.1,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP126",
+    "date": "2025-05-09",
+    "leaf_type": "Normal",
+    "full_kg": 131.7,
+    "gross": 134.1,
+    "net_kg": 129.0,
+    "bag_kg": 7.6,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP133",
+    "date": "2025-05-09",
+    "leaf_type": "Normal",
+    "full_kg": 85.6,
+    "gross": 89.8,
+    "net_kg": 83.2,
+    "bag_kg": 6.0,
+    "line": "NG"
+  },
+  {
+    "supplier_id": "SUP138",
+    "date": "2025-05-09",
+    "leaf_type": "Super",
+    "full_kg": 120.3,
+    "gross": 127.2,
+    "net_kg": 116.7,
+    "bag_kg": 7.0,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP140",
+    "date": "2025-05-09",
+    "leaf_type": "Normal",
+    "full_kg": 89.5,
+    "gross": 92.8,
+    "net_kg": 87.8,
+    "bag_kg": 5.9,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP008",
+    "date": "2025-05-10",
+    "leaf_type": "Super",
+    "full_kg": 100.7,
+    "gross": 105.2,
+    "net_kg": 99.2,
+    "bag_kg": 5.4,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP017",
+    "date": "2025-05-10",
+    "leaf_type": "Super",
+    "full_kg": 102.0,
+    "gross": 108.5,
+    "net_kg": 97.4,
+    "bag_kg": 6.9,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP026",
+    "date": "2025-05-10",
+    "leaf_type": "Normal",
+    "full_kg": 98.0,
+    "gross": 103.8,
+    "net_kg": 96.5,
+    "bag_kg": 6.5,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP033",
+    "date": "2025-05-10",
+    "leaf_type": "Super",
+    "full_kg": 112.0,
+    "gross": 119.0,
+    "net_kg": 107.8,
+    "bag_kg": 8.8,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP042",
+    "date": "2025-05-10",
+    "leaf_type": "Normal",
+    "full_kg": 122.6,
+    "gross": 126.6,
+    "net_kg": 118.4,
+    "bag_kg": 7.9,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP055",
+    "date": "2025-05-10",
+    "leaf_type": "Super",
+    "full_kg": 98.5,
+    "gross": 105.7,
+    "net_kg": 95.8,
+    "bag_kg": 7.4,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP061",
+    "date": "2025-05-10",
+    "leaf_type": "Super",
+    "full_kg": 126.1,
+    "gross": 129.3,
+    "net_kg": 122.2,
+    "bag_kg": 8.8,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP089",
+    "date": "2025-05-10",
+    "leaf_type": "Normal",
+    "full_kg": 111.6,
+    "gross": 117.2,
+    "net_kg": 107.7,
+    "bag_kg": 7.5,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP093",
+    "date": "2025-05-10",
+    "leaf_type": "Normal",
+    "full_kg": 122.1,
+    "gross": 129.2,
+    "net_kg": 118.7,
+    "bag_kg": 8.0,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP141",
+    "date": "2025-05-10",
+    "leaf_type": "Normal",
+    "full_kg": 135.3,
+    "gross": 143.0,
+    "net_kg": 133.3,
+    "bag_kg": 6.9,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP144",
+    "date": "2025-05-10",
+    "leaf_type": "Super",
+    "full_kg": 106.1,
+    "gross": 110.5,
+    "net_kg": 102.0,
+    "bag_kg": 5.4,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP009",
+    "date": "2025-05-11",
+    "leaf_type": "Normal",
+    "full_kg": 97.9,
+    "gross": 100.7,
+    "net_kg": 93.8,
+    "bag_kg": 8.0,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP015",
+    "date": "2025-05-11",
+    "leaf_type": "Normal",
+    "full_kg": 118.2,
+    "gross": 122.8,
+    "net_kg": 115.1,
+    "bag_kg": 8.9,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP019",
+    "date": "2025-05-11",
+    "leaf_type": "Super",
+    "full_kg": 103.1,
+    "gross": 105.4,
+    "net_kg": 99.4,
+    "bag_kg": 9.0,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP023",
+    "date": "2025-05-11",
+    "leaf_type": "Super",
+    "full_kg": 130.7,
+    "gross": 133.2,
+    "net_kg": 126.6,
+    "bag_kg": 8.7,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP048",
+    "date": "2025-05-11",
+    "leaf_type": "Super",
+    "full_kg": 94.5,
+    "gross": 99.2,
+    "net_kg": 90.4,
+    "bag_kg": 8.9,
+    "line": "MT"
+  },
+  {
+    "supplier_id": "SUP065",
+    "date": "2025-05-11",
+    "leaf_type": "Super",
+    "full_kg": 110.7,
+    "gross": 113.2,
+    "net_kg": 107.9,
+    "bag_kg": 6.8,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP069",
+    "date": "2025-05-11",
+    "leaf_type": "Normal",
+    "full_kg": 115.1,
+    "gross": 117.8,
+    "net_kg": 112.5,
+    "bag_kg": 6.9,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP105",
+    "date": "2025-05-11",
+    "leaf_type": "Super",
+    "full_kg": 102.1,
+    "gross": 104.3,
+    "net_kg": 97.7,
+    "bag_kg": 5.7,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP109",
+    "date": "2025-05-11",
+    "leaf_type": "Super",
+    "full_kg": 105.5,
+    "gross": 112.0,
+    "net_kg": 104.3,
+    "bag_kg": 7.6,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP122",
+    "date": "2025-05-11",
+    "leaf_type": "Super",
+    "full_kg": 144.9,
+    "gross": 152.3,
+    "net_kg": 140.2,
+    "bag_kg": 8.8,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP143",
+    "date": "2025-05-11",
+    "leaf_type": "Super",
+    "full_kg": 102.4,
+    "gross": 105.1,
+    "net_kg": 98.9,
+    "bag_kg": 6.7,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP149",
+    "date": "2025-05-11",
+    "leaf_type": "Super",
+    "full_kg": 115.4,
+    "gross": 119.2,
+    "net_kg": 112.3,
+    "bag_kg": 8.8,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP002",
+    "date": "2025-05-12",
+    "leaf_type": "Super",
+    "full_kg": 141.9,
+    "gross": 146.4,
+    "net_kg": 138.4,
+    "bag_kg": 6.6,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP014",
+    "date": "2025-05-12",
+    "leaf_type": "Normal",
+    "full_kg": 115.2,
+    "gross": 121.8,
+    "net_kg": 110.3,
+    "bag_kg": 7.0,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP054",
+    "date": "2025-05-12",
+    "leaf_type": "Super",
+    "full_kg": 120.1,
+    "gross": 124.9,
+    "net_kg": 117.4,
+    "bag_kg": 8.5,
+    "line": "MT"
+  },
+  {
+    "supplier_id": "SUP062",
+    "date": "2025-05-12",
+    "leaf_type": "Super",
+    "full_kg": 87.2,
+    "gross": 91.2,
+    "net_kg": 83.0,
+    "bag_kg": 7.5,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP116",
+    "date": "2025-05-12",
+    "leaf_type": "Super",
+    "full_kg": 132.7,
+    "gross": 135.7,
+    "net_kg": 129.5,
+    "bag_kg": 7.6,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP135",
+    "date": "2025-05-12",
+    "leaf_type": "Normal",
+    "full_kg": 103.6,
+    "gross": 111.1,
+    "net_kg": 98.7,
+    "bag_kg": 6.0,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP040",
+    "date": "2025-05-13",
+    "leaf_type": "Normal",
+    "full_kg": 103.9,
+    "gross": 107.2,
+    "net_kg": 102.6,
+    "bag_kg": 8.2,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP050",
+    "date": "2025-05-13",
+    "leaf_type": "Super",
+    "full_kg": 97.2,
+    "gross": 99.8,
+    "net_kg": 95.9,
+    "bag_kg": 6.6,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP072",
+    "date": "2025-05-13",
+    "leaf_type": "Super",
+    "full_kg": 128.2,
+    "gross": 132.7,
+    "net_kg": 125.9,
+    "bag_kg": 5.1,
+    "line": "MT"
+  },
+  {
+    "supplier_id": "SUP081",
+    "date": "2025-05-13",
+    "leaf_type": "Super",
+    "full_kg": 80.5,
+    "gross": 82.6,
+    "net_kg": 77.0,
+    "bag_kg": 8.0,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP091",
+    "date": "2025-05-13",
+    "leaf_type": "Super",
+    "full_kg": 100.7,
+    "gross": 104.0,
+    "net_kg": 95.8,
+    "bag_kg": 8.2,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP092",
+    "date": "2025-05-13",
+    "leaf_type": "Normal",
+    "full_kg": 131.5,
+    "gross": 139.3,
+    "net_kg": 129.8,
+    "bag_kg": 8.0,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP094",
+    "date": "2025-05-13",
+    "leaf_type": "Normal",
+    "full_kg": 122.5,
+    "gross": 128.6,
+    "net_kg": 120.5,
+    "bag_kg": 7.5,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP100",
+    "date": "2025-05-13",
+    "leaf_type": "Normal",
+    "full_kg": 85.6,
+    "gross": 89.1,
+    "net_kg": 80.8,
+    "bag_kg": 5.2,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP113",
+    "date": "2025-05-13",
+    "leaf_type": "Super",
+    "full_kg": 97.7,
+    "gross": 100.0,
+    "net_kg": 95.5,
+    "bag_kg": 5.5,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP118",
+    "date": "2025-05-13",
+    "leaf_type": "Super",
+    "full_kg": 131.3,
+    "gross": 134.4,
+    "net_kg": 129.7,
+    "bag_kg": 7.9,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP131",
+    "date": "2025-05-13",
+    "leaf_type": "Super",
+    "full_kg": 117.9,
+    "gross": 122.9,
+    "net_kg": 116.8,
+    "bag_kg": 7.0,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP142",
+    "date": "2025-05-13",
+    "leaf_type": "Super",
+    "full_kg": 145.4,
+    "gross": 149.5,
+    "net_kg": 140.9,
+    "bag_kg": 6.2,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP011",
+    "date": "2025-05-14",
+    "leaf_type": "Super",
+    "full_kg": 132.3,
+    "gross": 136.9,
+    "net_kg": 130.6,
+    "bag_kg": 5.1,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP024",
+    "date": "2025-05-14",
+    "leaf_type": "Super",
+    "full_kg": 148.7,
+    "gross": 153.2,
+    "net_kg": 144.3,
+    "bag_kg": 7.0,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP034",
+    "date": "2025-05-14",
+    "leaf_type": "Super",
+    "full_kg": 85.2,
+    "gross": 90.4,
+    "net_kg": 82.3,
+    "bag_kg": 5.6,
+    "line": "MP"
+  },
+  {
+    "supplier_id": "SUP051",
+    "date": "2025-05-14",
+    "leaf_type": "Super",
+    "full_kg": 110.6,
+    "gross": 117.6,
+    "net_kg": 105.6,
+    "bag_kg": 8.4,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP052",
+    "date": "2025-05-14",
+    "leaf_type": "Super",
+    "full_kg": 104.7,
+    "gross": 107.5,
+    "net_kg": 101.5,
+    "bag_kg": 5.1,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP058",
+    "date": "2025-05-14",
+    "leaf_type": "Super",
+    "full_kg": 132.1,
+    "gross": 137.1,
+    "net_kg": 130.5,
+    "bag_kg": 5.4,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP073",
+    "date": "2025-05-14",
+    "leaf_type": "Super",
+    "full_kg": 112.6,
+    "gross": 116.0,
+    "net_kg": 111.0,
+    "bag_kg": 8.8,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP078",
+    "date": "2025-05-14",
+    "leaf_type": "Super",
+    "full_kg": 90.0,
+    "gross": 95.8,
+    "net_kg": 85.1,
+    "bag_kg": 7.2,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP082",
+    "date": "2025-05-14",
+    "leaf_type": "Super",
+    "full_kg": 137.7,
+    "gross": 143.9,
+    "net_kg": 135.0,
+    "bag_kg": 6.3,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP085",
+    "date": "2025-05-14",
+    "leaf_type": "Normal",
+    "full_kg": 98.7,
+    "gross": 101.2,
+    "net_kg": 97.6,
+    "bag_kg": 7.8,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP086",
+    "date": "2025-05-14",
+    "leaf_type": "Normal",
+    "full_kg": 95.7,
+    "gross": 98.1,
+    "net_kg": 93.6,
+    "bag_kg": 6.0,
+    "line": "GO"
+  },
+  {
+    "supplier_id": "SUP013",
+    "date": "2025-05-19",
+    "leaf_type": "Super",
+    "full_kg": 132.5,
+    "gross": 139.8,
+    "net_kg": 129.9,
+    "bag_kg": 5.3,
+    "line": "NG"
+  },
+  {
+    "supplier_id": "SUP032",
+    "date": "2025-05-19",
+    "leaf_type": "Normal",
+    "full_kg": 134.1,
+    "gross": 140.2,
+    "net_kg": 133.1,
+    "bag_kg": 6.3,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP041",
+    "date": "2025-05-19",
+    "leaf_type": "Super",
+    "full_kg": 116.8,
+    "gross": 121.2,
+    "net_kg": 112.6,
+    "bag_kg": 5.6,
+    "line": "NG"
+  },
+  {
+    "supplier_id": "SUP046",
+    "date": "2025-05-18",
+    "leaf_type": "Super",
+    "full_kg": 147.5,
+    "gross": 155.3,
+    "net_kg": 142.7,
+    "bag_kg": 7.2,
+    "line": "NG"
+  },
+  {
+    "supplier_id": "SUP057",
+    "date": "2025-05-18",
+    "leaf_type": "Normal",
+    "full_kg": 140.1,
+    "gross": 145.6,
+    "net_kg": 135.7,
+    "bag_kg": 9.0,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP060",
+    "date": "2025-05-18",
+    "leaf_type": "Normal",
+    "full_kg": 94.4,
+    "gross": 99.5,
+    "net_kg": 92.8,
+    "bag_kg": 6.6,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP070",
+    "date": "2025-05-18",
+    "leaf_type": "Normal",
+    "full_kg": 101.7,
+    "gross": 109.3,
+    "net_kg": 99.9,
+    "bag_kg": 8.8,
+    "line": "PH"
+  },
+  {
+    "supplier_id": "SUP084",
+    "date": "2025-05-18",
+    "leaf_type": "Super",
+    "full_kg": 110.6,
+    "gross": 118.0,
+    "net_kg": 109.1,
+    "bag_kg": 8.1,
+    "line": "NG"
+  },
+  {
+    "supplier_id": "SUP088",
+    "date": "2025-05-19",
+    "leaf_type": "Normal",
+    "full_kg": 93.4,
+    "gross": 97.7,
+    "net_kg": 89.3,
+    "bag_kg": 8.1,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP101",
+    "date": "2025-05-19",
+    "leaf_type": "Normal",
+    "full_kg": 84.2,
+    "gross": 92.0,
+    "net_kg": 80.7,
+    "bag_kg": 5.9,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP102",
+    "date": "2025-05-19",
+    "leaf_type": "Normal",
+    "full_kg": 88.5,
+    "gross": 91.2,
+    "net_kg": 87.1,
+    "bag_kg": 6.1,
+    "line": "UG"
+  },
+  {
+    "supplier_id": "SUP107",
+    "date": "2025-05-19",
+    "leaf_type": "Normal",
+    "full_kg": 102.5,
+    "gross": 107.4,
+    "net_kg": 98.2,
+    "bag_kg": 7.2,
+    "line": "TP"
+  },
+  {
+    "supplier_id": "SUP112",
+    "date": "2025-05-19",
+    "leaf_type": "Normal",
+    "full_kg": 141.8,
+    "gross": 144.4,
+    "net_kg": 138.1,
+    "bag_kg": 6.0,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP119",
+    "date": "2025-05-19",
+    "leaf_type": "Normal",
+    "full_kg": 115.6,
+    "gross": 119.0,
+    "net_kg": 112.6,
+    "bag_kg": 8.7,
+    "line": "BM"
+  },
+  {
+    "supplier_id": "SUP121",
+    "date": "2025-05-19",
+    "leaf_type": "Super",
+    "full_kg": 112.9,
+    "gross": 119.9,
+    "net_kg": 109.0,
+    "bag_kg": 8.1,
+    "line": "PW"
+  },
+  {
+    "supplier_id": "SUP129",
+    "date": "2025-05-19",
+    "leaf_type": "Normal",
+    "full_kg": 149.6,
+    "gross": 152.9,
+    "net_kg": 148.5,
+    "bag_kg": 8.4,
+    "line": "UP"
+  },
+  {
+    "supplier_id": "SUP136",
+    "date": "2025-05-19",
+    "leaf_type": "Normal",
+    "full_kg": 126.0,
+    "gross": 132.1,
+    "net_kg": 123.4,
+    "bag_kg": 5.8,
+    "line": "GO"
+  }
+]

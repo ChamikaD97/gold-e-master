@@ -1,0 +1,47 @@
+/* Loader.css */
+
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color:transparent; /* Matches Ant Design default background */
+  }
+  
+  .train {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .train-wheel {
+    width: 100px;
+    height: 100px;
+    border: 10px solid #114704b2; /* Ant Design primary color */
+    border-radius: 100%;
+    border-top-color: transparent;
+  }
+  
+  .train-track {
+    width: 200px;
+    height: 5px;
+    background: repeating-linear-gradient(
+      90deg,
+      #8c8c8c,
+      #8c8c8c 10px,
+      #d9d9d9 10px,
+      #d9d9d9 20px
+    );
+  }
+  
+  .loading-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 30px;
+    color: #000000; /* Neutral gray */
+  }
+  

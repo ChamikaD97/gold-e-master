@@ -1,0 +1,294 @@
+/* Global app styles */
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.line-select .ant-select-selector {
+  cursor: pointer;
+}
+
+
+/* White text for selected value */
+.ant-select-selection-item {
+  color: #fff !important;
+}
+
+/* White text for search input inside Select */
+.ant-select-selection-search-input {
+  color: #fff !important;
+}
+
+.ant-select-selection-search {
+  cursor: pointer;
+}
+/* Force pointer cursor on dropdown options */
+.ant-select-item-option {
+  cursor: pointer !important;
+}
+
+/* White text for dropdown options */
+.ant-select-item-option-content {
+  color: #fff !important;
+}
+
+/* White placeholder text */
+.ant-select-selection-placeholder {
+  color: #fff !important;
+}
+
+/* Optional: Dark background for dropdown */
+.ant-select-dropdown {
+  background-color: rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Optional: White highlight on active item */
+.ant-select-item-option-active {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+/* Optional: White highlight for selected item */
+.ant-select-item-option-selected {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+}
+/* Hide scrollbar for all browsers */
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+  overflow: hidden;          /* Disable scroll */
+}
+#root {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#root::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  scrollbar-width: none;           /* Firefox */
+  -ms-overflow-style: none;        /* IE 10+ */
+  overflow-y: auto;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;                   /* Chrome, Safari */
+}
+
+.App-header {
+  background-color: #005e08;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.ant-select-item-option:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Card animation and hover */
+.card {
+  width: auto;
+  background-color: lab(34.03% -41.06 37.63 / 0.801);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 1s ease-out forwards;
+  height: auto;
+  border-color: rgba(3, 100, 0, 0.856);
+  border-radius: 5px;
+}
+
+.fade-in {
+  animation: zoomInFade 0.6s ease-in-out both;
+}
+
+@keyframes zoomInFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.card:hover {
+  transform: scale(1.05);
+  background-color: lab(34.03% -41.06 37.63 / 0.801);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Add this to your CSS file or in a <style> block if using styled-components */
+.ant-table-cell.highlight-column {
+  background: linear-gradient(to right, #0f9b0f, #00c853) !important;
+  color: #fff !important;
+  font-weight: bold;
+  animation: pulseHighlight 2s ease-in-out infinite alternate;
+  transition: background-color 0.6s ease;
+  border-radius: 6px;
+}
+
+
+@keyframes pulseRed {
+  0% {
+    background-color: #AA0114;
+  }
+
+  50% {
+    background-color: #ffffff00;
+  }
+
+  100% {
+    background-color: #AA0114;
+  }
+}
+
+.pulse-red {
+  animation: pulseRed 1.5s infinite;
+}
+
+
+/* Form element styling */
+.custom-input .ant-input,
+.custom-input .ant-input-number,
+.custom-input .ant-picker,
+.custom-input .ant-select-selector,
+.custom-input .ant-input-textarea {
+  border: 1px solid black !important;
+  border-radius: 4px !important;
+}
+
+/* Red error border for Ant Design validation */
+.custom-input.ant-form-item-has-error .ant-input,
+.custom-input.ant-form-item-has-error .ant-input-number,
+.custom-input.ant-form-item-has-error .ant-select-selector,
+.custom-input.ant-form-item-has-error .ant-picker,
+.custom-input.ant-form-item-has-error .ant-input-textarea {
+  border-color: #006f91 !important;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
+}
+input::placeholder {
+  color: #ffffff;
+
+}
+
+.white-label .ant-form-item-label>label {
+  color: white !important;
+}
+
+
+
+/* Make all table borders red */
+.red-bordered-table .ant-table,
+.red-bordered-table .ant-table-container,
+.red-bordered-table .ant-table-content,
+.red-bordered-table .ant-table-thead > tr > th,
+.red-bordered-table .ant-table-tbody > tr > td {
+  border: 0.5px solid rgb(255, 255, 255) !important;
+}
+
+.red-bordered-table .ant-table-thead > tr > th,
+.red-bordered-table .ant-table-tbody > tr > td {
+  border: 0.2px solid rgb(172, 172, 172) !important;
+}
+
+.sup-bordered-table .ant-table-thead > tr > th,
+.sup-bordered-table .ant-table-tbody > tr > td  {
+  border: 0.2px solid rgb(0, 0, 0) !important;
+  background: transparent !important;
+}
+
+/* For a glassy, modern dark table look */
+.sup-bordered-table .ant-table {
+  background: rgba(0, 0, 0, 0.466);
+  overflow: hidden;
+}
+
+.sup-bordered-table .ant-table-thead > tr > th {
+  background: #1a1a1a;
+  color: #f0f0f0;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: center;
+}
+
+.sup-bordered-table .ant-table-tbody > tr > td {
+  background: rgba(0, 0, 0, 0.904);
+  color: #f5f5f5;
+  font-size: 13px;
+  border-color: #444;
+  text-align: center;
+  padding: 8px 12px;
+}
+
+.sup-bordered-table .ant-table-tbody > tr:hover > td {
+  background: rgba(0, 255, 200, 0.877);
+  transition: background 0.3s ease;
+}
+
+.sup-bordered-table .ant-pagination {
+  background-color: rgba(0, 0, 0, 0.801);
+  padding: 8px;
+  border-radius: 0 0 12px 12px;
+  color: #fff;
+}
+
+.sup-bordered-table .ant-pagination-item,
+.sup-bordered-table .ant-pagination-prev,
+.sup-bordered-table .ant-pagination-next {
+  border: none;
+  color: #fff;
+}
+
+.sup-bordered-table .ant-pagination-item-active {
+  background-color: #0000006b;
+  color: #ffffff;
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Routes</title>
+</head>
+<body>
+
+    <h2>Enter Teacher Information</h2>
+
+    <div id="teacher-inputs">
+        <label>Teacher Name: </label><input type="text" id="teacher-name"><br>
+        <label>From Location: </label><input type="text" id="from-location"><br>
+        <label>To Location: </label><input type="text" id="to-location"><br><br>
+        <button onclick="addTeacher()">Add Teacher</button>
+    </div>
+
+    <h3>Teachers and their Routes:</h3>
+    <pre id="output"></pre>
+
+    <script>
+        // Stores the routes dynamically
+        let routes = {};
+        let teachers = [];
+
+        // Function to find the path from start to target
+        function findPath(start, target) {
+            let visited = new Set();
+            let path = [];
+
+            function dfs(current) {
+                if (current === target) {
+                    path.push(current);
+                    return true;
+                }
+                visited.add(current);
+                for (let neighbor of routes[current] || []) {
+                    if (!visited.has(neighbor)) {
+                        path.push(current);
+                        if (dfs(neighbor)) {
+                            return true;
+                        }
+                        path.pop();
+                    }
+                }
+                return false;
+            }
+
+            dfs(start);
+            return path;
+        }
+
+        // Function to add a teacher and generate output
+        function addTeacher() {
+            const teacherName = document.getElementById('teacher-name').value;
+            const fromLocation = document.getElementById('from-location').value;
+            const toLocation = document.getElementById('to-location').value;
+
+            if (teacherName && fromLocation && toLocation) {
+                // Update the routes dynamically by adding locations
+                if (!routes[fromLocation]) {
+                    routes[fromLocation] = [];
+                }
+                if (!routes[toLocation]) {
+                    routes[toLocation] = [];
+                }
+
+                // Add a two-way route (from -> to and to -> from)
+                routes[fromLocation].push(toLocation);
+                routes[toLocation].push(fromLocation);
+
+                // Add teacher's information
+                teachers.push({ teacher: teacherName, from: fromLocation, to: toLocation });
+
+                // Generate output
+                let output = '';
+                teachers.forEach((teacher) => {
+                    const { from, to, teacher: teacherName } = teacher;
+                    const path = findPath(from, to);
+                    const pathStr = path.join(" - ");
+                    output += `${teacherName}\t${from}\t${to}\t\t${teacherName} can go to her target '${to}' using ${pathStr}\n`;
+                });
+
+                document.getElementById('output').textContent = output;
+
+                // Clear the inputs
+                document.getElementById('teacher-name').value = '';
+                document.getElementById('from-location').value = '';
+                document.getElementById('to-location').value = '';
+            } else {
+                alert("Please fill in all fields!");
+            }
+        }
+    </script>
+
+</body>
+</html>

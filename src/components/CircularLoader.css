@@ -1,0 +1,41 @@
+.circular-loader {
+    position: relative;
+    width: 120px;
+    height: 120px;
+  }
+  
+  .progress-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-90deg); /* Start spinning from top */
+  }
+  
+  .progress-ring__circle {
+    stroke-dasharray: 314;
+    stroke-dashoffset: 0;
+    transform-origin: 50% 50%;
+  }
+  
+  .center-image {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  /* ✅ Spinner animation only on the SVG ring */
+  .spinning-ring {
+    animation: spin 3s linear infinite;
+    transform-origin: 50% 50%;
+  }
+  
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  

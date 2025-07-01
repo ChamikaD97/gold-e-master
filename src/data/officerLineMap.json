@@ -1,0 +1,51 @@
+{
+  "Ajith": [
+    { "code": "MT", "line": "" },
+    { "code": "PH", "line": "" },
+    { "code": "PW", "line": "" },
+    { "code": "GO", "line": "" },
+    { "code": "UG", "line": "" },
+    { "code": "MP", "line": "" },
+    { "code": "BM", "line": "" },
+    { "code": "TP", "line": "" },
+    { "code": "UP", "line": "" },
+    { "code": "PP", "line": "" },
+    { "code": "MULATIYANA", "line": "" }
+  ],
+  "Chamod": [
+    { "code": "NG", "line": "" },
+    { "code": "S", "line": "" },
+    { "code": "DR", "line": "" },
+    { "code": "S2", "line": "" },
+    { "code": "S2 II", "line": "" },
+    { "code": "DR-01", "line": "" }
+  ],
+  "Udara": [
+    { "code": "J", "line": "" },
+    { "code": "T", "line": "" },
+    { "code": "SLF", "line": "" },
+    { "code": "TK", "line": "" },
+    { "code": "HA", "line": "" },
+    { "code": "D", "line": "" }
+  ],
+  "Gamini": [
+    { "code": "SELF", "line": "" },
+    { "code": "DG", "line": "" },
+    { "code": "ML", "line": "" },
+    { "code": "MV", "line": "" },
+    { "code": "C-13", "line": "" }
+  ],
+  "Udayanga": [
+    { "code": "BA", "line": "" },
+    { "code": "BK", "line": "" },
+    { "code": "K", "line": "" },
+    { "code": "PT", "line": "" },
+    { "code": "PK", "line": "" },
+    { "code": "A", "line": "" },
+    { "code": "KM", "line": "" },
+    { "code": "N", "line": "" },
+    { "code": "DM", "line": "" },
+    { "code": "DM-2", "line": "" },
+    { "code": "PT2", "line": "" }
+  ]
+}
