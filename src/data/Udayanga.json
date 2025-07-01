@@ -1,0 +1,64 @@
+{
+  "lines": [
+    {
+      "lineCode": "BA",
+      "lineId": "6"
+    },
+    {
+      "lineCode": "BK",
+      "lineId": "7"
+    },
+    {
+      "lineCode": "K",
+      "lineId": "25"
+    },
+    {
+      "lineCode": "PT",
+      "lineId": "62"
+    },
+    {
+      "lineCode": "PK",
+      "lineId": "61"
+    },
+    {
+      "lineCode": "A",
+      "lineId": "150"
+    },
+    {
+      "lineCode": "KM",
+      "lineId": "155"
+    },
+    {
+      "lineCode": "N",
+      "lineId": "36"
+    },
+    {
+      "lineCode": "DM",
+      "lineId": "102"
+    },
+    {
+      "lineCode": "DM-2",
+      "lineId": "161"
+    },
+    {
+      "lineCode": "PT2",
+      "lineId": "64"
+    },
+    {
+      "lineCode": "O-18",
+      "lineId": "48"
+    },
+    {
+      "lineCode": "O-18/PT/PT2",
+      "lineId": "48,64,62"
+    },
+    {
+      "lineCode": "C 13",
+      "lineId": "129"
+    },
+    {
+      "lineCode": "DM/DM-2",
+      "lineId": "102,161"
+    }
+  ]
+}

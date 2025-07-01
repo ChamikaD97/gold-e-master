@@ -1,0 +1,60 @@
+{
+  "lines": [
+    {
+      "lineCode": "MT",
+      "lineId": "81"
+    },
+    {
+      "lineCode": "PH",
+      "lineId": "60"
+    },
+    {
+      "lineCode": "PH2",
+      "lineId": "154"
+    },
+    {
+      "lineCode": "PH/PH2",
+      "lineId": "60,154"
+    },
+    {
+      "lineCode": "PW",
+      "lineId": "65"
+    },
+    {
+      "lineCode": "GO",
+      "lineId": "146"
+    },
+    {
+      "lineCode": "UG",
+      "lineId": "152"
+    },
+    {
+      "lineCode": "MP",
+      "lineId": "33"
+    },
+    {
+      "lineCode": "BM",
+      "lineId": "8"
+    },
+    {
+      "lineCode": "TP",
+      "lineId": "98"
+    },
+    {
+      "lineCode": "UP",
+      "lineId": "74"
+    },
+    {
+      "lineCode": "PP",
+      "lineId": "145"
+    },
+    {
+      "lineCode": "MULATIYANA",
+      "lineId": "97"
+    },
+    {
+      "lineCode": "MT / MULATIYANA",
+      "lineId": "81,97"
+    }
+  ]
+}

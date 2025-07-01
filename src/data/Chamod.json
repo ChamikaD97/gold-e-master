@@ -1,0 +1,40 @@
+{
+  "lines": [
+    {
+      "lineCode": "NG",
+      "lineId": "91"
+    },
+    {
+      "lineCode": "S",
+      "lineId": "67"
+    },
+    {
+      "lineCode": "",
+      "lineId": "N/A"
+    },
+    {
+      "lineCode": "S2",
+      "lineId": "68"
+    },
+    {
+      "lineCode": "S2 II",
+      "lineId": "69"
+    },
+    {
+      "lineCode": "DR-02",
+      "lineId": "138"
+    },
+    {
+      "lineCode": "DR-01",
+      "lineId": "124"
+    },
+    {
+      "lineCode": "DR-01/DR-02",
+      "lineId": "124,138"
+    },
+    {
+      "lineCode": "S / S2/S2 II",
+      "lineId": "67,68,69"
+    }
+  ]
+}

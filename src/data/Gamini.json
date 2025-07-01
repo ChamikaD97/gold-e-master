@@ -1,0 +1,40 @@
+{
+  "lines": [
+    {
+      "lineCode": "EL",
+      "lineId": "109"
+    },
+    {
+      "lineCode": "SELF",
+      "lineId": "70"
+    },
+    {
+      "lineCode": "DG",
+      "lineId": "12"
+    },
+    {
+      "lineCode": "ML",
+      "lineId": "31"
+    },
+    {
+      "lineCode": "ML2",
+      "lineId": "157"
+    },
+    {
+      "lineCode": "MV",
+      "lineId": "34"
+    },
+    {
+      "lineCode": "C-13",
+      "lineId": "127"
+    },
+    {
+      "lineCode": "DG/EL/C-13",
+      "lineId": "12,109,127"
+    },
+    {
+      "lineCode": "ML / ML2",
+      "lineId": "31,157"
+    }
+  ]
+}
