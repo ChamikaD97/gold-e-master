@@ -14,10 +14,13 @@ import { useDispatch } from "react-redux";
 import { setSelectedSupplier } from "../redux/commonDataSlice";
 import { useNavigate } from "react-router-dom";
 import { showLoader } from "../redux/loaderSlice";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 
 
 const Suppliers = () => {
+
   const { Option } = Select;
   const { Text } = Typography;
   const dispatch = useDispatch();
@@ -34,6 +37,43 @@ const Suppliers = () => {
   const [singleSupplier, setSingleSupplier] = useState([]);
 
   const navigate = useNavigate();
+
+const exportToPDF = () => {
+  const doc = new jsPDF();
+
+  doc.setFontSize(14);
+  doc.text("Supplier List", 10, 10);
+
+  const headers = [["Supplier ID", "Supplier Name"]];
+  const rows = filteredData.map(s => [
+    s["Supplier Id"],
+    s["Supplier Name"]
+  ]);
+
+  autoTable(doc, {
+    startY: 16,
+    head: headers,
+    body: rows,
+    styles: {
+      fontSize: 10,
+      cellPadding: 3,
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+    },
+    headStyles: {
+      fillColor: [40, 40, 40],
+      textColor: 255,
+    },
+    alternateRowStyles: {
+      fillColor: [245, 245, 245],
+    },
+    margin: { top: 16, left: 10, right: 10 }
+  });
+
+  const selectedLine = filters.line === "All" ? "AllLines" : lineIdToCodeMap[filters.line] || filters.line;
+  doc.save(`Supplier_List_${selectedLine}.pdf`);
+};
+
 
 
   const [loading, setLoading] = useState(false);
@@ -333,6 +373,12 @@ const Suppliers = () => {
                 </Col>
               </Row>
             </Col>
+            <Col>
+  <Button type="default" onClick={exportToPDF}>
+    📄 Export to PDF
+  </Button>
+</Col>
+
           </Row>
 
         </Card>

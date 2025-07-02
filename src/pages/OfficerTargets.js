@@ -104,6 +104,7 @@ const OfficerTargets = () => {
           {/* Line Table */}
           <Card bordered={false} style={cardStyle} className="fade-in">
             <Table
+             className="red-bordered-table"
               dataSource={filteredLines.map((line, index) => ({ key: index, ...line }))}
               columns={columns}
               pagination={false}
