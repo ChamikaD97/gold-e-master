@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { showLoader } from "../redux/loaderSlice";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { toast } from "react-toastify";
 
 
 
@@ -38,41 +39,41 @@ const Suppliers = () => {
 
   const navigate = useNavigate();
 
-const exportToPDF = () => {
-  const doc = new jsPDF();
+  const exportToPDF = () => {
+    const doc = new jsPDF();
 
-  doc.setFontSize(14);
-  doc.text("Supplier List", 10, 10);
+    doc.setFontSize(14);
+    doc.text("Supplier List", 10, 10);
 
-  const headers = [["Supplier ID", "Supplier Name"]];
-  const rows = filteredData.map(s => [
-    s["Supplier Id"],
-    s["Supplier Name"]
-  ]);
+    const headers = [["Supplier ID", "Supplier Name"]];
+    const rows = filteredData.map(s => [
+      s["Supplier Id"],
+      s["Supplier Name"]
+    ]);
 
-  autoTable(doc, {
-    startY: 16,
-    head: headers,
-    body: rows,
-    styles: {
-      fontSize: 10,
-      cellPadding: 3,
-      lineWidth: 0.1,
-      lineColor: [0, 0, 0],
-    },
-    headStyles: {
-      fillColor: [40, 40, 40],
-      textColor: 255,
-    },
-    alternateRowStyles: {
-      fillColor: [245, 245, 245],
-    },
-    margin: { top: 16, left: 10, right: 10 }
-  });
+    autoTable(doc, {
+      startY: 16,
+      head: headers,
+      body: rows,
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+        lineWidth: 0.1,
+        lineColor: [0, 0, 0],
+      },
+      headStyles: {
+        fillColor: [40, 40, 40],
+        textColor: 255,
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      margin: { top: 16, left: 10, right: 10 }
+    });
 
-  const selectedLine = filters.line === "All" ? "AllLines" : lineIdToCodeMap[filters.line] || filters.line;
-  doc.save(`Supplier_List_${selectedLine}.pdf`);
-};
+    const selectedLine = filters.line === "All" ? "AllLines" : lineIdToCodeMap[filters.line] || filters.line;
+    doc.save(`Supplier_List_${selectedLine}.pdf`);
+  };
 
 
 
@@ -82,55 +83,54 @@ const exportToPDF = () => {
 
   const apiKey = "quix717244";
 
-  const fetchSupplierDataFromAPI = async (lineCode) => {
-    const baseUrl = "/quiX/ControllerV1/supdata";
-    const params = new URLSearchParams({ k: apiKey, r: lineCode });
-    const url = `${baseUrl}?${params.toString()}`;
+const fetchSupplierDataFromAPI = async (lineCode) => {
+  const baseUrl = "/quiX/ControllerV1/supdata";
+  const params = new URLSearchParams({ k: apiKey, r: lineCode });
+  const url = `${baseUrl}?${params.toString()}`;
 
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch supplier data");
-      const data = await response.json();
-      setSuppliers(Array.isArray(data) ? data : data ? [data] : []);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load supplier data");
-      setSuppliers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch supplier data");
 
-  const fetchSupplierDataFromId = async (supplierId) => {
+    const data = await response.json();
+    setSuppliers(Array.isArray(data) ? data : data ? [data] : []);
+  } catch (err) {
+    console.error(err);
+    setError("Failed to load supplier data");
+    toast.error("❌ Failed to load suppliers for the selected line.");
+    setSuppliers([]);
+  } finally {
+    setLoading(false);
+  }
+};
+const fetchSupplierDataFromId = async (supplierId) => {
+  const baseUrl = "/quiX/ControllerV1/supdata";
+  const params = new URLSearchParams({ k: apiKey, s: supplierId });
+  const url = `${baseUrl}?${params.toString()}`;
 
-    const baseUrl = "/quiX/ControllerV1/supdata";
-    const params = new URLSearchParams({ k: apiKey, s: supplierId });
-    const url = `${baseUrl}?${params.toString()}`;
+  setLoading(true);
+  setError(null);
 
-    setLoading(true);
-    setError(null);
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch supplier data");
 
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch supplier data");
-      const data = await response.json();
-      setSingleSupplier(Array.isArray(data) ? data[0] : data[0] ? [data] : []);
-
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load supplier data");
-      setSingleSupplier([]);
-    } finally {
-      setLoading(false);
-      dispatch(setSelectedSupplier(singleSupplier));
-      navigate(`/supplier/${supplierId}`); // or filters.searchById if that's your input
-    }
-
-
-  };
+    const data = await response.json();
+    setSingleSupplier(Array.isArray(data) ? data[0] : data[0] ? [data] : []);
+  } catch (err) {
+    console.error(err);
+    setError("Failed to load supplier data");
+    toast.error("❌ Supplier ID not found or error occurred.");
+    setSingleSupplier([]);
+  } finally {
+    setLoading(false);
+    dispatch(setSelectedSupplier(singleSupplier));
+    navigate(`/supplier/${supplierId}`);
+  }
+};
 
   const lineIdToCodeMap = useMemo(() => {
     const map = {};
@@ -192,7 +192,7 @@ const exportToPDF = () => {
       render: (text) => (
         <Button
 
-          onClick={()=>handleSearchSupplier(text)}
+          onClick={() => handleSearchSupplier(text)}
           style={{
             backgroundColor: "#006623",
             color: "#fff",
@@ -374,10 +374,10 @@ const exportToPDF = () => {
               </Row>
             </Col>
             <Col>
-  <Button type="default" onClick={exportToPDF}>
-    📄 Export to PDF
-  </Button>
-</Col>
+              <Button type="default" onClick={exportToPDF}>
+                📄 Export to PDF
+              </Button>
+            </Col>
 
           </Row>
 
