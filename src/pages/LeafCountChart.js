@@ -10,8 +10,10 @@ import SupplierLeafModal from "../components/SupplierLeafModal";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import { API_KEY, getMonthDateRangeFromParts } from "../api/api";
-
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import CountUp from "react-countup";
+
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -32,6 +34,91 @@ const LeafSupply = () => {
     return match ? match.officer : null;
   };
 
+  const [xModalVisible, setXModalVisible] = useState(false);
+  const [xSupplierList, setXSupplierList] = useState([]);
+
+  const handleSupplierClick = (supplier_id) => {
+    const yearNum = Number(filters.year);
+    const monthNum = Number(filters.month);
+
+    const firstDate = new Date(yearNum, monthNum - 1, 1);
+    setSelectedSupplierId(supplier_id);
+    setSelectedDate(firstDate);
+    setModalOpen(true);
+  };
+
+  const getTotalKG = () => {
+    return xSupplierDetails.reduce((sum, item) => sum + (parseFloat(item["X KG"]) || 0), 0);
+  };
+  const notificationDate = useSelector((state) => state.commonData?.notificationDate);
+  const fetchSupplierDataFromAPI = async (supplierId) => {
+    setLineWiseTotals([])
+    const baseUrl = "/quiX/ControllerV1/supdata";
+    const params = new URLSearchParams({ k: API_KEY, s: supplierId });
+    const url = `${baseUrl}?${params.toString()}`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch supplier data");
+      const data = await response.json();
+      return Array.isArray(data) ? data : data ? [data] : [];
+    } catch (err) {
+      setLineWiseTotals([])
+      console.error(err);
+      return [];
+    }
+  };
+  const getSuppliersMarkedXToday = async () => {
+    const today = new Date().toDateString();
+    const supplierMap = {};
+
+    data.forEach(item => {
+      supplierMap[item.supplier_id] = [...(supplierMap[item.supplier_id] || []), item];
+    });
+
+    const result = [];
+    const xValueMap = {}; // supplier_id => total kg string
+
+    for (const [supplierId, records] of Object.entries(supplierMap)) {
+      const lastRecord = records.reduce((latest, current) =>
+        new Date(current.date) > new Date(latest.date) ? current : latest
+      );
+
+      const nextDate = new Date(lastRecord.date);
+      nextDate.setDate(nextDate.getDate() + leafRound);
+
+      if (nextDate.toDateString() === today) {
+        result.push(supplierId);
+
+        // Calculate total kg
+        if (typeof lastRecord.net_kg === "object") {
+          const total =
+            (lastRecord.net_kg.Super || 0) + (lastRecord.net_kg.Normal || 0);
+          xValueMap[supplierId] = `${total} kg`;
+        } else {
+          xValueMap[supplierId] = `${lastRecord.net_kg} kg`;
+        }
+      }
+    }
+
+    setXSupplierList(result);
+    setXModalVisible(true);
+
+    try {
+      const detailPromises = result.map(id => fetchSupplierDataFromAPI(id));
+      const details = await Promise.all(detailPromises);
+      const flattened = details.flat().filter(Boolean);
+
+      const enriched = flattened.map(s => ({
+        ...s,
+        "X KG": xValueMap[s["Supplier Id"]] || "-"
+      }));
+
+      setXSupplierDetails(enriched);
+    } catch {
+      setXSupplierDetails([]);
+    }
+  };
   const [xSupplierDetails, setXSupplierDetails] = useState([]); // array of detailed supplier objects
   const leafRound = useSelector((state) => state.commonData?.leafRound);
 
@@ -61,7 +148,7 @@ const LeafSupply = () => {
             supplier_id: item["Supplier Id"],
             date: item["Leaf Date"],
             lineCode: parseInt(item["Route"]),
-            line: filters.lineCode,
+            line: filters.lineCode || "", // fallback if undefined
             super_kg: 0,
             normal_kg: 0,
           };
@@ -106,29 +193,19 @@ const LeafSupply = () => {
         supplierMonthlyTotalMap[sid].normal += item.normal_kg;
       });
 
-
       const lineWiseTotalMap = {};
-
       transformed.forEach(item => {
         const lineCode = item.lineCode;
         if (!lineWiseTotalMap[lineCode]) {
           lineWiseTotalMap[lineCode] = { super: 0, normal: 0, overall: 0 };
         }
-        console.log('***********************************', lineCode);
-
         lineWiseTotalMap[lineCode].super += item.super_kg;
         lineWiseTotalMap[lineCode].normal += item.normal_kg;
         lineWiseTotalMap[lineCode].overall += item.super_kg + item.normal_kg;
       });
-      console.log('***********************************', lineWiseTotalMap);
-      console.log('***********************************', lineWiseTotalMap);
-
-
 
       setLineWiseTotals(lineWiseTotalMap);
 
-      console.LOG("Line-wise totals:", lineWiseTotalMap);
-      // Line-wide totals
       const lineSuperTotal = transformed.reduce((sum, item) => sum + item.super_kg, 0);
       const lineNormalTotal = transformed.reduce((sum, item) => sum + item.normal_kg, 0);
       const lineOverallTotal = lineSuperTotal + lineNormalTotal;
@@ -150,6 +227,7 @@ const LeafSupply = () => {
       dispatch(hideLoader());
     }
   };
+
 
 
   const setColData = (transformedData) => {
@@ -313,6 +391,8 @@ const LeafSupply = () => {
               boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
               transition: "transform 0.2s",
             }}
+            onClick={() => handleSupplierClick(text)}
+
             onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
             onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
           >
@@ -447,10 +527,264 @@ const LeafSupply = () => {
     `${filters.officer !== "All" ? `Officer: ${filters.officer}, ` : ""}` +
     `${filters.line !== "All" ? `Line: ${filters.lineCode}` : ""}`;
 
+
+  const downloadXSupplierListAsPDF = (p) => {
+    const doc = new jsPDF();
+    const today = new Date().toLocaleDateString();
+    const selectedLine = filters.lineCode || "All";
+
+    // Header
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.line(14, 20, 196, 20);
+    doc.setFont(undefined, 'bold');
+    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
+
+    doc.setFontSize(9);
+    doc.line(14, 32, 196, 32);
+    doc.setFont(undefined, 'normal');
+    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 40);
+    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text("Daily Leaf Supply Summary", 14, 52);
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text(`${selectedLine} Line Suppliers that need to Supply Leaf Today`, 14, 58);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Date: ${today}    |    Line: ${selectedLine}`, 14, 63);
+
+
+
+    doc.setDrawColor(0);
+    doc.line(14, 66, 196, 66);
+
+    // Table data with ✓ or ✘
+    const tableData = xSupplierDetails.map((s, i) => [
+      s["Supplier Id"],
+      s["Supplier Name"],
+      s["Contact"] || "-",
+      s["X KG"] || "0", "",  // Simulated Informed
+      ""   // Simulated Availability
+    ]);
+
+    // Table with footer and page number
+    doc.autoTable({
+      startY: 72,
+      head: [["Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
+      body: tableData,
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontSize: 9,
+        halign: 'center',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.1
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2
+      },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.1,
+      didDrawPage: function () {
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(50);
+        doc.line(14, 275, 196, 275);
+        doc.setFont(undefined, 'normal');
+        doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+        doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
+
+        // Page number
+        const page = doc.internal.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.text(`Page ${page}`, 190, 290, { align: 'right' });
+      }
+    });
+
+    // Total
+    const total = tableData.reduce((sum, row) => sum + parseFloat(row[3] || 0), 0);
+    const sixDaysAgo = new Date();
+    sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
+    const sixDaysAgoStr = sixDaysAgo.toLocaleDateString();
+
+    doc.setFontSize(10);
+    doc.setTextColor(0);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Total KG Supplied on ${sixDaysAgoStr}: ${total} kg`, 14, doc.lastAutoTable.finalY + 10);
+
+    // Optional signature lines
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+
+    // Save
+    // Save or Print]
+    if (p) {
+
+
+
+      doc.autoPrint(); // Trigger print dialog
+      const blob = doc.output("blob");
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl); // Open in new tab for printing
+    } else {
+
+
+      const formattedDate = new Date().toISOString().split('T')[0];
+      doc.save(`${selectedLine} line suppliers - ${formattedDate}.pdf`);
+    }
+
+  };
+
+
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <SupplierLeafModal open={modalOpen} filters={filters} onClose={() => setModalOpen(false)} supplierId={selectedSupplierId} selectedDate={selectedDate} />
+      <Modal
 
+        open={xModalVisible}
+        onCancel={() => setXModalVisible(false)}
+        footer={[
+          <Button
+            key="download"
+            type="primary"
+            onClick={() => downloadXSupplierListAsPDF(false)}
+            style={{
+              backgroundColor: '#007bff',
+              borderRadius: 6,
+              fontWeight: 400,
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.4)'
+            }}
+          >
+            Download PDF
+          </Button>,
+          <Button
+            key="download"
+
+            onClick={() => downloadXSupplierListAsPDF(true)}
+            style={{ backgroundColor: "#28a745", color: "#fff", borderRadius: 6 }}
+
+          >
+            Print PDF
+          </Button>,
+
+          <Button
+            key="close"
+            danger
+            onClick={() => setXModalVisible(false)}
+            style={{ borderRadius: 6 }}
+          >
+            Close
+          </Button>,
+        ]}
+        bodyStyle={{
+          backgroundColor: "#1e1e1e",
+          color: "#fff",
+          padding: 20,
+          borderRadius: 8
+        }}
+        style={{ top: 60, borderRadius: 12, overflow: 'hidden' }}
+        width={800}
+      >
+        <div
+          style={{
+            marginBottom: 20,
+            padding: 12,
+            background: "#2b2b2b",
+            borderRadius: 8,
+            display: "flex",
+            justifyContent: "center", // ✅ center horizontally
+            color: "#ffc107",
+            fontWeight: "bold",
+            fontSize: 16,
+            border: "1px solid #444"
+          }}
+        >
+          <span style={{ color: '#fff', fontWeight: 600, fontSize: 18 }}>
+            {filters.lineCode} line Suppliers That need to Supply Leaf Today
+          </span>
+        </div>
+
+        {xSupplierDetails.length > 0 ? (
+          <div style={{ padding: 6, borderRadius: 10 }}>
+            <Table
+              dataSource={xSupplierDetails}
+
+              rowKey="Supplier Id"
+              pagination={false}
+              bordered
+              size="small"
+              columns={[
+                {
+                  title: <span style={{ color: '#000' }}>Supplier ID</span>,
+                  dataIndex: "Supplier Id",
+                  key: "supplierId",
+                  align: "center", // ✅ centered
+                  render: text => <span style={{ color: '#000', fontWeight: 500 }}>{text}</span>
+                },
+                {
+                  title: <span style={{ color: '#000' }}>Name</span>,
+                  dataIndex: "Supplier Name",
+                  key: "name",
+                  align: "center", // ✅ centered
+                  render: text => <span style={{ color: '#000' }}>{text}</span>
+                },
+                {
+                  title: <span style={{ color: '#000' }}>Contact</span>,
+                  dataIndex: "Contact",
+                  key: "contact",
+                  align: "center", // ✅ centered
+                  render: text => <span style={{ color: '#000' }}>{text}</span>
+                },
+                {
+                  title: <span style={{ color: '#000' }}>Net KG (X)</span>,
+                  dataIndex: "X KG",
+                  key: "xkg",
+                  align: "center", // ✅ centered
+                  render: value => (
+                    <span style={{ color: '#000', fontWeight: 'bold' }}>{value}</span>
+                  )
+                }
+              ]}
+              style={{
+                backgroundColor: '#2a2a2a',
+                color: '#000',
+                borderRadius: 8
+              }}
+            />
+
+
+            <div
+              style={{
+                marginTop: 20,
+                padding: 12,
+                background: "#2b2b2b",
+                borderRadius: 8,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                color: "#fff",
+                fontSize: 16,
+                border: "1px solid #444"
+              }}
+            >
+              <span>Total KG Supplied</span>
+              <span>{getTotalKG()} kg</span>
+            </div>
+          </div>
+        ) : (
+          <p style={{ color: '#fff', textAlign: "center", margin: "24px 0", fontSize: 16 }}>
+            No suppliers marked today.
+          </p>
+        )}
+      </Modal>
 
 
       <div style={{ flex: "0 0 auto" }} className="fade-in">
@@ -526,7 +860,13 @@ const LeafSupply = () => {
                 allowClear
               />
             </Col>
-
+            <Col md={4}>
+              {filters.month === currentMonth && filters.year == currentYear && (
+                <Button type="primary" onClick={getSuppliersMarkedXToday}>
+                  Today Suppliers
+                </Button>
+              )}
+            </Col>
           </Row>
         </Card>
       </div>
@@ -551,7 +891,7 @@ const LeafSupply = () => {
           </Row>
         </Card>
       )}
-      {filters.month !== "Select Month" && (
+      {filters.month !== "Select Month" && filteredTableData.length && (
         <>
           {
             lineWiseTotals && (
@@ -577,7 +917,7 @@ const LeafSupply = () => {
                             textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
                           }}
                         >
-                          -     {lineWiseTotals.length}  - Mr. {getOfficerByLineId(filters.line) || "Officer"} –  {filters.lineCode} Line - {monthMap[filters.month]} {filters.year}
+                          Mr. {getOfficerByLineId(filters.line) || "Officer"} –  {filters.lineCode} Line - {monthMap[filters.month]} {filters.year}
                         </span>
                       </div>
 
@@ -647,12 +987,34 @@ const LeafSupply = () => {
             )
 
           }
+          {suppliersMarkedTomorrow.length > 0 && (
+            <Card bordered={false} style={{ ...cardStyle, marginTop: 12 }}>
+              <Text strong>Suppliers that need to supply leaf after {notificationDate} days</Text>
+              <ul style={{ color: "#fff", paddingLeft: 20 }}>
+                {suppliersMarkedTomorrow.map(sid => <li key={sid}>{sid}</li>)}
+              </ul>
+            </Card>
+          )}
+          <Card bordered={false} style={cardStyle}>
+            {isLoading ? <CircularLoader /> : (
+              <Table
+                className="red-bordered-table"
+                columns={columns}
+                dataSource={filteredTableData}
+                pagination={false}
+                scroll={{ x: "max-content", y: 400 }} // ✅ vertical scroll to fix header
+                bordered
+                size="small"
+                rowKey="supplier_id"
+              />
+
+            )}
+          </Card>
 
 
 
-        
-          
-          
+
+
         </>
       )}
     </div>

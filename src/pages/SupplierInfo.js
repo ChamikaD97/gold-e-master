@@ -19,6 +19,7 @@ import { API_KEY } from "../api/api";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedSupplier } from "../redux/commonDataSlice";
+import { ToastContainer, toast } from 'react-toastify';
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -41,46 +42,44 @@ const SupplierInfo = () => {
 
   const [totals, setTotals] = useState({ super: 0, normal: 0 });
 
-  const fetchSupplierDataFromId = async (supId) => {
-    dispatch(showLoader());
+const fetchSupplierDataFromId = async (supId) => {
+  const id = supId?.toString().trim().padStart(5, "0");
 
-    console.log
-      ("Fetching supplier data for ID:", supId);
-    const id = supId?.toString().padStart(5, "0").trim();
-    dispatch(setSelectedSupplier(id)); // Dispatch the selected supplier ID to the Redux store
-    if (!id || id.length !== 5) {
-      message.warning("⚠️ Please enter a valid 5-digit Supplier ID");
-      return;
+  if (!id || id.length !== 5) {
+    toast.warning("⚠️ Please enter a valid 5-digit Supplier ID");
+    return;
+  }
+
+  dispatch(showLoader());
+  dispatch(setSelectedSupplier(id));
+  setSupplier(null);
+  setData([]);
+
+  const url = `/quiX/ControllerV1/supdata?k=${apiKey}&s=${id}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch supplier data");
+
+    const result = await response.json();
+    const supplierData = Array.isArray(result) ? result[0] : result;
+
+    if (supplierData) {
+      setSupplier(supplierData);
+      console.log("Supplier data loaded:", supplierData);
+      toast.success(`Supplier ID ${id} loaded successfully`);
+    } else {
+      toast.warning(`No supplier data found for ID ${id}`);
     }
-
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to load supplier data");
     setSupplier(null);
-    setData([]);
-    const url = `/quiX/ControllerV1/supdata?k=${apiKey}&s=${id}`;
-    try {
-      const response = await fetch(url);
+  } finally {
+    dispatch(hideLoader());
+  }
+};
 
-      if (!response.ok) throw new Error("Failed to fetch supplier data");
-
-      const result = await response.json();
-      const supplierData = Array.isArray(result) ? result[0] : result;
-
-      if (supplierData) {
-        setSupplier(supplierData);
-        console.log("Supplier data loaded:", supplierData);
-        message.success(`✅ Supplier ID ${id} loaded successfully`);
-        dispatch(hideLoader());
-      } else {
-        message.warning(`⚠️ No supplier data found for ID ${id}`);
-        dispatch(hideLoader());
-      }
-    } catch (err) {
-      console.error(err);
-      message.error("❌ Failed to load supplier data");
-      setSupplier(null);
-    } finally {
-      //dispatch(hideLoader());
-    }
-  };
 
 
 
@@ -90,7 +89,7 @@ const SupplierInfo = () => {
       dispatch(showLoader());
 
       fetchSupplierDataFromId(supplierId);  // Fetch supplier data when component mounts or supplierId changes    
-      // dispatch(hideLoader());
+      dispatch(hideLoader());
 
     }
   }, []);

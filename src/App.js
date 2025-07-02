@@ -18,6 +18,7 @@ import MissingCards from "./pages/Missing Cards";
 import LeafSupplyByDateRange from "./pages/LeafSupplyByDateRange";
 import Prediction from "./pages/Prediction";
 import OfficersPage from "./pages/Officers";
+import { ToastContainer } from "react-toastify";
 
 const LayoutWithHeader = () => (
   <>
@@ -30,6 +31,18 @@ const App = () => {
   return (
     <AntdApp> {/* ✅ Wrap with Ant Design context provider */}
 
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark" // or "light" | "dark"
+        limit={3} // limit to 3 toasts at a time
+      />
 
       <Router>
         <Routes>
