@@ -19,6 +19,7 @@ import LeafSupplyByDateRange from "./pages/LeafSupplyByDateRange";
 import Prediction from "./pages/Prediction";
 import OfficersPage from "./pages/Officers";
 import { ToastContainer } from "react-toastify";
+import OfficerTargets from "./pages/OfficerTargets";
 
 const LayoutWithHeader = () => (
   <>
@@ -73,6 +74,7 @@ const App = () => {
 
             <Route path="/suppliers/routes" element={<Suppliers />} />
             <Route path="/factory-targets/prediction" element={<Prediction />} />
+            <Route path="/factory-targets/officer" element={<OfficerTargets />} />
 
 
             <Route path="/vehicles" element={<Vehicles />} />

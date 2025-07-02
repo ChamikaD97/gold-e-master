@@ -198,7 +198,7 @@ const LeafSupply = () => {
       });
 
 
-   
+
       // ✅ Merge all line-wise totals into first lineCode
       const firstLineCode = transformed[0]?.lineCode;
       const lineWiseTotalMap = {
@@ -509,11 +509,6 @@ const LeafSupply = () => {
   }, [filters.year, filters.month, filters.line, filters.lineCode]);
 
 
-
-
-
-
-
   const filteredTableData = tableData.filter(item =>
     !filters.supplierId || item.supplier_id.toLowerCase().startsWith(filters.supplierId.toLowerCase())
   );
@@ -799,6 +794,8 @@ const LeafSupply = () => {
       </Modal>
 
 
+
+
       <div style={{ flex: "0 0 auto" }} className="fade-in">
         <Card bordered={false} style={cardStyle}>
           <Row gutter={[16, 16]}>
@@ -884,151 +881,148 @@ const LeafSupply = () => {
       </div>
 
 
+      {isLoading && <CircularLoader />}
 
 
-      {filters.line !== "M" && filters.officer !== "All" && (
-        <Card bordered={false} style={cardStyle}>
-          <Row gutter={[12, 12]}>
-            {filteredLines.filter(l => l !== "All").map(line => (
-              <Col xs={8} sm={4} md={4} key={line}>
-                <Button
-                  type={filters.line === line ? "primary" : "default"}
-                  onClick={() => setFilters(prev => ({ ...prev, line, month: "Select Month" }))}
-                  style={{ width: "100%", background: filters.line === line ? "#1890ff" : "#000", color: "#fff" }}
-                >
-                  {line}
-                </Button>
-              </Col>
-            ))}
-          </Row>
-        </Card>
-      )}
-      {filters.month !== "Select Month" && filteredTableData.length && (
+      {!isLoading &&
+
         <>
-          {
-            lineWiseTotals && (
-              <Card bordered={false} style={{ ...cardStyle, marginTop: 0 }}>
-
-                <Row gutter={[16, 16]} justify="center" style={{ marginTop: 1 }}>
-                  {Object.entries(lineWiseTotals).map(([lineCode, totals]) => (
-                    <Col xs={24} sm={24} md={24} key={lineCode}>
-
-                      <div
-                        style={{
-                          margin: "16px 0",
-                          textAlign: "center",
-
-                          borderRadius: 10,
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: 18,
-                            fontWeight: "bold",
-                            color: "#fff",
-                            textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
-                          }}
-                        >
-                          Mr. {getOfficerByLineId(filters.line) || "Officer"} –  {filters.lineCode} Line - {monthMap[filters.month]} {filters.year}
-                        </span>
-                      </div>
 
 
-                      {/* 3-column row for Super, Normal, and Total */}
-                      <Row gutter={[16, 16]} justify="center">
-                        {/* Super Total */}
-                        <Col xs={24} sm={12} md={8}>
+          {filters.month !== "Select Month" && filteredTableData.length && (
+            <>
+              {
+                lineWiseTotals && (
+                  <Card bordered={false} style={{ ...cardStyle, marginTop: 0 }}>
+
+                    <Row gutter={[16, 16]} justify="center" style={{ marginTop: 1 }}>
+                      {Object.entries(lineWiseTotals).map(([lineCode, totals]) => (
+                        <Col xs={24} sm={24} md={24} key={lineCode}>
+
                           <div
                             style={{
-                              backgroundColor: "#ffa347",
+                              margin: "16px 0",
+                              textAlign: "center",
+
                               borderRadius: 10,
-                              padding: "14px 24px",
-                              textAlign: "center",
-                              fontWeight: 600,
-                              color: "#000",
-                              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
                             }}
                           >
-                            Super Total<br />
-                            <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={1.2} separator="," /> kg<br />
-
+                            <span
+                              style={{
+                                fontSize: 18,
+                                fontWeight: "bold",
+                                color: "#fff",
+                                textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
+                              }}
+                            >
+                              Mr. {getOfficerByLineId(filters.line) || "Officer"} –  {filters.lineCode} Line - {monthMap[filters.month]} {filters.year}
+                            </span>
                           </div>
-                        </Col>
 
-                        {/* Normal Total */}
-                        <Col xs={24} sm={12} md={8}>
-                          <div
-                            style={{
-                              backgroundColor: "#47a3ff",
-                              borderRadius: 15,
-                              padding: "14px 24px",
-                              textAlign: "center",
-                              fontWeight: 600,
-                              color: "#000",
-                              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                            }}
-                          >
-                            Normal Total<br />
-                            <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={1.2} separator="," /> kg
-                          </div>
-                        </Col>
 
-                        {/* Overall Total */}
-                        <Col xs={24} sm={24} md={8}>
-                          <div
-                            style={{
-                              backgroundColor: "#28a745",
-                              borderRadius: 10,
-                              padding: "14px 24px",
-                              textAlign: "center",
-                              fontWeight: 600,
-                              color: "#000",
-                              textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
-                              boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)",
-                            }}
-                          >
-                            Overall Total<br />                        <CountUp style={{ fontSize: 30 }} end={Math.round(totals.overall)} duration={1.2} separator="," /> kg<br />
+                          {/* 3-column row for Super, Normal, and Total */}
+                          <Row gutter={[16, 16]} justify="center">
+                            {/* Super Total */}
+                            <Col xs={24} sm={12} md={8}>
+                              <div
+                                style={{
+                                  backgroundColor: "#ffa347",
+                                  borderRadius: 10,
+                                  padding: "14px 24px",
+                                  textAlign: "center",
+                                  fontWeight: 600,
+                                  color: "#000",
+                                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                                }}
+                              >
+                                Super Total<br />
+                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={1.2} separator="," /> kg<br />
 
-                          </div>
+                              </div>
+                            </Col>
+
+                            {/* Normal Total */}
+                            <Col xs={24} sm={12} md={8}>
+                              <div
+                                style={{
+                                  backgroundColor: "#47a3ff",
+                                  borderRadius: 15,
+                                  padding: "14px 24px",
+                                  textAlign: "center",
+                                  fontWeight: 600,
+                                  color: "#000",
+                                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                                }}
+                              >
+                                Normal Total<br />
+                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={1.2} separator="," /> kg
+                              </div>
+                            </Col>
+
+                            {/* Overall Total */}
+                            <Col xs={24} sm={24} md={8}>
+                              <div
+                                style={{
+                                  backgroundColor: "#28a745",
+                                  borderRadius: 10,
+                                  padding: "14px 24px",
+                                  textAlign: "center",
+                                  fontWeight: 600,
+                                  color: "#000",
+                                  textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
+                                  boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)",
+                                }}
+                              >
+                                Overall Total<br />                        <CountUp style={{ fontSize: 30 }} end={Math.round(totals.overall)} duration={1.2} separator="," /> kg<br />
+
+                              </div>
+                            </Col>
+                          </Row>
                         </Col>
-                      </Row>
-                    </Col>
-                  ))}
-                </Row>
+                      ))}
+                    </Row>
+                  </Card>
+                )
+
+              }
+              {suppliersMarkedTomorrow.length > 0 && (
+                <Card bordered={false} style={{ ...cardStyle, marginTop: 12 }}>
+                  <Text strong>Suppliers that need to supply leaf after {notificationDate} days</Text>
+                  <ul style={{ color: "#fff", paddingLeft: 20 }}>
+                    {suppliersMarkedTomorrow.map(sid => <li key={sid}>{sid}</li>)}
+                  </ul>
+                </Card>
+              )}
+
+              <Card bordered={false} style={cardStyle}>
+                {(
+                  <Table
+                    className="red-bordered-table"
+                    columns={columns}
+                    dataSource={filteredTableData}
+                    pagination={false}
+                    scroll={{ x: "max-content", y: 400 }} // ✅ vertical scroll to fix header
+                    bordered
+                    size="small"
+                    rowKey="supplier_id"
+                  />
+
+                )}
               </Card>
-            )
-
-          }
-          {suppliersMarkedTomorrow.length > 0 && (
-            <Card bordered={false} style={{ ...cardStyle, marginTop: 12 }}>
-              <Text strong>Suppliers that need to supply leaf after {notificationDate} days</Text>
-              <ul style={{ color: "#fff", paddingLeft: 20 }}>
-                {suppliersMarkedTomorrow.map(sid => <li key={sid}>{sid}</li>)}
-              </ul>
-            </Card>
+            </>
           )}
-          <Card bordered={false} style={cardStyle}>
-            {isLoading ? <CircularLoader /> : (
-              <Table
-                className="red-bordered-table"
-                columns={columns}
-                dataSource={filteredTableData}
-                pagination={false}
-                scroll={{ x: "max-content", y: 400 }} // ✅ vertical scroll to fix header
-                bordered
-                size="small"
-                rowKey="supplier_id"
-              />
-
-            )}
-          </Card>
-
-
-
 
 
         </>
-      )}
+
+
+      }
+
+
+
+
+
+
     </div>
   );
 };

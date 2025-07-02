@@ -10,22 +10,36 @@ import lineIdCodeMap from "../data/lineIdCodeMap.json";
 import CountUp from "react-countup";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Search, SearchOff, SearchOffOutlined, SearchOffRounded, SearchRounded } from "@mui/icons-material";
+import CircularLoader from "../components/CircularLoader";
 
 const { Option } = Select;
 const { Text } = Typography;
 
 const LeafSupplyByDateRange = () => {
+  const today = new Date();
+  const currentYear = today.getFullYear().toString();
+  const currentMonth = (today.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-indexed
+  const currentDay = today.getDate().toString().padStart(2, "0");
+
   const [filters, setFilters] = useState({
-    fromYear: "", fromMonth: "", fromDay: "",
-    toYear: "", toMonth: "", toDay: "",
+    fromYear: currentYear,
+    fromMonth: currentMonth,
+    fromDay: "01",
+    toYear: currentYear,
+    toMonth: currentMonth,
+    toDay: currentDay,
     line: ""
   });
+
+  const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMap.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
+  const officerLineMap = useSelector((state) => state.officerLine?.officerLineMap || {});
 
   const [lineWiseSummary, setLineWiseSummary] = useState([]);
   const [data, setData] = useState([]);
   const [totals, setTotals] = useState({ super: 0, normal: 0 });
   const dispatch = useDispatch();
   const monthMap = useSelector((state) => state.commonData?.monthMap);
+  const { isLoading } = useSelector((state) => state.loader);
 
   const cardStyle = {
     background: "rgba(0, 0, 0, 0.6)",
@@ -143,7 +157,18 @@ const LeafSupplyByDateRange = () => {
                 bordered={false}
                 placeholder="Select Line"
                 value={filters.line}
-                onChange={(val) => setFilters(prev => ({ ...prev, line: val }))}
+
+
+
+                onChange={val => {
+                  const selectedLine = uniqueLines.find(line => line.value === val);
+                  const officerMatch = Object.entries(officerLineMap).find(([officer, lines]) => lines.includes(val));
+                  const matchedOfficer = officerMatch ? officerMatch[0] : "All";
+                  setFilters(f => ({ ...f, officer: val.officer, line: val, lineCode: selectedLine?.label || "", officer: matchedOfficer, month: "Select Month" }));
+                }}
+
+
+
                 style={selectStyle}
                 dropdownStyle={{ backgroundColor: "#1e1e1e" }}
               >
@@ -225,21 +250,8 @@ const LeafSupplyByDateRange = () => {
                     </Col>
                   );
                 })}
-
-
-
-
-
-
-
-
               </Row>
-
-
             </Card>
-
-
-
           </Col>
           <Col xs={24} sm={12} md={2}>
             <Card bordered={false} style={cardStyle}>
@@ -268,17 +280,9 @@ const LeafSupplyByDateRange = () => {
               />
             </Card>
           </Col>
-
-
-
-
-
         </Row>
-
-
-
       </div>
-
+      {isLoading && <CircularLoader />}
       {/* Display Totals */}
       {lineWiseSummary.length > 0 && (
         <Card bordered={false} style={{ ...cardStyle, marginTop: 12 }}>
@@ -287,7 +291,7 @@ const LeafSupplyByDateRange = () => {
               <Col xs={24} sm={24} md={24} key={line.lineCode}>
                 <div style={{ margin: "16px 0", textAlign: "center", borderRadius: 10 }}>
                   <span style={{ fontSize: 18, fontWeight: "bold", color: "#fff", textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}>
-                    Mr. {getOfficerByLineId(line.lineCode) || "Officer"} – Line {line.lineCode}
+                    Mr. {getOfficerByLineId(filters.line) || "Officer"} –  {filters.lineCode} Line
                   </span>
                 </div>
                 <Row gutter={[16, 16]} justify="center">

@@ -1,18 +1,17 @@
 import React, { useState } from "react";
 import {
-  Card, Col, Row, Button
+  Card, Col, Row, Button, Table
 } from "antd";
 import { ReloadOutlined, UserOutlined } from "@ant-design/icons";
 import '../App.css';
 
-import lineIdCodeMap from "../data/lineIdCodeMap.json";
 import Ajith from "../data/Ajith.json";
 import Udara from "../data/Udara.json";
 import Udayanga from "../data/Udayanga.json";
 import Gamini from "../data/Gamini.json";
 import Chamod from "../data/Chamod.json";
 
-const Officers = () => {
+const OfficerTargets = () => {
   const [officerDataMap] = useState({
     Ajith: Ajith.lines,
     Udara: Udara.lines,
@@ -33,9 +32,23 @@ const Officers = () => {
     padding: 20,
   };
 
+  const columns = [
+    {
+      title: "Line Code",
+      dataIndex: "lineCode",
+      key: "lineCode",
+      render: text => text || "N/A"
+    },
+    {
+      title: "Line ID",
+      dataIndex: "lineId",
+      key: "lineId",
+      render: text => text || "N/A"
+    }
+  ];
+
   return (
     <div style={{ padding: 20 }}>
-      {/* Officer selection row */}
       <Card bordered={false} style={cardStyle} className="fade-in">
         <Row gutter={[16, 16]}>
           {Object.keys(officerDataMap).map((officer) => (
@@ -45,19 +58,15 @@ const Officers = () => {
                 type="primary"
                 block
                 onClick={() => {
- setFilters({ officer: "All", line: "" })
-
+                  setFilters({ officer: "All", line: "" });
                   setTimeout(() => {
-                    setFilters({ officer, line: "" })
+                    setFilters({ officer, line: "" });
                   }, 100);
-
-                 
                 }}
               >
                 Mr. {officer}
               </Button>
             </Col>
-
           ))}
           <Col xs={12} sm={8} md={4}>
             <Button
@@ -73,26 +82,43 @@ const Officers = () => {
         </Row>
       </Card>
 
-      {/* Line selection row */}
       {filters.officer !== "All" && (
-        <Card bordered={false} style={cardStyle} className="fade-in" >
-          <Row gutter={[12, 12]}>
-            {filteredLines.map(({ lineCode }) => (
-              <Col xs={8} sm={4} md={4} key={lineCode}>
-                <Button
-                  type={filters.line === lineCode ? "primary" : "default"}
-                  onClick={() => setFilters(prev => ({ ...prev, line: lineCode }))}
-                  style={{ width: "100%", background: filters.line === lineCode ? "#1890ff" : "#000", color: "#fff" }}
-                >
-                  {lineCode || "N/A"}
-                </Button>
-              </Col>
-            ))}
-          </Row>
-        </Card>
+        <>
+          {/* Line Buttons */}
+          <Card bordered={false} style={cardStyle} className="fade-in">
+            <Row gutter={[12, 12]}>
+              {filteredLines.map(({ lineCode }) => (
+                <Col xs={8} sm={4} md={4} key={lineCode}>
+                  <Button
+                    type={filters.line === lineCode ? "primary" : "default"}
+                    onClick={() => setFilters(prev => ({ ...prev, line: lineCode }))}
+                    style={{ width: "100%", background: filters.line === lineCode ? "#1890ff" : "#000", color: "#fff" }}
+                  >
+                    {lineCode || "N/A"}
+                  </Button>
+                </Col>
+              ))}
+            </Row>
+          </Card>
+
+          {/* Line Table */}
+          <Card bordered={false} style={cardStyle} className="fade-in">
+            <Table
+              dataSource={filteredLines.map((line, index) => ({ key: index, ...line }))}
+              columns={columns}
+              pagination={false}
+              rowClassName={record =>
+                record.lineCode === filters.line ? "ant-table-row-selected" : ""
+              }
+              onRow={record => ({
+                onClick: () => setFilters(prev => ({ ...prev, line: record.lineCode }))
+              })}
+            />
+          </Card>
+        </>
       )}
     </div>
   );
 };
 
-export default Officers;
+export default OfficerTargets;
