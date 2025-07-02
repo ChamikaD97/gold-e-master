@@ -42,43 +42,43 @@ const SupplierInfo = () => {
 
   const [totals, setTotals] = useState({ super: 0, normal: 0 });
 
-const fetchSupplierDataFromId = async (supId) => {
-  const id = supId?.toString().trim().padStart(5, "0");
+  const fetchSupplierDataFromId = async (supId) => {
+    const id = supId?.toString().trim().padStart(5, "0");
 
-  if (!id || id.length !== 5) {
-    toast.warning("⚠️ Please enter a valid 5-digit Supplier ID");
-    return;
-  }
-
-  dispatch(showLoader());
-  dispatch(setSelectedSupplier(id));
-  setSupplier(null);
-  setData([]);
-
-  const url = `/quiX/ControllerV1/supdata?k=${apiKey}&s=${id}`;
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch supplier data");
-
-    const result = await response.json();
-    const supplierData = Array.isArray(result) ? result[0] : result;
-
-    if (supplierData) {
-      setSupplier(supplierData);
-      console.log("Supplier data loaded:", supplierData);
-      toast.success(`Supplier ID ${id} loaded successfully`);
-    } else {
-      toast.warning(`No supplier data found for ID ${id}`);
+    if (!id || id.length !== 5) {
+      toast.warning("⚠️ Please enter a valid 5-digit Supplier ID");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to load supplier data");
+
+    dispatch(showLoader());
+    dispatch(setSelectedSupplier(id));
     setSupplier(null);
-  } finally {
-    dispatch(hideLoader());
-  }
-};
+    setData([]);
+
+    const url = `/quiX/ControllerV1/supdata?k=${apiKey}&s=${id}`;
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch supplier data");
+
+      const result = await response.json();
+      const supplierData = Array.isArray(result) ? result[0] : result;
+
+      if (supplierData) {
+        setSupplier(supplierData);
+        console.log("Supplier data loaded:", supplierData);
+        toast.success(`Supplier ID ${id} loaded successfully`);
+      } else {
+        toast.warning(`No supplier data found for ID ${id}`);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load supplier data");
+      setSupplier(null);
+    } finally {
+      dispatch(hideLoader());
+    }
+  };
 
 
 

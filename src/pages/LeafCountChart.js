@@ -13,6 +13,7 @@ import { API_KEY, getMonthDateRangeFromParts } from "../api/api";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import CountUp from "react-countup";
+import { toast } from "react-toastify";
 
 
 const { Option } = Select;
@@ -33,7 +34,14 @@ const LeafSupply = () => {
     const match = lineIdCodeMap.find((line) => line.lineId === lineId);
     return match ? match.officer : null;
   };
+  const [xSupplierDetails, setXSupplierDetails] = useState([]); // array of detailed supplier objects
+  const leafRound = useSelector((state) => state.commonData?.leafRound);
 
+  const officerLineMap = useSelector((state) => state.officerLine?.officerLineMap || {});
+  const monthMap = useSelector((state) => state.commonData?.monthMap);
+  const dispatch = useDispatch();
+  const { isLoading } = useSelector((state) => state.loader);
+  const [lineWiseTotals, setLineWiseTotals] = useState({});
   const [xModalVisible, setXModalVisible] = useState(false);
   const [xSupplierList, setXSupplierList] = useState([]);
 
@@ -51,182 +59,183 @@ const LeafSupply = () => {
     return xSupplierDetails.reduce((sum, item) => sum + (parseFloat(item["X KG"]) || 0), 0);
   };
   const notificationDate = useSelector((state) => state.commonData?.notificationDate);
-  const fetchSupplierDataFromAPI = async (supplierId) => {
-    setLineWiseTotals([])
-    const baseUrl = "/quiX/ControllerV1/supdata";
-    const params = new URLSearchParams({ k: API_KEY, s: supplierId });
-    const url = `${baseUrl}?${params.toString()}`;
 
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch supplier data");
-      const data = await response.json();
-      return Array.isArray(data) ? data : data ? [data] : [];
-    } catch (err) {
-      setLineWiseTotals([])
-      console.error(err);
-      return [];
+const fetchSupplierDataFromAPI = async (supplierId) => {
+  setLineWiseTotals([]);
+  const baseUrl = "/quiX/ControllerV1/supdata";
+  const params = new URLSearchParams({ k: API_KEY, s: supplierId });
+  const url = `${baseUrl}?${params.toString()}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch supplier data");
+    const data = await response.json();
+    return Array.isArray(data) ? data : data ? [data] : [];
+  } catch (err) {
+    console.error(err);
+    toast.error("❌ Failed to fetch supplier details from API");
+    return [];
+  }
+};
+const getSuppliersMarkedXToday = async () => {
+  const today = new Date().toDateString();
+  const supplierMap = {};
+
+  // Group by supplier_id
+  data.forEach(item => {
+    supplierMap[item.supplier_id] = [...(supplierMap[item.supplier_id] || []), item];
+  });
+
+  const result = [];
+  const xValueMap = {}; // Map supplier_id -> total kg
+
+  for (const [supplierId, records] of Object.entries(supplierMap)) {
+    const lastRecord = records.reduce((latest, current) =>
+      new Date(current.date) > new Date(latest.date) ? current : latest
+    );
+
+    const nextDate = new Date(lastRecord.date);
+    nextDate.setDate(nextDate.getDate() + leafRound);
+
+    if (nextDate.toDateString() === today) {
+      result.push(supplierId);
+
+      const total =
+        typeof lastRecord.net_kg === "object"
+          ? (lastRecord.net_kg.Super || 0) + (lastRecord.net_kg.Normal || 0)
+          : lastRecord.net_kg || 0;
+
+      xValueMap[supplierId] = `${total} kg`;
     }
-  };
-  const getSuppliersMarkedXToday = async () => {
-    const today = new Date().toDateString();
-    const supplierMap = {};
+  }
 
-    data.forEach(item => {
-      supplierMap[item.supplier_id] = [...(supplierMap[item.supplier_id] || []), item];
+  setXSupplierList(result);
+  setXModalVisible(true);
+
+  try {
+    const detailPromises = result.map(id => fetchSupplierDataFromAPI(id));
+    const details = await Promise.all(detailPromises);
+    const flattened = details.flat().filter(Boolean);
+
+    const enriched = flattened.map(s => ({
+      ...s,
+      "X KG": xValueMap[s["Supplier Id"]] || "-"
+    }));
+
+    setXSupplierDetails(enriched);
+  } catch (err) {
+    console.error(err);
+    toast.error("❌ Failed to fetch supplier details for X markers");
+    setXSupplierDetails([]);
+  }
+};
+
+
+
+const getLeafRecordsByRoutes = async () => {
+  dispatch(showLoader());
+  const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
+  const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${filters.line}&d=${dateRange}`;
+  setError(null);
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch supplier data");
+
+    const result = await response.json();
+    const groupedMap = {};
+
+    result.forEach(item => {
+      const key = `${item["Supplier Id"]}_${item["Leaf Date"]}`;
+      if (!groupedMap[key]) {
+        groupedMap[key] = {
+          supplier_id: item["Supplier Id"],
+          date: item["Leaf Date"],
+          lineCode: parseInt(item["Route"]),
+          line: filters.lineCode || "",
+          super_kg: 0,
+          normal_kg: 0,
+        };
+      }
+
+      const net = parseFloat(item["Net"] || 0);
+      const isSuper = item["Leaf Type"] === 2;
+      if (isSuper) {
+        groupedMap[key].super_kg += net;
+      } else {
+        groupedMap[key].normal_kg += net;
+      }
     });
 
-    const result = [];
-    const xValueMap = {}; // supplier_id => total kg string
+    const transformed = Object.values(groupedMap).map(item => {
+      const total_kg = item.super_kg + item.normal_kg;
+      return {
+        ...item,
+        leaf_type:
+          item.super_kg > 0 && item.normal_kg > 0
+            ? "Both"
+            : item.super_kg > 0
+              ? "Super"
+              : "Normal",
+        net_kg: {
+          Super: item.super_kg || null,
+          Normal: item.normal_kg || null,
+        },
+        total_kg: total_kg.toFixed(2),
+      };
+    });
 
-    for (const [supplierId, records] of Object.entries(supplierMap)) {
-      const lastRecord = records.reduce((latest, current) =>
-        new Date(current.date) > new Date(latest.date) ? current : latest
-      );
-
-      const nextDate = new Date(lastRecord.date);
-      nextDate.setDate(nextDate.getDate() + leafRound);
-
-      if (nextDate.toDateString() === today) {
-        result.push(supplierId);
-
-        // Calculate total kg
-        if (typeof lastRecord.net_kg === "object") {
-          const total =
-            (lastRecord.net_kg.Super || 0) + (lastRecord.net_kg.Normal || 0);
-          xValueMap[supplierId] = `${total} kg`;
-        } else {
-          xValueMap[supplierId] = `${lastRecord.net_kg} kg`;
-        }
+    // Monthly totals per supplier
+    const supplierMonthlyTotalMap = {};
+    transformed.forEach(item => {
+      const sid = item.supplier_id;
+      if (!supplierMonthlyTotalMap[sid]) {
+        supplierMonthlyTotalMap[sid] = { total: 0, super: 0, normal: 0 };
       }
-    }
+      supplierMonthlyTotalMap[sid].total += parseFloat(item.total_kg);
+      supplierMonthlyTotalMap[sid].super += item.super_kg;
+      supplierMonthlyTotalMap[sid].normal += item.normal_kg;
+    });
 
-    setXSupplierList(result);
-    setXModalVisible(true);
+    // Line-wise total
+    const lineWiseTotalMap = {};
+    transformed.forEach(item => {
+      const lineCode = item.lineCode;
+      if (!lineWiseTotalMap[lineCode]) {
+        lineWiseTotalMap[lineCode] = { super: 0, normal: 0, overall: 0 };
+      }
+      lineWiseTotalMap[lineCode].super += item.super_kg;
+      lineWiseTotalMap[lineCode].normal += item.normal_kg;
+      lineWiseTotalMap[lineCode].overall += item.super_kg + item.normal_kg;
+    });
 
-    try {
-      const detailPromises = result.map(id => fetchSupplierDataFromAPI(id));
-      const details = await Promise.all(detailPromises);
-      const flattened = details.flat().filter(Boolean);
+    setLineWiseTotals(lineWiseTotalMap);
 
-      const enriched = flattened.map(s => ({
-        ...s,
-        "X KG": xValueMap[s["Supplier Id"]] || "-"
-      }));
+    // Grand total for selected line
+    const lineSuperTotal = transformed.reduce((sum, item) => sum + item.super_kg, 0);
+    const lineNormalTotal = transformed.reduce((sum, item) => sum + item.normal_kg, 0);
+    const lineOverallTotal = lineSuperTotal + lineNormalTotal;
 
-      setXSupplierDetails(enriched);
-    } catch {
-      setXSupplierDetails([]);
-    }
-  };
-  const [xSupplierDetails, setXSupplierDetails] = useState([]); // array of detailed supplier objects
-  const leafRound = useSelector((state) => state.commonData?.leafRound);
+    setLineTotal({
+      super: lineSuperTotal,
+      normal: lineNormalTotal,
+      overall: lineOverallTotal,
+    });
 
-  const officerLineMap = useSelector((state) => state.officerLine?.officerLineMap || {});
-  const monthMap = useSelector((state) => state.commonData?.monthMap);
-  const dispatch = useDispatch();
-  const { isLoading } = useSelector((state) => state.loader);
-  const [lineWiseTotals, setLineWiseTotals] = useState({});
-
-  const getLeafRecordsByRoutes = async () => {
-    dispatch(showLoader());
-    const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
-    const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${filters.line}&d=${dateRange}`;
-    setError(null);
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch supplier data");
-      const result = await response.json();
-
-      const groupedMap = {};
-
-      result.forEach(item => {
-        const key = `${item["Supplier Id"]}_${item["Leaf Date"]}`;
-        if (!groupedMap[key]) {
-          groupedMap[key] = {
-            supplier_id: item["Supplier Id"],
-            date: item["Leaf Date"],
-            lineCode: parseInt(item["Route"]),
-            line: filters.lineCode || "", // fallback if undefined
-            super_kg: 0,
-            normal_kg: 0,
-          };
-        }
-
-        const net = parseFloat(item["Net"] || 0);
-        const isSuper = item["Leaf Type"] === 2;
-        if (isSuper) {
-          groupedMap[key].super_kg += net;
-        } else {
-          groupedMap[key].normal_kg += net;
-        }
-      });
-
-      const transformed = Object.values(groupedMap).map(item => {
-        const total_kg = item.super_kg + item.normal_kg;
-        return {
-          ...item,
-          leaf_type:
-            item.super_kg > 0 && item.normal_kg > 0
-              ? "Both"
-              : item.super_kg > 0
-                ? "Super"
-                : "Normal",
-          net_kg: {
-            Super: item.super_kg || null,
-            Normal: item.normal_kg || null,
-          },
-          total_kg: total_kg.toFixed(2),
-        };
-      });
-
-      // Supplier-wise monthly totals
-      const supplierMonthlyTotalMap = {};
-      transformed.forEach(item => {
-        const sid = item.supplier_id;
-        if (!supplierMonthlyTotalMap[sid]) {
-          supplierMonthlyTotalMap[sid] = { total: 0, super: 0, normal: 0 };
-        }
-        supplierMonthlyTotalMap[sid].total += parseFloat(item.total_kg);
-        supplierMonthlyTotalMap[sid].super += item.super_kg;
-        supplierMonthlyTotalMap[sid].normal += item.normal_kg;
-      });
-
-      const lineWiseTotalMap = {};
-      transformed.forEach(item => {
-        const lineCode = item.lineCode;
-        if (!lineWiseTotalMap[lineCode]) {
-          lineWiseTotalMap[lineCode] = { super: 0, normal: 0, overall: 0 };
-        }
-        lineWiseTotalMap[lineCode].super += item.super_kg;
-        lineWiseTotalMap[lineCode].normal += item.normal_kg;
-        lineWiseTotalMap[lineCode].overall += item.super_kg + item.normal_kg;
-      });
-
-      setLineWiseTotals(lineWiseTotalMap);
-
-      const lineSuperTotal = transformed.reduce((sum, item) => sum + item.super_kg, 0);
-      const lineNormalTotal = transformed.reduce((sum, item) => sum + item.normal_kg, 0);
-      const lineOverallTotal = lineSuperTotal + lineNormalTotal;
-
-      setLineTotal({
-        super: lineSuperTotal,
-        normal: lineNormalTotal,
-        overall: lineOverallTotal,
-      });
-
-      setData(transformed);
-      setColData(transformed);
-    } catch (err) {
-      setError("❌ Failed to load supplier data");
-      setData([]);
-      setColData([]);
-      setLineTotal({ super: 0, normal: 0, overall: 0 });
-    } finally {
-      dispatch(hideLoader());
-    }
-  };
+    setData(transformed);
+    setColData(transformed);
+  } catch (err) {
+    console.error(err);
+    toast.error("❌ Failed to load leaf collection data");
+    setError("Failed to load supplier data");
+    setData([]);
+    setColData([]);
+    setLineTotal({ super: 0, normal: 0, overall: 0 });
+    setLineWiseTotals([]);
+  } finally {
+    dispatch(hideLoader());
+  }
+};
 
 
 
