@@ -17,6 +17,7 @@ import { showLoader } from "../redux/loaderSlice";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "react-toastify";
+import { API_KEY } from "../api/api";
 
 
 
@@ -81,11 +82,10 @@ const Suppliers = () => {
   const [error, setError] = useState(null);
   const [showSingleModel, setShowSingleModel] = useState(false);
 
-  const apiKey = "quix717244";
 
 const fetchSupplierDataFromAPI = async (lineCode) => {
   const baseUrl = "/quiX/ControllerV1/supdata";
-  const params = new URLSearchParams({ k: apiKey, r: lineCode });
+  const params = new URLSearchParams({ k: API_KEY, r: lineCode });
   const url = `${baseUrl}?${params.toString()}`;
 
   setLoading(true);
@@ -108,7 +108,7 @@ const fetchSupplierDataFromAPI = async (lineCode) => {
 };
 const fetchSupplierDataFromId = async (supplierId) => {
   const baseUrl = "/quiX/ControllerV1/supdata";
-  const params = new URLSearchParams({ k: apiKey, s: supplierId });
+  const params = new URLSearchParams({ k: API_KEY, s: supplierId });
   const url = `${baseUrl}?${params.toString()}`;
 
   setLoading(true);

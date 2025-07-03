@@ -36,7 +36,7 @@ const SupplierInfo = () => {
   const [data, setData] = useState([]);
   const dispatch = useDispatch();
   const supplierId = useSelector((state) => state.commonData?.selectedSupplierId);
-  const apiKey = "quix717244";
+  
   const { isLoading } = useSelector((state) => state.loader);
 
   const [totals, setTotals] = useState({ super: 0, normal: 0 });
@@ -54,7 +54,7 @@ const SupplierInfo = () => {
     setSupplier(null);
     setData([]);
 
-    const url = `/quiX/ControllerV1/supdata?k=${apiKey}&s=${id}`;
+    const url = `/quiX/ControllerV1/supdata?k=${API_KEY}&s=${id}`;
 
     try {
       const response = await fetch(url);

@@ -10,7 +10,14 @@ import Udara from "../data/Udara.json";
 import Udayanga from "../data/Udayanga.json";
 import Gamini from "../data/Gamini.json";
 import Chamod from "../data/Chamod.json";
+import { useDispatch, useSelector } from "react-redux";
+import { hideLoader, showLoader } from "../redux/loaderSlice";
 
+import { API_KEY } from "../api/api";
+import dayjs from "dayjs";
+import LineAnalyticsModal from "../components/LineAnalyticsModal";
+import { AllInbox, ReportOffRounded } from "@mui/icons-material";
+import FactoryAnalyticsModal from "../components/FactoryAnalyticsModal";
 const OfficerTargets = () => {
   const [officerDataMap] = useState({
     Ajith: Ajith.lines,
@@ -21,7 +28,8 @@ const OfficerTargets = () => {
   });
 
   const [filters, setFilters] = useState({ officer: "All", line: "" });
-
+  const [modalOpen, setModalOpen] = useState(false);
+  const [isFactory, setIsFactory] = useState(false);
   const filteredLines = filters.officer === "All" ? [] : officerDataMap[filters.officer] || [];
 
   const cardStyle = {
@@ -32,25 +40,49 @@ const OfficerTargets = () => {
     padding: 20,
   };
 
-  const columns = [
-    {
-      title: "Line Code",
-      dataIndex: "lineCode",
-      key: "lineCode",
-      render: text => text || "N/A"
-    },
-    {
-      title: "Line ID",
-      dataIndex: "lineId",
-      key: "lineId",
-      render: text => text || "N/A"
-    }
-  ];
+
+
+
 
   return (
     <div style={{ padding: 20 }}>
+
+
+      <LineAnalyticsModal
+        visible={modalOpen}
+        onClose={() => {
+
+
+          setModalOpen(false)
+        }}
+        lineCode={filters.line}
+        filteredLines={filteredLines.find(line => line.lineCode === filters.line)}
+      />
+      <FactoryAnalyticsModal
+        visible={isFactory}
+        onClose={() => {
+
+          setIsFactory(false);
+        }}
+        lineCode={filters.line}
+        filteredLines={filteredLines.find(line => line.lineCode === filters.line)}
+      />
+
       <Card bordered={false} style={cardStyle} className="fade-in">
         <Row gutter={[16, 16]}>
+          <Col xs={12} sm={8} md={3}>
+            <Button
+              type="primary"
+              block
+              danger
+              onClick={() => {
+                setIsFactory(true);
+               
+              }}
+            >
+              All
+            </Button>
+          </Col>
           {Object.keys(officerDataMap).map((officer) => (
             <Col key={officer} xs={12} sm={8} md={4}>
               <Button
@@ -68,7 +100,7 @@ const OfficerTargets = () => {
               </Button>
             </Col>
           ))}
-          <Col xs={12} sm={8} md={4}>
+          <Col xs={12} sm={8} md={1}>
             <Button
               icon={<ReloadOutlined />}
               type="primary"
@@ -76,7 +108,7 @@ const OfficerTargets = () => {
               danger
               onClick={() => setFilters({ officer: "All", line: "" })}
             >
-              Reset
+
             </Button>
           </Col>
         </Row>
@@ -87,11 +119,16 @@ const OfficerTargets = () => {
           {/* Line Buttons */}
           <Card bordered={false} style={cardStyle} className="fade-in">
             <Row gutter={[12, 12]}>
+
               {filteredLines.map(({ lineCode }) => (
                 <Col xs={8} sm={4} md={4} key={lineCode}>
                   <Button
                     type={filters.line === lineCode ? "primary" : "default"}
-                    onClick={() => setFilters(prev => ({ ...prev, line: lineCode }))}
+                    onClick={() => {
+                      setFilters(prev => ({ ...prev, line: lineCode }));
+                      setModalOpen(true);
+                    }}
+
                     style={{ width: "100%", background: filters.line === lineCode ? "#1890ff" : "#000", color: "#fff" }}
                   >
                     {lineCode || "N/A"}
@@ -101,21 +138,7 @@ const OfficerTargets = () => {
             </Row>
           </Card>
 
-          {/* Line Table */}
-          <Card bordered={false} style={cardStyle} className="fade-in">
-            <Table
-             className="red-bordered-table"
-              dataSource={filteredLines.map((line, index) => ({ key: index, ...line }))}
-              columns={columns}
-              pagination={false}
-              rowClassName={record =>
-                record.lineCode === filters.line ? "ant-table-row-selected" : ""
-              }
-              onRow={record => ({
-                onClick: () => setFilters(prev => ({ ...prev, line: record.lineCode }))
-              })}
-            />
-          </Card>
+
         </>
       )}
     </div>

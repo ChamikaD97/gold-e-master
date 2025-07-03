@@ -8,6 +8,7 @@ import lineIdCodeMap from "../data/lineIdCodeMap.json";
 import { useDispatch } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import dayjs from "dayjs";
+import { API_KEY } from "../api/api";
 
 const MissingCards = () => {
   const { Option } = Select;
@@ -21,7 +22,7 @@ const MissingCards = () => {
   const [missingSupplierList, setMissingSupplierList] = useState([]);
   const [error, setError] = useState(null);
 
-  const apiKey = "quix717244";
+  
 
   const lineIdToCodeMap = useMemo(() => {
     const map = {};
@@ -50,11 +51,11 @@ const MissingCards = () => {
     const rangeParam = `${from}~${to}`;
 
     try {
-      const supUrl = `/quiX/ControllerV1/supdata?k=${apiKey}&r=${filters.line}`;
+      const supUrl = `/quiX/ControllerV1/supdata?k=${API_KEY}&r=${filters.line}`;
       const supRes = await fetch(supUrl);
       const allSuppliers = await supRes.json();
 
-      const leafUrl = `/quiX/ControllerV1/glfdata?k=${apiKey}&r=${filters.line}&d=${rangeParam}`;
+      const leafUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${filters.line}&d=${rangeParam}`;
       const leafRes = await fetch(leafUrl);
       const leafRecords = await leafRes.json();
 
