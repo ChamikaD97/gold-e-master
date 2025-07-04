@@ -101,6 +101,9 @@ const HeaderComponent = () => {
             <Menu.Item key="leaf-supply">
               <Link to="/leaf/supply">Leaf Supply</Link>
             </Menu.Item>
+            <Menu.Item key="todaySupply">
+              <Link to="/leaf/todaySupply">Today Suppliers</Link>
+            </Menu.Item>
             <Menu.Item key="leaf-counts">
               <Link to="/leaf/count">Leaf Counts</Link>
             </Menu.Item>

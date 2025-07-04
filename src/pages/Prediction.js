@@ -432,9 +432,14 @@ const Prediction = () => {
 
     return map;
   };
-  const downloadPredictionPDF = async (print = false) => {
-    const supplierInfoMap = await buildSupplierInfoMap();
-    downloadXSupplierListAsPDF(supplierInfoMap, print);
+  const downloadPredictionPDF = async (print = false, withName = false) => {
+    if (withName) {
+      const supplierInfoMap = await buildSupplierInfoMap();
+      downloadXSupplierListAsPDF(supplierInfoMap, print);
+    } else {
+      downloadXSupplierListAsPDF([],print);
+    }
+
   };
 
   const downloadXSupplierListAsPDF = (supplierInfoMap, p) => {

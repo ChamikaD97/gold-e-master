@@ -20,6 +20,7 @@ import Prediction from "./pages/Prediction";
 import OfficersPage from "./pages/Officers";
 import { ToastContainer } from "react-toastify";
 import OfficerTargets from "./pages/OfficerTargets";
+import TodaySuppliers from "./pages/TodaySuppliers";
 
 const LayoutWithHeader = () => (
   <>
@@ -69,6 +70,7 @@ const App = () => {
             <Route path="/leaf/dailyLeafSupply" element={<LeafSupplyByDateRange
             />} />
             <Route path="/leaf/missingCards" element={<MissingCards />} />
+            <Route path="/leaf/todaySupply" element={<TodaySuppliers />} />
 
             <Route path="/meal" element={<MealManagement />} />
 

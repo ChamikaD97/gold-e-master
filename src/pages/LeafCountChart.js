@@ -130,8 +130,6 @@ const LeafSupply = () => {
     }
   };
 
-
-
   const getLeafRecordsByRoutes = async () => {
     dispatch(showLoader());
     const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
@@ -239,8 +237,6 @@ const LeafSupply = () => {
       dispatch(hideLoader());
     }
   };
-
-
 
   const setColData = (transformedData) => {
     if (filters.month === "Select Month") {
@@ -512,9 +508,6 @@ const LeafSupply = () => {
   const filteredTableData = tableData.filter(item =>
     !filters.supplierId || item.supplier_id.toLowerCase().startsWith(filters.supplierId.toLowerCase())
   );
-
-
-
 
 
   const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMap.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
