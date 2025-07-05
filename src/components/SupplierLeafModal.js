@@ -8,6 +8,7 @@ import autoTable from "jspdf-autotable";
 import { useSelector, useDispatch } from "react-redux";
 import { setSelectedSupplier } from "../redux/commonDataSlice";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
+import './DarkCalendar.css';
 
 const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId }) => {
     const [leafData, setLeafData] = useState([]);
@@ -310,12 +311,16 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
                     <>
 
 
-                        <Calendar
-                            fullscreen={false}
-                            dateCellRender={dateCellRender}
-                            value={dayjs(selectedDate)}
+                     
 
-                        />
+<div className="dark-calendar-wrapper">
+  <Calendar
+    fullscreen={false}
+    dateCellRender={dateCellRender}
+    value={dayjs(selectedDate)}
+  />
+</div>
+
                         <div
                             style={{
                                 marginTop: 20,

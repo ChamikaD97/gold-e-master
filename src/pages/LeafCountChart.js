@@ -990,7 +990,7 @@ const LeafSupply = () => {
               <Card bordered={false} style={cardStyle}>
                 {(
                   <Table
-                    className="red-bordered-table"
+                    className="sup-bordered-table"
                     columns={columns}
                     dataSource={filteredTableData}
                     pagination={false}

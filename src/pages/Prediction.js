@@ -769,7 +769,8 @@ const Prediction = () => {
           <Card bordered={false} style={cardStyle}>
             {isLoading ? <CircularLoader /> : (
               <Table
-                className="red-bordered-table"
+                
+                 className="sup-bordered-table"
                 columns={columns}
                 dataSource={filteredTableData}
                 pagination={false}

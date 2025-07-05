@@ -77,7 +77,7 @@ const OfficerTargets = () => {
               danger
               onClick={() => {
                 setIsFactory(true);
-               
+
               }}
             >
               All
