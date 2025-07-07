@@ -24,6 +24,7 @@ const TodaySuppliers = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
 
   const [isToday, setIsToday] = useState(true);
+  const [supplierLength, setSuppliersLength] = useState([]);
 
   const [totals, setTotals] = useState({ super: 0, normal: 0, total: 0 });
 
@@ -80,14 +81,28 @@ const TodaySuppliers = () => {
       s.lastDate ? dayjs(s.lastDate).format("YYYY-MM-DD") : "",
       `${Math.round(s.total_kg || 0)} kg`,
       " ",  // Informed
-      " "   // Availability
-    ]);
 
-    // AutoTable
+    ]);
+    // Add row numbers to each row in tableData
+    const numberedTableData = tableData.map((row, index) => [index + 1, ...row]);
+
+    // Calculate the total (example: summing "Total Leaf" column, which is index 5 in the row)
+    const totalLeaf = tableData.reduce((sum, row) => sum + parseFloat(row[4] || 0), 0);
+
+    // Add final total row (colSpan used to merge first 5 columns)
+    const finalRow = [
+      { content: "Total", colSpan: 5, styles: { halign: "right", fontStyle: "bold" } },
+      { content: totalLeaf.toFixed(2), styles: { fontStyle: "bold" } },
+      { content: "", styles: {} }, // empty last cell ("Availability")
+    ];
+
+    // Append the final row to the body
+    numberedTableData.push(finalRow);
+
     doc.autoTable({
       startY: 72,
-      head: [["Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Informed", "Availability"]],
-      body: tableData,
+      head: [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Availability"]],
+      body: numberedTableData,
       styles: {
         fillColor: [255, 255, 255],
         textColor: [0, 0, 0],
@@ -104,30 +119,37 @@ const TodaySuppliers = () => {
         lineWidth: 0.2,
       },
       alternateRowStyles: { fillColor: [245, 245, 245] },
-      didDrawPage: function () {
-        // Footer
-        doc.setFontSize(8);
-        doc.setTextColor(50);
-        doc.line(14, 275, 196, 275);
-        doc.text("Green House Plantation SLMS | DA Engineer: A.C.D. Jayasinghe", 14, 280);
-        doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
-
-        const page = doc.internal.getNumberOfPages();
-        doc.text(`Page ${page}`, 196, 285, { align: "right" });
-      }
     });
+
+
 
     // Total Summary
     const totalKG = supplierWithDataList.reduce((sum, s) => sum + (s.total_kg || 0), 0);
     doc.setFontSize(10);
     doc.setFont(undefined, "bold");
-    doc.text(`Total Leaf Supplied on ${selectedDateFormatted}: ${Math.round(totalKG)} kg`, 14, doc.lastAutoTable.finalY + 10);
+
+
+
+    // ✅ Add footer and summary ONLY on the last page
+    const lastPage = doc.internal.getNumberOfPages();
+    doc.setPage(lastPage);
+
+    doc.line(14, 275, 196, 275);
+    doc.setFontSize(8);
+    doc.setTextColor(5);
+    doc.setFont(undefined, 'normal');
+    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
+
+
+
+
 
     // Save
     const fileName = `${selectedLine}_line_leaf_supply.pdf`;
     doc.save(fileName);
-    setFilters({ line: "All" });
-    setSupplierWithDataList([]);
+    //setFilters({ line: "All" });
+    //setSupplierWithDataList([]);
   };
   const { isLoading } = useSelector((state) => state.loader);
 
@@ -196,6 +218,7 @@ const TodaySuppliers = () => {
         tel: sup["Contact"],
         lineCode: filters.lineCode || ""
       }));
+      setSuppliersLength(allSuppliers.length)
 
       // 4. Filter and combine leaf data
       const withData = allSuppliers
@@ -486,7 +509,7 @@ const TodaySuppliers = () => {
 
       {
 
-        !isLoading  && (
+        !isLoading && (
           <>
 
             <Card bordered={false} style={cardStyle}>
@@ -524,6 +547,15 @@ const TodaySuppliers = () => {
                     <div>Suppliers</div>
                     <div style={{ fontSize: 18, fontWeight: "bold", color: "#ff000e" }}>
                       <CountUp end={supplierWithDataList.length} duration={1.2} separator="," />
+                    </div>
+                  </div>
+                </Col>
+
+                <Col>
+                  <div style={{ color: "#fff", fontWeight: 500 }}>
+                    <div>All </div>
+                    <div style={{ fontSize: 18, fontWeight: "bold", color: "#ff000e" }}>
+                      <CountUp end={supplierLength} duration={1.2} separator="," />
                     </div>
                   </div>
                 </Col>

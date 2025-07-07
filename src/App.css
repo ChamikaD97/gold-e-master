@@ -32,6 +32,7 @@
 .ant-select-selection-search {
   cursor: pointer;
 }
+
 /* Force pointer cursor on dropdown options */
 .ant-select-item-option {
   cursor: pointer !important;
@@ -63,16 +64,21 @@
   background-color: rgba(255, 255, 255, 0.15) !important;
   color: #fff !important;
 }
+
 /* Hide scrollbar for all browsers */
 body::-webkit-scrollbar {
   display: none;
 }
 
 body {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
-  overflow: hidden;          /* Disable scroll */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  overflow: hidden;
+  /* Disable scroll */
 }
+
 #root {
   overflow: auto;
   scrollbar-width: none;
@@ -82,14 +88,18 @@ body {
 #root::-webkit-scrollbar {
   display: none;
 }
+
 .hide-scrollbar {
-  scrollbar-width: none;           /* Firefox */
-  -ms-overflow-style: none;        /* IE 10+ */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
   overflow-y: auto;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none;                   /* Chrome, Safari */
+  display: none;
+  /* Chrome, Safari */
 }
 
 .App-header {
@@ -215,6 +225,7 @@ body {
   border-color: #006f91 !important;
   box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
 }
+
 input::placeholder {
   color: #ffffff;
 
@@ -230,20 +241,21 @@ input::placeholder {
 .red-bordered-table .ant-table,
 .red-bordered-table .ant-table-container,
 .red-bordered-table .ant-table-content,
-.red-bordered-table .ant-table-thead > tr > th,
-.red-bordered-table .ant-table-tbody > tr > td {
-  border: 0.5px solid rgb(255, 255, 255) !important;
+.red-bordered-table .ant-table-thead>tr>th,
+.red-bordered-table .ant-table-tbody>tr>td {
+  border: 0.5px solid rgb(0, 0, 0) !important;
 }
 
-.red-bordered-table .ant-table-thead > tr > th,
-.red-bordered-table .ant-table-tbody > tr > td {
+.red-bordered-table .ant-table-thead>tr>th,
+.red-bordered-table .ant-table-tbody>tr>td {
   border: 0.2px solid rgb(172, 172, 172) !important;
 }
 
-.sup-bordered-table .ant-table-thead > tr > th,
-.sup-bordered-table .ant-table-tbody > tr > td  {
+.sup-bordered-table .ant-table-thead>tr>th,
+
+.sup-bordered-table .ant-table-tbody>tr>td {
   border: 0.2px solid rgb(0, 0, 0) !important;
-  background: transparent !important;
+   background: transparent !important; 
 }
 
 /* For a glassy, modern dark table look */
@@ -252,7 +264,7 @@ input::placeholder {
   overflow: hidden;
 }
 
-.sup-bordered-table .ant-table-thead > tr > th {
+.sup-bordered-table .ant-table-thead>tr>th {
   background: #1a1a1a;
   color: #f0f0f0;
   font-weight: bold;
@@ -260,7 +272,7 @@ input::placeholder {
   text-align: center;
 }
 
-.sup-bordered-table .ant-table-tbody > tr > td {
+.sup-bordered-table .ant-table-tbody>tr>td {
   background: rgba(0, 0, 0, 0.904);
   color: #f5f5f5;
   font-size: 13px;
@@ -269,10 +281,7 @@ input::placeholder {
   padding: 8px 12px;
 }
 
-.sup-bordered-table .ant-table-tbody > tr:hover > td {
-  background: rgba(0, 255, 200, 0.877);
-  transition: background 0.3s ease;
-}
+
 
 .sup-bordered-table .ant-pagination {
   background-color: rgba(0, 0, 0, 0.801);
@@ -291,4 +300,17 @@ input::placeholder {
 .sup-bordered-table .ant-pagination-item-active {
   background-color: #0000006b;
   color: #ffffff;
+}
+
+.sup-bordered-table .ant-table-tbody > tr:hover {
+  background-color: #0000004d; /* Light blue */
+  cursor: pointer;
+  color: #000000;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.sup-bordered-table .ant-table-tbody > tr:hover td {
+  color: #000000;
+  font-weight: 600;
 }

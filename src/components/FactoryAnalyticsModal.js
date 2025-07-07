@@ -113,6 +113,8 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
     }, [visible, chartType, filters.month]);
 
 
+
+    
     const handlePrevMonth = () => {
         setFilters(prev => {
             const newMonth = prev.month - 1;

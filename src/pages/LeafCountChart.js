@@ -45,6 +45,9 @@ const LeafSupply = () => {
   const [xModalVisible, setXModalVisible] = useState(false);
   const [xSupplierList, setXSupplierList] = useState([]);
 
+  const [allSuppliers, setAllSuppliers] = useState([]);
+
+  const [remainingSuppliers, setRemainingSuppliers] = useState([])
   const handleSupplierClick = (supplier_id) => {
     const yearNum = Number(filters.year);
     const monthNum = Number(filters.month);
@@ -130,7 +133,11 @@ const LeafSupply = () => {
     }
   };
 
-  const getLeafRecordsByRoutes = async () => {
+
+
+
+
+  const s = async () => {
     dispatch(showLoader());
     const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${filters.line}&d=${dateRange}`;
@@ -225,6 +232,7 @@ const LeafSupply = () => {
 
       setData(transformed);
       setColData(transformed);
+
     } catch (err) {
       console.error(err);
       toast.error("❌ Failed to load leaf collection data");
@@ -233,10 +241,143 @@ const LeafSupply = () => {
       setColData([]);
       setLineTotal({ super: 0, normal: 0, overall: 0 });
       setLineWiseTotals([]);
+
+    } finally {
+
+      dispatch(hideLoader());
+    }
+  };
+
+  const getLeafRecordsByRoutes = async () => {
+    dispatch(showLoader());
+
+    const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
+    const glfUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${filters.line}&d=${dateRange}`;
+    const supUrl = `/quiX/ControllerV1/supdata?k=${API_KEY}&r=${filters.line}`;
+
+    setError(null);
+
+    try {
+      // ✅ Fetch leaf supply + supplier data in parallel
+      const [glfRes, supRes] = await Promise.all([fetch(glfUrl), fetch(supUrl)]);
+      if (!glfRes.ok || !supRes.ok) throw new Error("Failed to fetch data");
+
+      const result = await glfRes.json();       // leaf collection
+      const allSuppliers = await supRes.json(); // supplier info
+
+      // ✅ Group leaf records by Supplier ID + Date
+      const groupedMap = {};
+
+      result.forEach(item => {
+        const key = `${item["Supplier Id"]}_${item["Leaf Date"]}`;
+        if (!groupedMap[key]) {
+          groupedMap[key] = {
+            supplier_id: item["Supplier Id"],
+            date: item["Leaf Date"],
+            lineCode: parseInt(item["Route"]),
+            line: filters.lineCode || "",
+            super_kg: 0,
+            normal_kg: 0,
+          };
+        }
+
+        const net = parseFloat(item["Net"] || 0);
+        const isSuper = item["Leaf Type"] === 2;
+        if (isSuper) {
+          groupedMap[key].super_kg += net;
+        } else {
+          groupedMap[key].normal_kg += net;
+        }
+      });
+
+      // ✅ Transform to usable structure
+      const transformed = Object.values(groupedMap).map(item => {
+        const total_kg = item.super_kg + item.normal_kg;
+        return {
+          ...item,
+          leaf_type:
+            item.super_kg > 0 && item.normal_kg > 0
+              ? "Both"
+              : item.super_kg > 0
+                ? "Super"
+                : "Normal",
+          net_kg: {
+            Super: item.super_kg || null,
+            Normal: item.normal_kg || null,
+          },
+          total_kg: total_kg.toFixed(2),
+        };
+      });
+
+      // ✅ Monthly totals per supplier
+      const supplierMonthlyTotalMap = {};
+      transformed.forEach(item => {
+        const sid = item.supplier_id;
+        if (!supplierMonthlyTotalMap[sid]) {
+          supplierMonthlyTotalMap[sid] = { total: 0, super: 0, normal: 0 };
+        }
+        supplierMonthlyTotalMap[sid].total += parseFloat(item.total_kg);
+        supplierMonthlyTotalMap[sid].super += item.super_kg;
+        supplierMonthlyTotalMap[sid].normal += item.normal_kg;
+      });
+
+      // ✅ Line-wise totals
+      const firstLineCode = transformed[0]?.lineCode;
+      const lineWiseTotalMap = {
+        [firstLineCode]: { super: 0, normal: 0, overall: 0 }
+      };
+
+      transformed.forEach(item => {
+        lineWiseTotalMap[firstLineCode].super += item.super_kg;
+        lineWiseTotalMap[firstLineCode].normal += item.normal_kg;
+        lineWiseTotalMap[firstLineCode].overall += item.super_kg + item.normal_kg;
+      });
+
+      setLineWiseTotals(lineWiseTotalMap);
+
+      const lineSuperTotal = transformed.reduce((sum, item) => sum + item.super_kg, 0);
+      const lineNormalTotal = transformed.reduce((sum, item) => sum + item.normal_kg, 0);
+      const lineOverallTotal = lineSuperTotal + lineNormalTotal;
+
+      setLineTotal({
+        super: lineSuperTotal,
+        normal: lineNormalTotal,
+        overall: lineOverallTotal,
+      });
+
+      setData(transformed);
+      setColData(transformed);
+
+      // ✅ Detect remaining suppliers who did not supply
+      const activeSupplierIds = new Set(transformed.map(item => String(item.supplier_id)));
+
+      const remainingSuppliers = allSuppliers.filter(
+        sup => !activeSupplierIds.has(String(sup["Supplier Id"]))
+      );
+
+      setAllSuppliers(allSuppliers);
+      setRemainingSuppliers(remainingSuppliers);
+
+      // ✅ Optional debug logs
+      console.log("Active Supplier Example:", transformed[0]);
+      console.log("Remaining Supplier Example:", remainingSuppliers[0]);
+
+    } catch (err) {
+      console.error(err);
+      toast.error("❌ Failed to load leaf collection or supplier data");
+      setError("Failed to load supplier data");
+
+      setData([]);
+      setColData([]);
+      setLineTotal({ super: 0, normal: 0, overall: 0 });
+      setLineWiseTotals([]);
+      setAllSuppliers([]);
+      setRemainingSuppliers([]);
     } finally {
       dispatch(hideLoader());
     }
   };
+
 
   const setColData = (transformedData) => {
     if (filters.month === "Select Month") {
@@ -290,6 +431,7 @@ const LeafSupply = () => {
         className: isTodayCol ? "highlight-column" : "",
         render: (value, row) => {
           const isHighlight = highlightDateMap[row.supplier_id] === dateStr;
+          const isInactiveX = row?.isInactive && day === todayDate;
 
           const spanStyle = (bg, color) => ({
             background: bg,
@@ -305,20 +447,45 @@ const LeafSupply = () => {
             transition: "transform 0.5s",
           });
 
+          // 🔴 Mark today's column with red X for inactive supplier
+          if (isInactiveX) {
+            return (
+              <div
+                className="pulse-red"
+                style={{
+                  backgroundColor: "#AA0114",
+                  color: "#fff",
+                  borderRadius: "20px",
+                  padding: "6px",
+                  fontWeight: "bold",
+                  display: "inline-block",
+                  minWidth: "50px",
+                  textAlign: "center",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                }}
+              >
+                X
+              </div>
+            );
+          }
+
+          // 🔴 Predicted X for active suppliers
           if (isHighlight) {
             return (
-              <div className="pulse-red animated-cell" style={{
-                backgroundColor: '#AA0114',
-                color: '#fff',
-                borderRadius: '20px',
-                padding: '6px',
-                fontWeight: 'bold'
-                , display: "inline-block",
-                minWidth: "50px",
-                textAlign: "center",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                transition: "transform 0.5s",
-              }}>
+              <div
+                className="pulse-red animated-cell"
+                style={{
+                  backgroundColor: "#AA0114",
+                  color: "#fff",
+                  borderRadius: "20px",
+                  padding: "6px",
+                  fontWeight: "bold",
+                  display: "inline-block",
+                  minWidth: "50px",
+                  textAlign: "center",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                }}
+              >
                 X
               </div>
             );
@@ -326,32 +493,30 @@ const LeafSupply = () => {
 
           if (!value) return "";
 
-          if (value.kg.Super && value.kg.Normal) {
+          if (value.kg?.Super && value.kg?.Normal) {
             return (
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: '4px'
-              }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "4px" }}>
                 <span style={spanStyle("#ffa347", "#000")}>{value.kg.Super}</span>
-                <span style={spanStyle("hsl(210, 100.00%, 63.90%)	", "#000")}>{value.kg.Normal}</span>
+                <span style={spanStyle("hsl(210, 100.00%, 63.90%)", "#000")}>{value.kg.Normal}</span>
               </div>
             );
           }
 
-          if (value.kg.Super) {
-            return <span style={spanStyle("#ffa347", "#000")}>{value.kg.Super}  </span>;
+          if (value.kg?.Super) {
+            return <span style={spanStyle("#ffa347", "#000")}>{value.kg.Super}</span>;
           }
 
-          if (value.kg.Normal) {
-            return <span style={spanStyle("#47a3ff	", "#000")}>{value.kg.Normal}  </span>;
+          if (value.kg?.Normal) {
+            return <span style={spanStyle("#47a3ff", "#000")}>{value.kg.Normal}</span>;
           }
 
           return "";
         }
 
+
       };
     });
+
 
 
     const rows = suppliers.map(supplier_id => {
@@ -375,6 +540,39 @@ const LeafSupply = () => {
 
       return row;
     });
+
+    // ✅ Append inactive rows once, after active rows are built
+    const todayDayIndex = today.getDate(); // Example: 7 if today is July 7
+
+    remainingSuppliers.forEach(supplier => {
+      const row = {
+        supplier_id: supplier["Supplier Id"],
+        name: supplier["Supplier Name"] || "-",
+        contact: supplier["Contact No"] || "-",
+        total_kg: 0,
+        super_kg: 0,
+        normal_kg: 0,
+        isInactive: true,
+      };
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        // Set "X" only for today's column
+        if (d === todayDayIndex) {
+          row[`day_${d}`] = {
+            type: "inactive",
+            kg: "X"
+          };
+        } else {
+          row[`day_${d}`] = "";
+        }
+      }
+
+      rows.push(row);
+    });
+
+
+    // Add inactive suppliers with blank data
+
 
     setColumns([
       {
@@ -502,6 +700,7 @@ const LeafSupply = () => {
 
   useEffect(() => {
     if (filters.month !== "Select Month") getLeafRecordsByRoutes();
+
   }, [filters.year, filters.month, filters.line, filters.lineCode]);
 
 
@@ -552,7 +751,7 @@ const LeafSupply = () => {
 
     doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
-    doc.text(`${selectedLine} Line Suppliers that need to Supply Leaf Today`, 14, 58);
+    doc.text(`${selectedLine} Line Suppliers that need to Supply Leaf`, 14, 58);
     doc.setFont(undefined, 'normal');
     doc.text(`Date: ${today}    |    Line: ${selectedLine}`, 14, 63);
 
@@ -561,53 +760,83 @@ const LeafSupply = () => {
     doc.setDrawColor(0);
     doc.line(14, 66, 196, 66);
 
-    // Table data with ✓ or ✘
-    const tableData = xSupplierDetails.map((s, i) => [
-      s["Supplier Id"],
-      s["Supplier Name"],
-      s["Contact"] || "-",
-      s["X KG"] || "0", "",  // Simulated Informed
-      ""   // Simulated Availability
-    ]);
+    if (xSupplierDetails.length > 0) {
+      // Table data with ✓ or ✘
+      const tableData = xSupplierDetails.map((s, i) => [
+        s["Supplier Id"],
+        s["Supplier Name"],
+        s["Contact"] || "-",
+        s["X KG"] || "0", "",  // Simulated Informed
+        ""   // Simulated Availability
+      ]);
 
-    // Table with footer and page number
-    doc.autoTable({
-      startY: 72,
-      head: [["Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
-      body: tableData,
-      styles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontSize: 9,
-        halign: 'center',
-        lineColor: [0, 0, 0],
-        lineWidth: 0.1
-      },
-      headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontStyle: 'bold',
-        lineColor: [0, 0, 0],
-        lineWidth: 0.2
-      },
-      alternateRowStyles: { fillColor: [240, 240, 240] },
-      tableLineColor: [0, 0, 0],
-      tableLineWidth: 0.1,
-      didDrawPage: function () {
-        // Footer
-        doc.setFontSize(8);
-        doc.setTextColor(50);
-        doc.line(14, 275, 196, 275);
-        doc.setFont(undefined, 'normal');
-        doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
-        doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
+      // Table with footer and page number
+      doc.autoTable({
+        startY: 72,
+        head: [["Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
+        body: tableData,
+        styles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontSize: 9,
+          halign: 'center',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.1
+        },
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2
+        },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        tableLineColor: [0, 0, 0],
+        tableLineWidth: 0.1,
+      });
+    }
 
-        // Page number
-        const page = doc.internal.getNumberOfPages();
-        doc.setFontSize(8);
-        doc.text(`Page ${page}`, 190, 290, { align: 'right' });
-      }
-    });
+
+    // ➕ Remaining suppliers table (Inactive or not supplied)
+    if (remainingSuppliers.length > 0) {
+      doc.addPage(); // Optional: only if you want on a new page
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text("Remaining Inactive Suppliers (No Leaf Supplied This Month)", 14, 30);
+
+      const inactiveTableData = remainingSuppliers.map(s => [
+        s["Supplier Id"],
+        s["Supplier Name"] || "-",
+        s["Contact"] || "-",
+        "X", "", "" // Same 6 columns: Last Supply (X), Informed, Availability
+      ]);
+
+      doc.autoTable({
+        startY: 36,
+        head: [["Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
+        body: inactiveTableData,
+        styles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontSize: 9,
+          halign: 'center',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.1
+        },
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2
+        },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        tableLineColor: [0, 0, 0],
+        tableLineWidth: 0.1,
+
+      });
+    }
 
     // Total
     const total = tableData.reduce((sum, row) => sum + parseFloat(row[3] || 0), 0);
@@ -624,8 +853,16 @@ const LeafSupply = () => {
     doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
 
-    // Save
-    // Save or Print]
+    const lastPage = doc.internal.getNumberOfPages();
+    doc.setPage(lastPage);
+
+    doc.line(14, 275, 196, 275);
+    doc.setFontSize(8);
+    doc.setTextColor(5);
+    doc.setFont(undefined, 'normal');
+    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
+
     if (p) {
 
 
@@ -916,7 +1153,28 @@ const LeafSupply = () => {
                           {/* 3-column row for Super, Normal, and Total */}
                           <Row gutter={[16, 16]} justify="center">
                             {/* Super Total */}
-                            <Col xs={24} sm={12} md={8}>
+
+                            <Col xs={24} sm={12} md={6}>
+                              <div
+                                style={{
+                                  backgroundColor: "#ff000e",
+                                  borderRadius: 10,
+                                  padding: "14px 24px",
+                                  textAlign: "center",
+                                  fontWeight: 600,
+                                  color: "#fff",
+                                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                                }}
+                              >
+                                Suppliers<br />
+
+                                <CountUp style={{ fontSize: 30 }} end={Math.round(allSuppliers.length)} duration={1.2} separator="," /> <br />
+
+
+                              </div>
+                            </Col>
+
+                            <Col xs={24} sm={12} md={6}>
                               <div
                                 style={{
                                   backgroundColor: "#ffa347",
@@ -935,7 +1193,7 @@ const LeafSupply = () => {
                             </Col>
 
                             {/* Normal Total */}
-                            <Col xs={24} sm={12} md={8}>
+                            <Col xs={24} sm={12} md={6}>
                               <div
                                 style={{
                                   backgroundColor: "#47a3ff",
@@ -953,7 +1211,7 @@ const LeafSupply = () => {
                             </Col>
 
                             {/* Overall Total */}
-                            <Col xs={24} sm={24} md={8}>
+                            <Col xs={24} sm={24} md={6}>
                               <div
                                 style={{
                                   backgroundColor: "#28a745",
