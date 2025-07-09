@@ -144,7 +144,7 @@ const TodaySuppliers = () => {
           }));
 
         if (withData.length > 0) {
-           downloadXSupplierListAsPDFAuto(line.label, withData);
+          // downloadXSupplierListAsPDFAuto(line.label, withData);
         }
       } catch (err) {
         console.error(`Error processing line ${line.label}:`, err);
@@ -160,8 +160,6 @@ const TodaySuppliers = () => {
 
 
   const downloadXSupplierListAsPDFAuto = (lineCode, supplierWithDataList) => {
-    console.log(lineCode);
-
     const doc = new jsPDF("p", "mm", "a4");
     const today = dayjs().format("YYYY-MM-DD");
 
@@ -174,16 +172,24 @@ const TodaySuppliers = () => {
     doc.setFontSize(9);
     doc.line(14, 32, 196, 32);
     doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 40);
-    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
+    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 38);
+    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 43);
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    doc.line(14, 47, 196, 47);
+    doc.text("Daily Leaf Supply Summary", 14, 52);
+
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+
+    doc.text(`${lineCode}`, 14, 61);
+
+
 
     doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Daily Leaf Supply Summary", 14, 52);
-    doc.text(`${lineCode} Line Suppliers that need to Supply Leaf`, 14, 58);
     doc.setFont(undefined, 'normal');
-    doc.text(`Date: ${today}    |    Line: ${lineCode}`, 14, 63);
-    doc.line(14, 66, 196, 66);
+    doc.text(`Last Date of Supply: ${supplierWithDataList[0].lastDate} `, 14, 68);
+    doc.line(14, 71, 196, 71);
 
     const tableData = supplierWithDataList.map((s, i) => [
       s.id,
@@ -205,7 +211,7 @@ const TodaySuppliers = () => {
     numberedTableData.push(finalRow);
 
     doc.autoTable({
-      startY: 72,
+      startY: 75,
       head: [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Availability"]],
       body: numberedTableData,
       styles: {
