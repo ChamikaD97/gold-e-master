@@ -144,7 +144,7 @@ const TodaySuppliers = () => {
           }));
 
         if (withData.length > 0) {
-          // downloadXSupplierListAsPDFAuto(line.label, withData);
+          downloadXSupplierListAsPDFAuto(line.label, withData);
         }
       } catch (err) {
         console.error(`Error processing line ${line.label}:`, err);
@@ -159,7 +159,7 @@ const TodaySuppliers = () => {
   };
 
 
-  const downloadXSupplierListAsPDFAuto = (lineCode, supplierWithDataList) => {
+  const downloadXSupplierListAsPDFAuto = (lineCode, supplierWithDataList, day) => {
     const doc = new jsPDF("p", "mm", "a4");
     const today = dayjs().format("YYYY-MM-DD");
 
@@ -241,7 +241,8 @@ const TodaySuppliers = () => {
     doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
     doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-    const fileName = `${lineCode}_line_leaf_supply.pdf`;
+    const fileName = `${lineCode}_line_leaf_supply_on_${day}.pdf`;
+
     doc.save(fileName);
   };
 
@@ -382,7 +383,7 @@ const TodaySuppliers = () => {
               <Button
                 block
                 style={{
-                  background: "rgba(255, 217, 0, 0.6)",
+                  background: "rgb(168, 143, 0)",
 
                   color: "#000",
                   border: "none"
@@ -545,14 +546,6 @@ const TodaySuppliers = () => {
         )
 
       }
-      <>
-
-
-      </>
-
-
-
-
 
     </div>
   );
