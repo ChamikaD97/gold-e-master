@@ -14,10 +14,13 @@ import {
   FileOutlined,
   BellOutlined,
   UserOutlined,
+  InfoCircleFilled,
 } from "@ant-design/icons";
 import SettingsModal from "../components/SettingsModal";
 
 import icon from "../images/logo.ico";
+import { Table } from "@mui/material";
+import { SummarizeRounded, TableBar } from "@mui/icons-material";
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
@@ -101,9 +104,15 @@ const HeaderComponent = () => {
             <Menu.Item key="leaf-supply">
               <Link to="/leaf/supply">Leaf Supply</Link>
             </Menu.Item>
-            <Menu.Item key="todaySupply">
-              <Link to="/leaf/todaySupply">Today Suppliers</Link>
-            </Menu.Item>
+            <Menu.SubMenu key="todaySupply" title="Today Suppliers">
+              <Menu.Item key="todaySupplyR">
+                <Link to="/leaf/todaySupply/route">Route Wise</Link>
+              </Menu.Item>
+              <Menu.Item key="todaySupplyF">
+                <Link to="/leaf/todaySupply/full">Full Wise</Link>
+              </Menu.Item>
+            </Menu.SubMenu>
+
             <Menu.Item key="leaf-counts">
               <Link to="/leaf/count">Leaf Counts</Link>
             </Menu.Item>
@@ -114,14 +123,13 @@ const HeaderComponent = () => {
               <Link to="/leaf/dailyLeafSupply">Daily Leaf Supply</Link>
             </Menu.Item>
           </SubMenu>
-
-          <Menu.Item key="store" icon={<ShopOutlined />}>
-            <Link to="/store">Store</Link>
+          <Menu.Item key="summery" icon={<SummarizeRounded />}>
+            <Link to="/summery">Summery</Link>
           </Menu.Item>
 
-          <Menu.Item key="meal" icon={<CoffeeOutlined />}>
+          {/* <Menu.Item key="meal" icon={<CoffeeOutlined />}>
             <Link to="/meal">Meal Management</Link>
-          </Menu.Item>
+          </Menu.Item> */}
         </Menu>
 
         {/* Action Buttons */}

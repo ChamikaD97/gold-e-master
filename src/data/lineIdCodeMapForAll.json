@@ -1,27 +1,6 @@
 [
   {
     "officer": "Ajith",
-    "lineCode": "MT",
-    "lineId": "81"
-  },
-  {
-    "officer": "Ajith",
-    "lineCode": "C-15",
-    "lineId": "129"
-  },
-  {
-    "officer": "Ajith",
-    "lineCode": "PH",
-    "lineId": "60"
-  },
-  {
-    "officer": "Ajith",
-    "lineCode": "PH2",
-    "lineId": "154"
-  },
-  
-  {
-    "officer": "Ajith",
     "lineCode": "PH/PH2/C-15",
     "lineId": "60,154,129"
   },
@@ -66,44 +45,9 @@
     "lineId": "145"
   },
   {
-    "officer": "Ajith",
-    "lineCode": "MULATIYANA",
-    "lineId": "97"
-  },
-  {
     "officer": "Chamod",
     "lineCode": "NG",
     "lineId": "91"
-  },
-  {
-    "officer": "Chamod",
-    "lineCode": "S",
-    "lineId": "67"
-  },
-  {
-    "officer": "Chamod",
-    "lineCode": "",
-    "lineId": "N/A"
-  },
-  {
-    "officer": "Chamod",
-    "lineCode": "S2",
-    "lineId": "68"
-  },
-  {
-    "officer": "Chamod",
-    "lineCode": "S2 II",
-    "lineId": "69"
-  },
-  {
-    "officer": "Chamod",
-    "lineCode": "DR-02",
-    "lineId": "138"
-  },
-  {
-    "officer": "Chamod",
-    "lineCode": "DR-01",
-    "lineId": "124"
   },
   {
     "officer": "Udara",
@@ -136,29 +80,9 @@
     "lineId": "9"
   },
   {
-    "lineId": "109",
-    "lineCode": "EL",
-    "officer": "Gamini"
-  },
-  {
     "officer": "Gamini",
     "lineCode": "SELF",
     "lineId": "70"
-  },
-  {
-    "officer": "Gamini",
-    "lineCode": "DG",
-    "lineId": "12"
-  },
-  {
-    "officer": "Gamini",
-    "lineCode": "ML",
-    "lineId": "31"
-  },
-  {
-    "officer": "Gamini",
-    "lineCode": "ML2",
-    "lineId": "157"
   },
   {
     "officer": "Gamini",
@@ -209,21 +133,6 @@
     "officer": "Udayanga",
     "lineCode": "N",
     "lineId": "36"
-  },
-  {
-    "officer": "Udayanga",
-    "lineCode": "DM",
-    "lineId": "102"
-  },
-  {
-    "officer": "Udayanga",
-    "lineCode": "DM-2",
-    "lineId": "161"
-  },
-  {
-    "officer": "Udayanga",
-    "lineCode": "PT2",
-    "lineId": "64"
   },
   {
     "officer": "Chamod",

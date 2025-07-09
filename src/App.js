@@ -21,6 +21,8 @@ import OfficersPage from "./pages/Officers";
 import { ToastContainer } from "react-toastify";
 import OfficerTargets from "./pages/OfficerTargets";
 import TodaySuppliers from "./pages/TodaySuppliers";
+import TodaySuppliersFull from "./pages/TodaySuppliersFull";
+import Summary from "./pages/Summery";
 
 const LayoutWithHeader = () => (
   <>
@@ -70,7 +72,8 @@ const App = () => {
             <Route path="/leaf/dailyLeafSupply" element={<LeafSupplyByDateRange
             />} />
             <Route path="/leaf/missingCards" element={<MissingCards />} />
-            <Route path="/leaf/todaySupply" element={<TodaySuppliers />} />
+            <Route path="/leaf/todaySupply/route" element={<TodaySuppliers />} />
+            <Route path="/leaf/todaySupply/full" element={<TodaySuppliersFull />} />
 
             <Route path="/meal" element={<MealManagement />} />
 
@@ -78,7 +81,7 @@ const App = () => {
             <Route path="/factory-targets/prediction" element={<Prediction />} />
             <Route path="/factory-targets/officer" element={<OfficerTargets />} />
 
-
+            <Route path="/summery" element={<Summary />} />
             <Route path="/vehicles" element={<Vehicles />} />
             <Route path="/supplier/info" element={<SupplierInfo />} />
             {/* 404 Route */}

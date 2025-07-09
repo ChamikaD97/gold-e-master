@@ -136,7 +136,6 @@ body {
 .card {
   width: auto;
   background-color: lab(34.03% -41.06 37.63 / 0.801);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   animation: fadeIn 1s ease-out forwards;
   height: auto;
   border-color: rgba(3, 100, 0, 0.856);
@@ -182,7 +181,6 @@ body {
   color: #fff !important;
   font-weight: bold;
   animation: pulseHighlight 2s ease-in-out infinite alternate;
-  transition: background-color 0.6s ease;
   border-radius: 6px;
 }
 
@@ -307,7 +305,6 @@ input::placeholder {
   cursor: pointer;
   color: #000000;
   font-weight: 600;
-  transition: background-color 0.3s ease;
 }
 
 .sup-bordered-table .ant-table-tbody > tr:hover td {

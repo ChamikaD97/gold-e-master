@@ -248,6 +248,7 @@ const LeafSupply = () => {
     }
   };
 
+
   const getLeafRecordsByRoutes = async () => {
     dispatch(showLoader());
 
@@ -727,158 +728,151 @@ const LeafSupply = () => {
     `${filters.line !== "All" ? `Line: ${filters.lineCode}` : ""}`;
 
 
-  const downloadXSupplierListAsPDF = (p) => {
-    const doc = new jsPDF();
-    const today = new Date().toLocaleDateString();
-    const selectedLine = filters.lineCode || "All";
+const downloadXSupplierListAsPDF = (p) => {
+  const doc = new jsPDF();
+  const today = new Date().toLocaleDateString();
+  const selectedLine = filters.lineCode || "All";
 
-    // Header
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.line(14, 20, 196, 20);
-    doc.setFont(undefined, 'bold');
-    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
+  // Header
+  doc.setFontSize(14);
+  doc.setTextColor(0);
+  doc.line(14, 20, 196, 20);
+  doc.setFont(undefined, 'bold');
+  doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
 
-    doc.setFontSize(9);
-    doc.line(14, 32, 196, 32);
-    doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 40);
-    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
+  doc.setFontSize(9);
+  doc.line(14, 32, 196, 32);
+  doc.setFont(undefined, 'normal');
+  doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 40);
+  doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
+
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'bold');
+  doc.text("Daily Leaf Supply Summary", 14, 52);
+
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'bold');
+  doc.text(`${selectedLine} Line Suppliers that need to Supply Leaf`, 14, 58);
+  doc.setFont(undefined, 'normal');
+  doc.text(`Date: ${today}    |    Line: ${selectedLine}`, 14, 63);
+
+  doc.setDrawColor(0);
+  doc.line(14, 66, 196, 66);
+
+  // 📋 X Supplier Details Table
+  if (xSupplierDetails.length > 0) {
+    const totalXKg = xSupplierDetails.reduce((sum, s) => sum + parseFloat(s["X KG"] || 0), 0);
+
+    const tableData2 = xSupplierDetails.map((s) => [
+      s["Supplier Id"],
+      s["Supplier Name"],
+      s["Contact"] || "-",
+      s["X KG"] || "0",
+      "",  // Informed (placeholder)
+      ""   // Availability (placeholder)
+    ]);
+
+    const tableData = tableData2.map((row, index) => [index + 1, ...row]);
+
+
+        const finalRow = [
+      { content: "Total", colSpan: 4, styles: { halign: "right", fontStyle: "bold" } },
+      { content: totalXKg.toFixed(2), styles: { fontStyle: "bold" } },
+      { content: "", styles: {} }, // empty last cell ("Availability")
+    ];
+
+    // Append the final row to the body
+    tableData.push(finalRow);
+
+    doc.autoTable({
+      startY: 72,
+      head: [["#","Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
+      body: tableData,
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontSize: 9,
+        halign: 'center',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.1
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2
+      },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.1,
+    });
+  }
+
+  // 📋 Remaining Inactive Suppliers Table
+  if (remainingSuppliers.length > 0) {
+    doc.addPage();
 
     doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
-    doc.text("Daily Leaf Supply Summary", 14, 52);
+    doc.text("Remaining Inactive Suppliers", 14, 30);
 
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text(`${selectedLine} Line Suppliers that need to Supply Leaf`, 14, 58);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Date: ${today}    |    Line: ${selectedLine}`, 14, 63);
+    const inactiveTableData1 = remainingSuppliers.map(s => [
+      s["Supplier Id"],
+      s["Supplier Name"] || "-",
+      s["Contact"] || "-",
+      " "
+    ]);
 
+    // Add summary row
+      const inactiveTableData = inactiveTableData1.map((row, index) => [index + 1, ...row]);
 
+    doc.autoTable({
+      startY: 36,
+      head: [["#", "Supplier ID", "Name", "Mobile"]],
+      body: inactiveTableData,
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontSize: 9,
+        halign: 'center',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.1
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2
+      },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.1,
+    });
+  }
 
-    doc.setDrawColor(0);
-    doc.line(14, 66, 196, 66);
+  // 🖋️ Footer (only on the last page)
+  const lastPage = doc.internal.getNumberOfPages();
+  doc.setPage(lastPage);
+  doc.line(14, 275, 196, 275);
+  doc.setFontSize(8);
+  doc.setTextColor(5);
+  doc.setFont(undefined, 'normal');
+  doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+  doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-    if (xSupplierDetails.length > 0) {
-      // Table data with ✓ or ✘
-      const tableData = xSupplierDetails.map((s, i) => [
-        s["Supplier Id"],
-        s["Supplier Name"],
-        s["Contact"] || "-",
-        s["X KG"] || "0", "",  // Simulated Informed
-        ""   // Simulated Availability
-      ]);
-
-      // Table with footer and page number
-      doc.autoTable({
-        startY: 72,
-        head: [["Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
-        body: tableData,
-        styles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontSize: 9,
-          halign: 'center',
-          lineColor: [0, 0, 0],
-          lineWidth: 0.1
-        },
-        headStyles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontStyle: 'bold',
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2
-        },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        tableLineColor: [0, 0, 0],
-        tableLineWidth: 0.1,
-      });
-    }
-
-
-    // ➕ Remaining suppliers table (Inactive or not supplied)
-    if (remainingSuppliers.length > 0) {
-      doc.addPage(); // Optional: only if you want on a new page
-
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text("Remaining Inactive Suppliers (No Leaf Supplied This Month)", 14, 30);
-
-      const inactiveTableData = remainingSuppliers.map(s => [
-        s["Supplier Id"],
-        s["Supplier Name"] || "-",
-        s["Contact"] || "-",
-        "X", "", "" // Same 6 columns: Last Supply (X), Informed, Availability
-      ]);
-
-      doc.autoTable({
-        startY: 36,
-        head: [["Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
-        body: inactiveTableData,
-        styles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontSize: 9,
-          halign: 'center',
-          lineColor: [0, 0, 0],
-          lineWidth: 0.1
-        },
-        headStyles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontStyle: 'bold',
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2
-        },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        tableLineColor: [0, 0, 0],
-        tableLineWidth: 0.1,
-
-      });
-    }
-
-    // Total
-    const total = tableData.reduce((sum, row) => sum + parseFloat(row[3] || 0), 0);
-    const sixDaysAgo = new Date();
-    sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
-    const sixDaysAgoStr = sixDaysAgo.toLocaleDateString();
-
-    doc.setFontSize(10);
-    doc.setTextColor(0);
-    doc.setFont(undefined, 'bold');
-    doc.text(`Total KG Supplied on ${sixDaysAgoStr}: ${total} kg`, 14, doc.lastAutoTable.finalY + 10);
-
-    // Optional signature lines
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
-
-    const lastPage = doc.internal.getNumberOfPages();
-    doc.setPage(lastPage);
-
-    doc.line(14, 275, 196, 275);
-    doc.setFontSize(8);
-    doc.setTextColor(5);
-    doc.setFont(undefined, 'normal');
-    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
-    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
-
-    if (p) {
-
-
-
-      doc.autoPrint(); // Trigger print dialog
-      const blob = doc.output("blob");
-      const blobUrl = URL.createObjectURL(blob);
-      window.open(blobUrl); // Open in new tab for printing
-    } else {
-
-
-      const formattedDate = new Date().toISOString().split('T')[0];
-      doc.save(`${selectedLine} line suppliers - ${formattedDate}.pdf`);
-    }
-
-  };
+  // 📤 Export
+  if (p) {
+    doc.autoPrint(); // Print preview
+    const blob = doc.output("blob");
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl); // New tab for print
+  } else {
+    const formattedDate = new Date().toISOString().split('T')[0];
+    doc.save(`${selectedLine} line suppliers - ${formattedDate}.pdf`);
+  }
+};
 
 
   return (
