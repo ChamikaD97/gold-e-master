@@ -48,6 +48,7 @@ const LeafSupply = () => {
   const [allSuppliers, setAllSuppliers] = useState([]);
 
   const [remainingSuppliers, setRemainingSuppliers] = useState([])
+
   const handleSupplierClick = (supplier_id) => {
     const yearNum = Number(filters.year);
     const monthNum = Number(filters.month);
@@ -132,122 +133,6 @@ const LeafSupply = () => {
       setXSupplierDetails([]);
     }
   };
-
-
-
-
-
-  const s = async () => {
-    dispatch(showLoader());
-    const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
-    const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${filters.line}&d=${dateRange}`;
-    setError(null);
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch supplier data");
-
-      const result = await response.json();
-      const groupedMap = {};
-
-      result.forEach(item => {
-        const key = `${item["Supplier Id"]}_${item["Leaf Date"]}`;
-        if (!groupedMap[key]) {
-          groupedMap[key] = {
-            supplier_id: item["Supplier Id"],
-            date: item["Leaf Date"],
-            lineCode: parseInt(item["Route"]),
-            line: filters.lineCode || "",
-            super_kg: 0,
-            normal_kg: 0,
-          };
-        }
-
-        const net = parseFloat(item["Net"] || 0);
-        const isSuper = item["Leaf Type"] === 2;
-        if (isSuper) {
-          groupedMap[key].super_kg += net;
-        } else {
-          groupedMap[key].normal_kg += net;
-        }
-      });
-
-      const transformed = Object.values(groupedMap).map(item => {
-        const total_kg = item.super_kg + item.normal_kg;
-        return {
-          ...item,
-          leaf_type:
-            item.super_kg > 0 && item.normal_kg > 0
-              ? "Both"
-              : item.super_kg > 0
-                ? "Super"
-                : "Normal",
-          net_kg: {
-            Super: item.super_kg || null,
-            Normal: item.normal_kg || null,
-          },
-          total_kg: total_kg.toFixed(2),
-        };
-      });
-
-      // Monthly totals per supplier
-      const supplierMonthlyTotalMap = {};
-      transformed.forEach(item => {
-        const sid = item.supplier_id;
-        if (!supplierMonthlyTotalMap[sid]) {
-          supplierMonthlyTotalMap[sid] = { total: 0, super: 0, normal: 0 };
-        }
-        supplierMonthlyTotalMap[sid].total += parseFloat(item.total_kg);
-        supplierMonthlyTotalMap[sid].super += item.super_kg;
-        supplierMonthlyTotalMap[sid].normal += item.normal_kg;
-      });
-
-
-
-      // ✅ Merge all line-wise totals into first lineCode
-      const firstLineCode = transformed[0]?.lineCode;
-      const lineWiseTotalMap = {
-        [firstLineCode]: { super: 0, normal: 0, overall: 0 }
-      };
-
-      transformed.forEach(item => {
-        lineWiseTotalMap[firstLineCode].super += item.super_kg;
-        lineWiseTotalMap[firstLineCode].normal += item.normal_kg;
-        lineWiseTotalMap[firstLineCode].overall += item.super_kg + item.normal_kg;
-      });
-
-      setLineWiseTotals(lineWiseTotalMap);
-
-      // Line-wide totals
-      const lineSuperTotal = transformed.reduce((sum, item) => sum + item.super_kg, 0);
-      const lineNormalTotal = transformed.reduce((sum, item) => sum + item.normal_kg, 0);
-      const lineOverallTotal = lineSuperTotal + lineNormalTotal;
-
-      setLineTotal({
-        super: lineSuperTotal,
-        normal: lineNormalTotal,
-        overall: lineOverallTotal,
-      });
-
-
-      setData(transformed);
-      setColData(transformed);
-
-    } catch (err) {
-      console.error(err);
-      toast.error("❌ Failed to load leaf collection data");
-      setError("Failed to load supplier data");
-      setData([]);
-      setColData([]);
-      setLineTotal({ super: 0, normal: 0, overall: 0 });
-      setLineWiseTotals([]);
-
-    } finally {
-
-      dispatch(hideLoader());
-    }
-  };
-
 
   const getLeafRecordsByRoutes = async () => {
     dispatch(showLoader());
@@ -377,6 +262,62 @@ const LeafSupply = () => {
     } finally {
       dispatch(hideLoader());
     }
+  };
+
+
+
+  const getLastMonthInactiveSuppliers = (remainingSuppliers, line, leafSupplies) => {
+    const now = new Date();
+    const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const nextMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Get all supplier IDs who gave leaf last month for the selected line
+    const lastMonthSupplierIds = new Set(
+      leafSupplies
+        .filter(supply => {
+          const supplyDate = new Date(supply.date);
+          return (
+            supplyDate >= prevMonth &&
+            supplyDate < nextMonth &&
+            (line === "All" || supply.line === line)
+          );
+        })
+        .map(supply => supply.supplierId)
+    );
+
+    // Return suppliers who were active last month but inactive this month
+    return remainingSuppliers.filter(supplier =>
+      lastMonthSupplierIds.has(supplier["Supplier Id"])
+    );
+  };
+
+
+  const loadAndCompareSuppliers = async () => {
+    const line = filters.line || "All";
+
+    // Determine date range for previous month
+    const now = new Date();
+    const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0); // Last day of prev month
+
+    const dateRange = `${prevMonthStart.toISOString().split('T')[0]}_${prevMonthEnd.toISOString().split('T')[0]}`;
+
+    // Build URLs
+    const glfUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line}&d=${dateRange}`;
+    const supUrl = `/quiX/ControllerV1/supdata?k=${API_KEY}&r=${line}`;
+
+    // Fetch GLF (leaf supply) data
+    const glfRes = await fetch(glfUrl);
+    const leafSupplies = await glfRes.json();
+
+    // Fetch all suppliers (if needed)
+    const supRes = await fetch(supUrl);
+    const allSuppliers = await supRes.json();
+
+    // Now call the logic
+    const inactiveFromLastMonth = getLastMonthInactiveSuppliers(remainingSuppliers, line, leafSupplies);
+
+    console.log("Inactive this month but active last month:", inactiveFromLastMonth);
   };
 
 
@@ -723,156 +664,152 @@ const LeafSupply = () => {
     background: "rgba(0, 0, 0, 0.6)", color: "#fff", borderRadius: 12, marginBottom: 6
   };
 
-  const filterText = `Displaying data for ${filters.month !== "Select Month" ? monthMap[filters.month] : "all months"} ${filters.year}, ` +
-    `${filters.officer !== "All" ? `Officer: ${filters.officer}, ` : ""}` +
-    `${filters.line !== "All" ? `Line: ${filters.lineCode}` : ""}`;
+  const downloadXSupplierListAsPDF = (p) => {
 
+    const doc = new jsPDF();
+    const today = new Date().toLocaleDateString();
+    const selectedLine = filters.lineCode || "All";
 
-const downloadXSupplierListAsPDF = (p) => {
-  const doc = new jsPDF();
-  const today = new Date().toLocaleDateString();
-  const selectedLine = filters.lineCode || "All";
+    // Header
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.line(14, 20, 196, 20);
+    doc.setFont(undefined, 'bold');
+    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
 
-  // Header
-  doc.setFontSize(14);
-  doc.setTextColor(0);
-  doc.line(14, 20, 196, 20);
-  doc.setFont(undefined, 'bold');
-  doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
-
-  doc.setFontSize(9);
-  doc.line(14, 32, 196, 32);
-  doc.setFont(undefined, 'normal');
-  doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 40);
-  doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
-
-  doc.setFontSize(11);
-  doc.setFont(undefined, 'bold');
-  doc.text("Daily Leaf Supply Summary", 14, 52);
-
-  doc.setFontSize(11);
-  doc.setFont(undefined, 'bold');
-  doc.text(`${selectedLine} Line Suppliers that need to Supply Leaf`, 14, 58);
-  doc.setFont(undefined, 'normal');
-  doc.text(`Date: ${today}    |    Line: ${selectedLine}`, 14, 63);
-
-  doc.setDrawColor(0);
-  doc.line(14, 66, 196, 66);
-
-  // 📋 X Supplier Details Table
-  if (xSupplierDetails.length > 0) {
-    const totalXKg = xSupplierDetails.reduce((sum, s) => sum + parseFloat(s["X KG"] || 0), 0);
-
-    const tableData2 = xSupplierDetails.map((s) => [
-      s["Supplier Id"],
-      s["Supplier Name"],
-      s["Contact"] || "-",
-      s["X KG"] || "0",
-      "",  // Informed (placeholder)
-      ""   // Availability (placeholder)
-    ]);
-
-    const tableData = tableData2.map((row, index) => [index + 1, ...row]);
-
-
-        const finalRow = [
-      { content: "Total", colSpan: 4, styles: { halign: "right", fontStyle: "bold" } },
-      { content: totalXKg.toFixed(2), styles: { fontStyle: "bold" } },
-      { content: "", styles: {} }, // empty last cell ("Availability")
-    ];
-
-    // Append the final row to the body
-    tableData.push(finalRow);
-
-    doc.autoTable({
-      startY: 72,
-      head: [["#","Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
-      body: tableData,
-      styles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontSize: 9,
-        halign: 'center',
-        lineColor: [0, 0, 0],
-        lineWidth: 0.1
-      },
-      headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontStyle: 'bold',
-        lineColor: [0, 0, 0],
-        lineWidth: 0.2
-      },
-      alternateRowStyles: { fillColor: [240, 240, 240] },
-      tableLineColor: [0, 0, 0],
-      tableLineWidth: 0.1,
-    });
-  }
-
-  // 📋 Remaining Inactive Suppliers Table
-  if (remainingSuppliers.length > 0) {
-    doc.addPage();
+    doc.setFontSize(9);
+    doc.line(14, 32, 196, 32);
+    doc.setFont(undefined, 'normal');
+    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 40);
+    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
 
     doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
-    doc.text("Remaining Inactive Suppliers", 14, 30);
+    doc.text("Daily Leaf Supply Summary", 14, 52);
 
-    const inactiveTableData1 = remainingSuppliers.map(s => [
-      s["Supplier Id"],
-      s["Supplier Name"] || "-",
-      s["Contact"] || "-",
-      " "
-    ]);
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text(`${selectedLine} Line Suppliers that need to Supply Leaf`, 14, 58);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Date: ${today}    |    Line: ${selectedLine}`, 14, 63);
 
-    // Add summary row
+    doc.setDrawColor(0);
+    doc.line(14, 66, 196, 66);
+
+    // 📋 X Supplier Details Table
+    if (xSupplierDetails.length > 0) {
+      const totalXKg = xSupplierDetails.reduce((sum, s) => sum + parseFloat(s["X KG"] || 0), 0);
+
+      const tableData2 = xSupplierDetails.map((s) => [
+        s["Supplier Id"],
+        s["Supplier Name"],
+        s["Contact"] || "-",
+        s["X KG"] || "0",
+        "",  // Informed (placeholder)
+        ""   // Availability (placeholder)
+      ]);
+
+      const tableData = tableData2.map((row, index) => [index + 1, ...row]);
+
+
+      const finalRow = [
+        { content: "Total", colSpan: 4, styles: { halign: "right", fontStyle: "bold" } },
+        { content: totalXKg.toFixed(2), styles: { fontStyle: "bold" } },
+        { content: "", styles: {} }, // empty last cell ("Availability")
+      ];
+
+      // Append the final row to the body
+      tableData.push(finalRow);
+
+      doc.autoTable({
+        startY: 72,
+        head: [["#", "Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
+        body: tableData,
+        styles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontSize: 9,
+          halign: 'center',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.1
+        },
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2
+        },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        tableLineColor: [0, 0, 0],
+        tableLineWidth: 0.1,
+      });
+    }
+
+    // 📋 Remaining Inactive Suppliers Table
+    if (remainingSuppliers.length > 0) {
+      doc.addPage();
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text("Remaining Inactive Suppliers", 14, 30);
+
+      const inactiveTableData1 = remainingSuppliers.map(s => [
+        s["Supplier Id"],
+        s["Supplier Name"] || "-",
+        s["Contact"] || "-",
+        " "
+      ]);
+
+      // Add summary row
       const inactiveTableData = inactiveTableData1.map((row, index) => [index + 1, ...row]);
 
-    doc.autoTable({
-      startY: 36,
-      head: [["#", "Supplier ID", "Name", "Mobile"]],
-      body: inactiveTableData,
-      styles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontSize: 9,
-        halign: 'center',
-        lineColor: [0, 0, 0],
-        lineWidth: 0.1
-      },
-      headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontStyle: 'bold',
-        lineColor: [0, 0, 0],
-        lineWidth: 0.2
-      },
-      alternateRowStyles: { fillColor: [240, 240, 240] },
-      tableLineColor: [0, 0, 0],
-      tableLineWidth: 0.1,
-    });
-  }
+      doc.autoTable({
+        startY: 36,
+        head: [["#", "Supplier ID", "Name", "Mobile"]],
+        body: inactiveTableData,
+        styles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontSize: 9,
+          halign: 'center',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.1
+        },
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2
+        },
+        alternateRowStyles: { fillColor: [240, 240, 240] },
+        tableLineColor: [0, 0, 0],
+        tableLineWidth: 0.1,
+      });
+    }
 
-  // 🖋️ Footer (only on the last page)
-  const lastPage = doc.internal.getNumberOfPages();
-  doc.setPage(lastPage);
-  doc.line(14, 275, 196, 275);
-  doc.setFontSize(8);
-  doc.setTextColor(5);
-  doc.setFont(undefined, 'normal');
-  doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
-  doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
+    // 🖋️ Footer (only on the last page)
+    const lastPage = doc.internal.getNumberOfPages();
+    doc.setPage(lastPage);
+    doc.line(14, 275, 196, 275);
+    doc.setFontSize(8);
+    doc.setTextColor(5);
+    doc.setFont(undefined, 'normal');
+    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-  // 📤 Export
-  if (p) {
-    doc.autoPrint(); // Print preview
-    const blob = doc.output("blob");
-    const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl); // New tab for print
-  } else {
-    const formattedDate = new Date().toISOString().split('T')[0];
-    doc.save(`${selectedLine} line suppliers - ${formattedDate}.pdf`);
-  }
-};
+    // 📤 Export
+    if (p) {
+      doc.autoPrint(); // Print preview
+      const blob = doc.output("blob");
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl); // New tab for print
+    } else {
+      const formattedDate = new Date().toISOString().split('T')[0];
+      doc.save(`${selectedLine} line suppliers - ${formattedDate}.pdf`);
+    }
+  };
 
 
   return (
@@ -1163,7 +1100,7 @@ const downloadXSupplierListAsPDF = (p) => {
                                 Suppliers<br />
 
                                 <CountUp style={{ fontSize: 30 }} end={Math.round(allSuppliers.length)} duration={1.2} separator="," /> <br />
-
+                                {remainingSuppliers.length}
 
                               </div>
                             </Col>

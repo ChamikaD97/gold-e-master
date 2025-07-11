@@ -73,7 +73,7 @@ const TodaySuppliers = () => {
 
     const startDate = day.subtract(leafRound, "day").format("YYYY-MM-DD");
 
-    for (let i = 0; i < total; i++) {
+    for (let i = 0; i < 5; i++) {
       setCurrentIndex(i);
 
       if (cancelDownload) {
@@ -132,6 +132,9 @@ const TodaySuppliers = () => {
 
         const allSuppliers = await supRes.json();
 
+
+
+        // ➤ Suppliers who did supply
         const withData = allSuppliers
           .filter(sup => supplierIdsWithData.includes(sup["Supplier Id"]))
           .map(sup => ({
@@ -143,9 +146,77 @@ const TodaySuppliers = () => {
             total_kg: leafMap[sup["Supplier Id"]].total_kg,
           }));
 
-        if (withData.length > 0) {
-          downloadXSupplierListAsPDFAuto(line.label, withData);
+        // ➤ Suppliers who did NOT supply
+        const withoutData = allSuppliers.filter(
+          sup => !supplierIdsWithData.includes(sup["Supplier Id"])
+        );
+
+        // Fetch last record for each missing supplier
+        let glfHistory = [];
+        try {
+          const dateRange = `${dayjs().subtract(1, 'year').format("YYYY-MM-DD")}~${dayjs().format("YYYY-MM-DD")}`;
+          const glfHistoryRes = await fetch(`/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line.id}&d=${dateRange}`);
+          glfHistory = await glfHistoryRes.json();
+        } catch (e) {
+          console.warn("Failed to fetch GLF history for missing suppliers", e);
         }
+
+        const latestSupplyMap = {};
+        glfHistory.forEach(entry => {
+          const sid = entry["Supplier Id"];
+          const date = entry["Leaf Date"];
+          const net = parseFloat(entry["Net"] || 0);
+
+          if (!latestSupplyMap[sid] || new Date(date) > new Date(latestSupplyMap[sid].lastDate)) {
+            latestSupplyMap[sid] = {
+              lastDate: date,
+              total_kg: net
+            };
+          } else {
+            latestSupplyMap[sid].total_kg += net;
+          }
+        });
+
+        const enrichedWithoutData = withoutData.map(sup => {
+          const sid = sup["Supplier Id"];
+          const lastInfo = latestSupplyMap[sid];
+          const lastDate = lastInfo?.lastDate || "-";
+
+          let inactiveFor = "-";
+          if (lastDate !== "-") {
+            const last = dayjs(lastDate);
+            const now = dayjs();
+            const years = now.diff(last, "year");
+            const months = now.diff(last.add(years, "year"), "month");
+            const days = now.diff(last.add(years, "year").add(months, "month"), "day");
+
+            const parts = [];
+            if (years > 0) parts.push(`${years} year${years > 1 ? "s" : ""}`);
+            if (months > 0) parts.push(`${months} month${months > 1 ? "s" : ""}`);
+            if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+            inactiveFor = parts.join(" ") || "0 days";
+          }
+
+          return {
+            id: sid,
+            name: sup["Supplier Name"],
+            address: sup["Address"],
+            tel: sup["Contact"],
+            lastDate,
+            total_kg: lastInfo?.total_kg || 0,
+            inactiveFor,
+          };
+        });
+
+
+        // Combine both
+
+        // 🔽 Export complete list
+        if (withData.length > 0) {
+          downloadXSupplierListAsPDFAuto(line.label, withData, enrichedWithoutData, startDate);
+        }
+
+
       } catch (err) {
         console.error(`Error processing line ${line.label}:`, err);
       }
@@ -158,95 +229,123 @@ const TodaySuppliers = () => {
     dispatch(hideLoader());
   };
 
+const downloadXSupplierListAsPDFAuto = (lineCode, todaySuppliers, missingSuppliers, day) => {
+  const doc = new jsPDF("p", "mm", "a4");
 
-  const downloadXSupplierListAsPDFAuto = (lineCode, supplierWithDataList, day) => {
-    const doc = new jsPDF("p", "mm", "a4");
-    const today = dayjs().format("YYYY-MM-DD");
+  const todayStr = dayjs().format("YYYY-MM-DD");
 
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.line(14, 20, 196, 20);
+  // === HEADER ===
+  doc.setFontSize(14);
+  doc.setTextColor(0);
+  doc.line(14, 20, 196, 20);
+  doc.setFont(undefined, 'bold');
+  doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
+
+  doc.setFontSize(9);
+  doc.line(14, 32, 196, 32);
+  doc.setFont(undefined, 'normal');
+  doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 38);
+  doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 43);
+
+  doc.setFontSize(11);
+  doc.line(14, 47, 196, 47);
+  doc.text("Daily Leaf Supply Summary", 14, 52);
+
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.text(`${lineCode}`, 14, 61);
+
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'normal');
+  doc.text(`Report Generated: ${todayStr}`, 14, 68);
+  doc.line(14, 71, 196, 71);
+
+  // === TODAY SUPPLIERS TABLE ===
+  const todayTable = todaySuppliers.map(s => [
+    s.id,
+    s.name,
+    s.tel || "-",
+    s.lastDate ? dayjs(s.lastDate).format("YYYY-MM-DD") : "-",
+    `${Math.round(s.total_kg || 0)} kg`,
+  ]);
+  const todayHead = [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf"]];
+  const todayTableBody = todayTable.map((row, i) => [i + 1, ...row]);
+
+  doc.autoTable({
+    startY: 75,
+    head: todayHead,
+    body: todayTableBody,
+    styles: {
+      fontSize: 9,
+      halign: "center",
+    },
+    headStyles: {
+      fillColor: [230, 230, 230],
+      fontStyle: "bold"
+    },
+    alternateRowStyles: { fillColor: [245, 245, 245] }
+  });
+
+  // === MISSING SUPPLIERS TABLE (sorted by inactivity) ===
+  if (missingSuppliers.length > 0) {
+    doc.addPage();
+
+    // Sort by inactiveFor descending (by calculating total inactive days)
+    const sortedMissing = [...missingSuppliers].sort((a, b) => {
+      const getInactiveDays = (str) => {
+        if (!str || str === "-") return 0;
+        const match = str.match(/(\d+)\s*year[s]?/);
+        const years = match ? parseInt(match[1]) : 0;
+        const months = (str.match(/(\d+)\s*month[s]?/) || [])[1] || 0;
+        const days = (str.match(/(\d+)\s*day[s]?/) || [])[1] || 0;
+        return (parseInt(years) * 365) + (parseInt(months) * 30) + parseInt(days);
+      };
+      return getInactiveDays(b.inactiveFor) - getInactiveDays(a.inactiveFor);
+    });
+
+    doc.setFontSize(13);
     doc.setFont(undefined, 'bold');
-    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
+    doc.text("Missing Suppliers with Last Supply Record", 14, 25);
+    doc.line(14, 28, 196, 28);
 
-    doc.setFontSize(9);
-    doc.line(14, 32, 196, 32);
-    doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 38);
-    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 43);
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'normal');
-    doc.line(14, 47, 196, 47);
-    doc.text("Daily Leaf Supply Summary", 14, 52);
-
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-
-    doc.text(`${lineCode}`, 14, 61);
-
-
-
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Last Date of Supply: ${supplierWithDataList[0].lastDate} `, 14, 68);
-    doc.line(14, 71, 196, 71);
-
-    const tableData = supplierWithDataList.map((s, i) => [
+    const missingTable = sortedMissing.map(s => [
       s.id,
       s.name,
       s.tel || "-",
-      s.lastDate ? dayjs(s.lastDate).format("YYYY-MM-DD") : "",
+      s.lastDate !== "-" ? dayjs(s.lastDate).format("YYYY-MM-DD") : "-",
       `${Math.round(s.total_kg || 0)} kg`,
-      " ",
+      s.inactiveFor || "-",
     ]);
-    const numberedTableData = tableData.map((row, index) => [index + 1, ...row]);
-
-    const totalLeaf = tableData.reduce((sum, row) => sum + parseFloat(row[4]) || 0, 0);
-
-    const finalRow = [
-      { content: "Total", colSpan: 5, styles: { halign: "right", fontStyle: "bold" } },
-      { content: totalLeaf.toFixed(2), styles: { fontStyle: "bold" } },
-      { content: "", styles: {} },
-    ];
-    numberedTableData.push(finalRow);
+    const missingHead = [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Inactive For"]];
+    const missingTableBody = missingTable.map((row, i) => [i + 1, ...row]);
 
     doc.autoTable({
-      startY: 75,
-      head: [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Availability"]],
-      body: numberedTableData,
+      startY: 32,
+      head: missingHead,
+      body: missingTableBody,
       styles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
         fontSize: 9,
         halign: "center",
-        lineColor: [0, 0, 0],
-        lineWidth: 0.1,
       },
       headStyles: {
-        fillColor: [230, 230, 230],
+        fillColor: [255, 235, 205],
         textColor: [0, 0, 0],
-        fontStyle: "bold",
-        lineColor: [0, 0, 0],
-        lineWidth: 0.2,
+        fontStyle: "bold"
       },
-      alternateRowStyles: { fillColor: [245, 245, 245] },
+      alternateRowStyles: { fillColor: [255, 250, 240] }
     });
+  }
 
-    const lastPage = doc.internal.getNumberOfPages();
-    doc.setPage(lastPage);
-    doc.line(14, 275, 196, 275);
-    doc.setFontSize(8);
-    doc.setTextColor(5);
-    doc.setFont(undefined, 'normal');
-    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
-    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
+  // === FOOTER ===
+  const lastPage = doc.internal.getNumberOfPages();
+  doc.setPage(lastPage);
+  doc.line(14, 275, 196, 275);
+  doc.setFontSize(8);
+  doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+  doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-    const fileName = `${lineCode}_line_leaf_supply_on_${day}.pdf`;
-
-    doc.save(fileName);
-  };
-
-
+  doc.save(`${lineCode}_leaf_report_${day}.pdf`);
+};
 
 
 

@@ -14,7 +14,7 @@ import Vehicles from "./pages/Vehicles";
 import SupplierInfo from "./pages/SupplierInfo";
 import LeafSupply from "./pages/LeafCountChart";
 import { App as AntdApp } from 'antd';
-import MissingCards from "./pages/Missing Cards";
+import LastSupply from "./pages/LastSupply";
 import LeafSupplyByDateRange from "./pages/LeafSupplyByDateRange";
 import Prediction from "./pages/Prediction";
 import OfficersPage from "./pages/Officers";
@@ -71,7 +71,7 @@ const App = () => {
 
             <Route path="/leaf/dailyLeafSupply" element={<LeafSupplyByDateRange
             />} />
-            <Route path="/leaf/missingCards" element={<MissingCards />} />
+            <Route path="/leaf/lastSupply" element={<LastSupply />} />
             <Route path="/leaf/todaySupply/route" element={<TodaySuppliers />} />
             <Route path="/leaf/todaySupply/full" element={<TodaySuppliersFull />} />
 
