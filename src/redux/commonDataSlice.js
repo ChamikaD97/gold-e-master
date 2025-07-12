@@ -4,6 +4,7 @@ import { notification } from "antd";
 const initialState = {
   notificationDate: 1,
   leafRound: 7,
+  dateRangeYears: 1,
   automaticalyInactive: 10, selectedSupplierId: '',
   selectedRoute: '',
   notification: true, // Default to true
@@ -32,6 +33,9 @@ const commonDataSlice = createSlice({
     setAutomaticalyInactive: (state, action) => {
       state.automaticalyInactive = action.payload;
     },
+    setDateRangeYears: (state, action) => {
+      state.dateRangeYears = action.payload;
+    },
     clearMarkers: (state) => {
       state.notificationDate = 1; // Reset to default value
       state.leafRound = 7; // Reset to default value
@@ -54,5 +58,5 @@ const commonDataSlice = createSlice({
   }
 });
 
-export const { setNotificationDate, setRange6DaysMarkers,setNotificationsVisible, setAutomaticalyInactive, setLeafRound, clearMarkers, setSelectedSupplier, setSelectedRoute } = commonDataSlice.actions;
+export const { setNotificationDate,setDateRangeYears, setRange6DaysMarkers,setNotificationsVisible, setAutomaticalyInactive, setLeafRound, clearMarkers, setSelectedSupplier, setSelectedRoute } = commonDataSlice.actions;
 export default commonDataSlice.reducer;

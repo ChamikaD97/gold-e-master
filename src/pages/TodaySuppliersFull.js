@@ -17,12 +17,12 @@ import jsPDF from "jspdf";
 import CircularLoader from "../components/CircularLoader";
 import { Space } from "antd";
 
-
 const TodaySuppliers = () => {
   const { Option } = Select;
   const dispatch = useDispatch();
   const leafRound = useSelector((state) => state.commonData?.leafRound);
 
+  const dateRangeYears = useSelector((state) => state.commonData?.dateRangeYears);
   const [filters, setFilters] = useState({ line: "All" });
   const [supplierWithDataList, setSupplierWithDataList] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
@@ -65,7 +65,7 @@ const TodaySuppliers = () => {
 
     const uniqueLines = lineIdCodeMapForAll
       .filter(l => l.lineCode && l.lineId)
-      .map(l => ({ label: l.lineCode, id: l.lineId }));
+      .map(l => ({ label: l.lineCode, id: l.lineId, officer: l.officer }));
 
     const total = uniqueLines.length;
     setTotalLines(total);
@@ -73,7 +73,9 @@ const TodaySuppliers = () => {
 
     const startDate = day.subtract(leafRound, "day").format("YYYY-MM-DD");
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < total; i++) {
+      console.log(i);
+
       setCurrentIndex(i);
 
       if (cancelDownload) {
@@ -154,7 +156,7 @@ const TodaySuppliers = () => {
         // Fetch last record for each missing supplier
         let glfHistory = [];
         try {
-          const dateRange = `${dayjs().subtract(1, 'year').format("YYYY-MM-DD")}~${dayjs().format("YYYY-MM-DD")}`;
+          const dateRange = `${dayjs().subtract(dateRangeYears, 'year').format("YYYY-MM-DD")}~${dayjs().subtract(leafRound, 'days').format("YYYY-MM-DD")}`;
           const glfHistoryRes = await fetch(`/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line.id}&d=${dateRange}`);
           glfHistory = await glfHistoryRes.json();
         } catch (e) {
@@ -177,43 +179,50 @@ const TodaySuppliers = () => {
           }
         });
 
-        const enrichedWithoutData = withoutData.map(sup => {
-          const sid = sup["Supplier Id"];
-          const lastInfo = latestSupplyMap[sid];
-          const lastDate = lastInfo?.lastDate || "-";
+        const enrichedWithoutData = withoutData
+          .filter(sup => {
+            const sid = sup["Supplier Id"];
+            const lastInfo = latestSupplyMap[sid];
+            return !!lastInfo?.lastDate; // only include if lastDate exists
+          })
+          .map(sup => {
+            const sid = sup["Supplier Id"];
+            const lastInfo = latestSupplyMap[sid];
+            const lastDate = lastInfo?.lastDate;
 
-          let inactiveFor = "-";
-          if (lastDate !== "-") {
-            const last = dayjs(lastDate);
-            const now = dayjs();
-            const years = now.diff(last, "year");
-            const months = now.diff(last.add(years, "year"), "month");
-            const days = now.diff(last.add(years, "year").add(months, "month"), "day");
+            let inactiveFor = "-";
+            if (lastDate) {
+              const last = dayjs(lastDate);
+              const now = dayjs();
+              const years = now.diff(last, "year");
+              const months = now.diff(last.add(years, "year"), "month");
+              const days = now.diff(last.add(years, "year").add(months, "month"), "day");
 
-            const parts = [];
-            if (years > 0) parts.push(`${years} year${years > 1 ? "s" : ""}`);
-            if (months > 0) parts.push(`${months} month${months > 1 ? "s" : ""}`);
-            if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
-            inactiveFor = parts.join(" ") || "0 days";
-          }
+              const parts = [];
+              if (years > 0) parts.push(`${years} year${years > 1 ? "s" : ""}`);
+              if (months > 0) parts.push(`${months} month${months > 1 ? "s" : ""}`);
+              if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+              inactiveFor = parts.join(" ") || "0 days";
+            }
 
-          return {
-            id: sid,
-            name: sup["Supplier Name"],
-            address: sup["Address"],
-            tel: sup["Contact"],
-            lastDate,
-            total_kg: lastInfo?.total_kg || 0,
-            inactiveFor,
-          };
-        });
+            return {
+              id: sid,
+              name: sup["Supplier Name"],
+              address: sup["Address"],
+              tel: sup["Contact"],
+              lastDate,
+              total_kg: lastInfo?.total_kg || 0,
+              inactiveFor,
+            };
+          });
 
 
-        // Combine both
+
+
 
         // 🔽 Export complete list
         if (withData.length > 0) {
-          downloadXSupplierListAsPDFAuto(line.label, withData, enrichedWithoutData, startDate);
+          downloadXSupplierListAsPDFAuto(line.label, withData, enrichedWithoutData, startDate, line.officer);
         }
 
 
@@ -229,9 +238,10 @@ const TodaySuppliers = () => {
     dispatch(hideLoader());
   };
 
-const downloadXSupplierListAsPDFAuto = (lineCode, todaySuppliers, missingSuppliers, day) => {
-  const doc = new jsPDF("p", "mm", "a4");
 
+
+ const downloadXSupplierListAsPDFAuto = (lineCode, todaySuppliers, missingSuppliers, day, officer) => {
+  const doc = new jsPDF("p", "mm", "a4");
   const todayStr = dayjs().format("YYYY-MM-DD");
 
   // === HEADER ===
@@ -251,9 +261,9 @@ const downloadXSupplierListAsPDFAuto = (lineCode, todaySuppliers, missingSupplie
   doc.line(14, 47, 196, 47);
   doc.text("Daily Leaf Supply Summary", 14, 52);
 
-  doc.setFontSize(16);
+  doc.setFontSize(14);
   doc.setFont(undefined, 'bold');
-  doc.text(`${lineCode}`, 14, 61);
+  doc.text(`Mr. ${officer}   -   ${lineCode} Line`, 14, 61);
 
   doc.setFontSize(11);
   doc.setFont(undefined, 'normal');
@@ -261,76 +271,103 @@ const downloadXSupplierListAsPDFAuto = (lineCode, todaySuppliers, missingSupplie
   doc.line(14, 71, 196, 71);
 
   // === TODAY SUPPLIERS TABLE ===
+  const todayHead = [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Informed"]];
   const todayTable = todaySuppliers.map(s => [
     s.id,
     s.name,
     s.tel || "-",
     s.lastDate ? dayjs(s.lastDate).format("YYYY-MM-DD") : "-",
     `${Math.round(s.total_kg || 0)} kg`,
+    ' '
   ]);
-  const todayHead = [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf"]];
   const todayTableBody = todayTable.map((row, i) => [i + 1, ...row]);
+
+  const todayTotalLeaf = todaySuppliers.reduce((sum, s) => sum + (s.total_kg || 0), 0);
+  todayTableBody.push([
+    "",
+    { content: "Total", colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
+    { content: `${Math.round(todayTotalLeaf)} kg`, styles: { fontStyle: 'bold' } },
+    ''
+  ]);
 
   doc.autoTable({
     startY: 75,
     head: todayHead,
     body: todayTableBody,
     styles: {
+      fillColor: [255, 255, 255],
+      textColor: [0, 0, 0],
       fontSize: 9,
-      halign: "center",
+      halign: 'center',
+      lineColor: [0, 0, 0],
+      lineWidth: 0.1
     },
     headStyles: {
-      fillColor: [230, 230, 230],
-      fontStyle: "bold"
+      fillColor: [255, 255, 255],
+      textColor: [0, 0, 0],
+      fontStyle: 'bold',
+      lineColor: [0, 0, 0],
+      lineWidth: 0.2
     },
     alternateRowStyles: { fillColor: [245, 245, 245] }
   });
 
-  // === MISSING SUPPLIERS TABLE (sorted by inactivity) ===
+  // === MISSING SUPPLIERS TABLE ===
   if (missingSuppliers.length > 0) {
     doc.addPage();
 
-    // Sort by inactiveFor descending (by calculating total inactive days)
-    const sortedMissing = [...missingSuppliers].sort((a, b) => {
+    const sortedMissing = [...missingSuppliers].sort((b, a) => {
       const getInactiveDays = (str) => {
         if (!str || str === "-") return 0;
-        const match = str.match(/(\d+)\s*year[s]?/);
-        const years = match ? parseInt(match[1]) : 0;
-        const months = (str.match(/(\d+)\s*month[s]?/) || [])[1] || 0;
-        const days = (str.match(/(\d+)\s*day[s]?/) || [])[1] || 0;
-        return (parseInt(years) * 365) + (parseInt(months) * 30) + parseInt(days);
+        const years = parseInt((str.match(/(\d+)\s*year[s]?/) || [])[1] || 0);
+        const months = parseInt((str.match(/(\d+)\s*month[s]?/) || [])[1] || 0);
+        const days = parseInt((str.match(/(\d+)\s*day[s]?/) || [])[1] || 0);
+        return (years * 365) + (months * 30) + days;
       };
       return getInactiveDays(b.inactiveFor) - getInactiveDays(a.inactiveFor);
     });
 
     doc.setFontSize(13);
     doc.setFont(undefined, 'bold');
-    doc.text("Missing Suppliers with Last Supply Record", 14, 25);
+    doc.text(`Suppliers with Last Supply Record Within ${dateRangeYears} Year`, 14, 25);
     doc.line(14, 28, 196, 28);
 
+    const missingHead = [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Inactive For"]];
     const missingTable = sortedMissing.map(s => [
       s.id,
       s.name,
       s.tel || "-",
       s.lastDate !== "-" ? dayjs(s.lastDate).format("YYYY-MM-DD") : "-",
       `${Math.round(s.total_kg || 0)} kg`,
-      s.inactiveFor || "-",
+      s.inactiveFor || "-"
     ]);
-    const missingHead = [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Inactive For"]];
     const missingTableBody = missingTable.map((row, i) => [i + 1, ...row]);
+
+    const missingTotalLeaf = sortedMissing.reduce((sum, s) => sum + (s.total_kg || 0), 0);
+    missingTableBody.push([
+      "",
+      { content: "Total", colSpan: 5, styles: { halign: 'right', fontStyle: 'bold' } },
+      { content: `${Math.round(missingTotalLeaf)} kg`, styles: { fontStyle: 'bold' } }
+    ]);
 
     doc.autoTable({
       startY: 32,
       head: missingHead,
       body: missingTableBody,
       styles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
         fontSize: 9,
-        halign: "center",
+        halign: 'center',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.1
       },
       headStyles: {
-        fillColor: [255, 235, 205],
+        fillColor: [255, 255, 255],
         textColor: [0, 0, 0],
-        fontStyle: "bold"
+        fontStyle: 'bold',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2
       },
       alternateRowStyles: { fillColor: [255, 250, 240] }
     });
@@ -341,11 +378,14 @@ const downloadXSupplierListAsPDFAuto = (lineCode, todaySuppliers, missingSupplie
   doc.setPage(lastPage);
   doc.line(14, 275, 196, 275);
   doc.setFontSize(8);
+  doc.setFont("helvetica");
   doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
   doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-  doc.save(`${lineCode}_leaf_report_${day}.pdf`);
+  doc.save(`Mr. ${officer}  ${lineCode}_leaf_report_${day}.pdf`);
 };
+
+
 
 
 

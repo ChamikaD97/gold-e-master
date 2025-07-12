@@ -10,7 +10,7 @@ import {
   Card,
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { setAutomaticalyInactive, setLeafRound, setNotificationsVisible, clearMarkers } from "../redux/commonDataSlice";
+import { setAutomaticalyInactive, setLeafRound, setNotificationsVisible, clearMarkers, setDateRangeYears } from "../redux/commonDataSlice";
 
 /**
  * SettingsModal
@@ -25,13 +25,14 @@ const SettingsModal = ({ open, onClose }) => {
   const leafRound = useSelector((state) => state.commonData?.leafRound);
   const notificationDate = useSelector((state) => state.commonData?.notificationDate);
   const automaticalyInactive = useSelector((state) => state.commonData?.automaticalyInactive);
+  const dateRangeYears = useSelector((state) => state.commonData?.dateRangeYears);
   const dispatch = useDispatch();
   const handleFinish = (values) => {
 
     dispatch(setLeafRound(values.leafRound));
     dispatch(setAutomaticalyInactive(values.automaticalyInactive));
     dispatch(setNotificationsVisible(values.notifications));
-
+    dispatch(setDateRangeYears(values.dateRangeYears)); // Reset to default value
     onClose();
   };
 
@@ -101,7 +102,7 @@ const SettingsModal = ({ open, onClose }) => {
             notifications: true,
             leafRound,
             automaticalyInactive,
-
+            dateRangeYears
           }}
         >
 
@@ -119,6 +120,9 @@ const SettingsModal = ({ open, onClose }) => {
             <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
           </Form.Item>
 
+          <Form.Item label="Missing Range" name="dateRangeYears">
+            <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
+          </Form.Item>
           <Form.Item label="Automatically Inactive (days)" name="automaticalyInactive">
             <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
           </Form.Item>
@@ -131,58 +135,58 @@ const SettingsModal = ({ open, onClose }) => {
 
 
 
-           <div style={{ display: "flex", gap: 10 }}>
-  <Button
-    type="primary"
-    htmlType="submit"
-    block
-    style={{
-      backgroundColor: "#00b96b", // custom green
-      borderColor: "#00b96b",
-    }}
-  >
-    Save
-  </Button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                style={{
+                  backgroundColor: "#00b96b", // custom green
+                  borderColor: "#00b96b",
+                }}
+              >
+                Save
+              </Button>
 
-  <Button
-    type="primary"
-    block
-    onClick={() => {
-      dispatch(clearMarkers());
+              <Button
+                type="primary"
+                block
+                onClick={() => {
+                  dispatch(clearMarkers());
 
-      // slight delay to reflect Redux state updates
-      setTimeout(() => {
-        form.setFieldsValue({
-          notifications: state.notificationsVisible,
-          leafRound: state.leafRound,
-          automaticalyInactive: state.automaticalyInactive,
-        });
-      }, 50);
-    }}
-    style={{
-      backgroundColor: "#1677ff", // custom blue
-      borderColor: "#1677ff",
-    }}
-  >
-    Reset
-  </Button>
+                  // slight delay to reflect Redux state updates
+                  setTimeout(() => {
+                    form.setFieldsValue({
+                      notifications: state.notificationsVisible,
+                      leafRound: state.leafRound,
+                      automaticalyInactive: state.automaticalyInactive,
+                    });
+                  }, 50);
+                }}
+                style={{
+                  backgroundColor: "#1677ff", // custom blue
+                  borderColor: "#1677ff",
+                }}
+              >
+                Reset
+              </Button>
 
-  <Button
-    danger
-    type="primary"
-    block
-    onClick={() =>
-      form.setFieldsValue({
-        notifications: false,
-        leafRound: null,
-        automaticalyInactive: null,
-      })
-    }
-    
-  >
-    Clear
-  </Button>
-</div>
+              <Button
+                danger
+                type="primary"
+                block
+                onClick={() =>
+                  form.setFieldsValue({
+                    notifications: false,
+                    leafRound: null,
+                    automaticalyInactive: null,
+                  })
+                }
+
+              >
+                Clear
+              </Button>
+            </div>
 
           </Form.Item>
 
