@@ -1,6 +1,11 @@
 import { useDispatch } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 
+import Ajith from "../data/Ajith.json";
+import Udara from "../data/Udara.json";
+import Udayanga from "../data/Udayanga.json";
+import Gamini from "../data/Gamini.json";
+import Chamod from "../data/Chamod.json";
 // api.js
 export const BASE_URL = "http://newserver:46597/quiX/ControllerV1";
 export const API_KEY = "quix717244";
@@ -162,7 +167,7 @@ export const getLeafRecordsBySupplierId = async ({ filters, supplierId, dispatch
   const query = {
     k: API_KEY,
     d: '2025-05-06',
-    h: '1,2,3,4,5,6,7,8,9,10'    ,   // e.g. "2024-06-01~2024-06-30"
+    h: '1,2,3,4,5,6,7,8,9,10',   // e.g. "2024-06-01~2024-06-30"
     s: supplierId,      // optional
   };
 
@@ -193,3 +198,13 @@ export const getIssueRecords = async ({ dateRange, supplierNos, issueTypes, head
 
   return response.json();
 };
+
+
+export const ajithLines = '81,60,154,65,146,152,33,8,98,145,97';
+export const udaraLines = '23, 72, 96, 149, 21, 9,162';
+export const udayangaLines = '6, 7, 25, 62, 61, 150, 155, 36, 102, 161, 64, 48, 129';
+export const gaminiLines = '109, 70, 12, 31, 157, 34, 127';
+export const chamodLines = '91, 67, 68, 69, 138, 124';
+
+
+

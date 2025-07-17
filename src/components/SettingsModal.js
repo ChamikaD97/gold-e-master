@@ -8,6 +8,8 @@ import {
   InputNumber,
   Descriptions,
   Card,
+  Row,
+  Col,
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { setAutomaticalyInactive, setLeafRound, setNotificationsVisible, clearMarkers, setDateRangeYears } from "../redux/commonDataSlice";
@@ -23,9 +25,12 @@ const SettingsModal = ({ open, onClose }) => {
 
   // Redux values
   const leafRound = useSelector((state) => state.commonData?.leafRound);
-  const notificationDate = useSelector((state) => state.commonData?.notificationDate);
   const automaticalyInactive = useSelector((state) => state.commonData?.automaticalyInactive);
   const dateRangeYears = useSelector((state) => state.commonData?.dateRangeYears);
+  const week1Target = useSelector((state) => state.commonData?.week1Target);
+  const week2Target = useSelector((state) => state.commonData?.week2Target);
+  const week3Target = useSelector((state) => state.commonData?.week3Target);
+  const week4Target = useSelector((state) => state.commonData?.week4Target);
   const dispatch = useDispatch();
   const handleFinish = (values) => {
 
@@ -50,42 +55,17 @@ const SettingsModal = ({ open, onClose }) => {
 
   return (
     <Modal
-      title="Settings"
+
       open={open}
       onCancel={onClose}
       footer={null}
       destroyOnClose
       bodyStyle={{
-        padding: 10,
+
         borderRadius: 10,
       }}
     >
-      {/* ✅ Summary Section in Card */}
-      <div style={{ display: "flex", gap: 16, marginBottom: 5 }}>
-        {/* Card 1 */}
-        {/* <Card style={{ ...cardStyle, flex: 1, minHeight: 120 }} bordered={false}>
-    <div style={{ color: "#fff", padding: 8, height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center" }}>
-      <div><strong>Notification Date (days)</strong></div>
-      <div style={{ fontSize: 20 }}>{notificationDate ?? "N/A"}</div>
-    </div>
-  </Card> */}
 
-        {/* Card 2 */}
-        <Card style={{ ...cardStyle, flex: 1, minHeight: 120 }} bordered={false}>
-          <div style={{ color: "#fff", padding: 8, height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center" }}>
-            <div><strong>Leaf Round (days)</strong></div>
-            <div style={{ fontSize: 20 }}>{leafRound ?? "N/A"}</div>
-          </div>
-        </Card>
-
-        {/* Card 3 */}
-        <Card style={{ ...cardStyle, flex: 1, minHeight: 120 }} bordered={false}>
-          <div style={{ color: "#fff", padding: 8, height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center" }}>
-            <div><strong>Inactive (days)</strong></div>
-            <div style={{ fontSize: 20 }}>{automaticalyInactive ?? "N/A"}</div>
-          </div>
-        </Card>
-      </div>
 
 
       <Card bordered={false}>
@@ -102,19 +82,21 @@ const SettingsModal = ({ open, onClose }) => {
             notifications: true,
             leafRound,
             automaticalyInactive,
-            dateRangeYears
+            dateRangeYears,
+            week1Target,
+            week2Target,
+            week3Target,
+            week4Target,
           }}
         >
 
-
-          <Form.Item
-            label="Enable Notifications"
-            name="notifications"
-            valuePropName="checked"
-          >
-            <Switch />
-          </Form.Item>
-
+          <Form.Item wrapperCol={{ span: 24 }}>
+            <div
+              style={{
+                borderTop: "1px solid",
+              }}
+            ></div>
+            <h4 style={{ color: "#333" }}>Settings</h4>          </Form.Item>
 
           <Form.Item label="Leaf Round" name="leafRound">
             <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
@@ -127,9 +109,46 @@ const SettingsModal = ({ open, onClose }) => {
             <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
           </Form.Item>
 
+          {/* 🔻 Separator */}
+          <Form.Item wrapperCol={{ span: 24 }}>
+            <div
+              style={{
+                borderTop: "1px solid",
+              }}
+            ></div>
+            <h4 style={{ color: "#333" }}>Weekly Targets</h4>
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Week 1 Target" name="week1Target">
+                <InputNumber min={week1Target} style={inputStyle} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Week 2 Target" name="week2Target">
+                <InputNumber min={week2Target} style={inputStyle} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Week 3 Target" name="week3Target">
+                <InputNumber min={week3Target} style={inputStyle} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Week 4 Target" name="week4Target">
+                <InputNumber min={week4Target} style={inputStyle} />
+              </Form.Item>
+            </Col>
+          </Row>
 
 
-
+          <div
+            style={{
+              borderTop: "1px solid",
+              marginBottom: 16,
+            }}
+          ></div>
           <Form.Item wrapperCol={{ span: 24 }}>
 
 

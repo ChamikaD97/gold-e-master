@@ -1,6 +1,10 @@
 {
   "lines": [
     {
+      "lineCode": "All",
+      "lineId": "109,70,12,31,157,34,127"
+    },
+    {
       "lineCode": "EL",
       "lineId": "109"
     },

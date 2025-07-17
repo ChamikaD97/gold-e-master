@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
     Modal,
     Typography,
-    Descriptions,
-    Divider,
+
     Select,
     Button,
     Row,
@@ -22,10 +21,16 @@ import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
 import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
 
 
+
 const { Title } = Typography;
 const { Option } = Select;
 
 const FactoryAnalyticsModal = ({ visible, onClose }) => {
+
+
+
+
+
     const dispatch = useDispatch();
     const [data, setData] = useState([]);
     const [totals, setTotals] = useState({ super: 0, normal: 0 });
@@ -64,10 +69,57 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
         const end = start.endOf("month");
         const dd = `${start.format("YYYY-MM-DD")}~${end.format("YYYY-MM-DD")}`;
 
-        const id = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160';
+        const id = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162';
 
 
         const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${id}&d=${dd}`;
+
+        setData([]);
+        dispatch(showLoader());
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Failed to fetch leaf records");
+
+            const result = await response.json();
+
+            const transformed = result.map(item => ({
+                supplier_id: item["Supplier Id"],
+                date: item["Leaf Date"],
+                leaf_type: item["Leaf Type"] === 2 ? "Super" : "Normal",
+                lineCode: parseInt(item["Route"]),
+                net_kg: parseFloat(item["Net"]),
+            }));
+
+            const calculatedTotals = transformed.reduce(
+                (acc, item) => {
+                    if (item.leaf_type === "Super") acc.super += item.net_kg;
+                    else acc.normal += item.net_kg;
+                    return acc;
+                },
+                { super: 0, normal: 0 }
+            );
+
+            setTotals(calculatedTotals);
+            setData(transformed);
+        } catch (err) {
+            console.error(err);
+            setData([]);
+            setTotals({ super: 0, normal: 0 });
+        } finally {
+            dispatch(hideLoader());
+        }
+    };
+
+    const getLeafRecordsByOfficer = async (officer) => {
+        const { year, month } = filters;
+        const start = dayjs(`${year}-${month}-01`);
+        const end = start.endOf("month");
+        const dd = `${start.format("YYYY-MM-DD")}~${end.format("YYYY-MM-DD")}`;
+
+
+
+        const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${officer}&d=${dd}`;
 
         setData([]);
         dispatch(showLoader());
@@ -114,7 +166,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
 
 
 
-    
+
     const handlePrevMonth = () => {
         setFilters(prev => {
             const newMonth = prev.month - 1;
@@ -145,7 +197,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
             const dd = `${start.format("YYYY-MM-DD")}~${end.format("YYYY-MM-DD")}`;
 
 
-            const id = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160';
+            const id = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162';
 
 
             const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${id}&d=${dd}`;
@@ -341,13 +393,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
 
                 !isLoading && (
 
-
                     <>
-
-
-
-
-
                         <div
                             style={{
                                 margin: "16px 0",
@@ -423,12 +469,8 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                                         </Col>
                                     </>
                                 }
-
                             </Row>
-
-
                         </div>
-
                         <div
                             style={{
                                 margin: "16px 0",
@@ -440,10 +482,8 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                                 fontWeight: "bold"
                             }}
                         >
-
                             <Row gutter={[16, 16]} justify="center" >
                                 {!isLoading &&
-
                                     <div style={{ width: "100%", height: 300 }}>
                                         <ResponsiveContainer>
                                             {chartType === "monthly" ? (
@@ -492,16 +532,9 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                                             )}
                                         </ResponsiveContainer>
 
-
                                     </div>
                                 }
-
-
                             </Row>
-
-
-
-
                         </div>
                     </>
                 )
@@ -549,6 +582,13 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                     Yearly Summary
                 </Button>
                 <Button
+                    type={chartType === "more" ? "primary" : "default"}
+                    onClick={() => setChartType("monthly")}
+                    style={{ marginRight: 8 }}
+                >
+                    Achievement
+                </Button>
+                <Button
                     type={chartType === "yearly" ? "primary" : "default"}
                     onClick={() => setIsLine(false)}
                 >
@@ -556,8 +596,6 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                 </Button>
 
             </div>
-
-
         </Modal>
     );
 };

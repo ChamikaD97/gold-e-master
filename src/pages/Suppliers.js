@@ -19,7 +19,7 @@ import autoTable from "jspdf-autotable";
 import { toast } from "react-toastify";
 import { API_KEY } from "../api/api";
 
-
+import * as XLSX from 'xlsx';
 
 const Suppliers = () => {
 
@@ -46,10 +46,12 @@ const Suppliers = () => {
     doc.setFontSize(14);
     doc.text("Supplier List", 10, 10);
 
-    const headers = [["Supplier ID", "Supplier Name"]];
+    const headers = [["Supplier ID", "Supplier Name", "Contact"]];
     const rows = filteredData.map(s => [
       s["Supplier Id"],
-      s["Supplier Name"]
+      s["Supplier Name"],
+      s["Contact"],
+
     ]);
 
     autoTable(doc, {
@@ -78,59 +80,87 @@ const Suppliers = () => {
 
 
 
+  const exportAllToExcel = () => {
+    const lines = Object.keys(lineIdToCodeMap); // e.g., { "1": "L001", "2": "L002" }
+
+    const delay = 500; // milliseconds between downloads
+
+
+
+    const worksheetData = filteredData.map(supplier => ({
+      'Supplier ID': supplier['Supplier Id'],
+      'Supplier Name': supplier['Supplier Name'],
+      'Contact': supplier['Contact']
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Suppliers");
+    const selectedLine = filters.line === "All" ? "AllLines" : lineIdToCodeMap[filters.line] || filters.line;
+
+    XLSX.writeFile(workbook, `Supplier_List_${selectedLine}.xlsx`);
+
+    lines.forEach((lineId, index) => {
+      setTimeout(() => {
+
+      }, index * delay);
+    });
+  };
+
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSingleModel, setShowSingleModel] = useState(false);
 
 
-const fetchSupplierDataFromAPI = async (lineCode) => {
-  const baseUrl = "/quiX/ControllerV1/supdata";
-  const params = new URLSearchParams({ k: API_KEY, r: lineCode });
-  const url = `${baseUrl}?${params.toString()}`;
+  const fetchSupplierDataFromAPI = async (lineCode) => {
+    const baseUrl = "/quiX/ControllerV1/supdata";
+    const params = new URLSearchParams({ k: API_KEY, r: lineCode });
+    const url = `${baseUrl}?${params.toString()}`;
 
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch supplier data");
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch supplier data");
 
-    const data = await response.json();
-    setSuppliers(Array.isArray(data) ? data : data ? [data] : []);
-  } catch (err) {
-    console.error(err);
-    setError("Failed to load supplier data");
-    toast.error("❌ Failed to load suppliers for the selected line.");
-    setSuppliers([]);
-  } finally {
-    setLoading(false);
-  }
-};
-const fetchSupplierDataFromId = async (supplierId) => {
-  const baseUrl = "/quiX/ControllerV1/supdata";
-  const params = new URLSearchParams({ k: API_KEY, s: supplierId });
-  const url = `${baseUrl}?${params.toString()}`;
+      const data = await response.json();
+      setSuppliers(Array.isArray(data) ? data : data ? [data] : []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load supplier data");
+      toast.error("❌ Failed to load suppliers for the selected line.");
+      setSuppliers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchSupplierDataFromId = async (supplierId) => {
+    const baseUrl = "/quiX/ControllerV1/supdata";
+    const params = new URLSearchParams({ k: API_KEY, s: supplierId });
+    const url = `${baseUrl}?${params.toString()}`;
 
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch supplier data");
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch supplier data");
 
-    const data = await response.json();
-    setSingleSupplier(Array.isArray(data) ? data[0] : data[0] ? [data] : []);
-  } catch (err) {
-    console.error(err);
-    setError("Failed to load supplier data");
-    toast.error("❌ Supplier ID not found or error occurred.");
-    setSingleSupplier([]);
-  } finally {
-    setLoading(false);
-    dispatch(setSelectedSupplier(singleSupplier));
-    navigate(`/supplier/${supplierId}`);
-  }
-};
+      const data = await response.json();
+      setSingleSupplier(Array.isArray(data) ? data[0] : data[0] ? [data] : []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load supplier data");
+      toast.error("❌ Supplier ID not found or error occurred.");
+      setSingleSupplier([]);
+    } finally {
+      setLoading(false);
+      dispatch(setSelectedSupplier(singleSupplier));
+      navigate(`/supplier/${supplierId}`);
+    }
+  };
 
   const lineIdToCodeMap = useMemo(() => {
     const map = {};
@@ -374,7 +404,7 @@ const fetchSupplierDataFromId = async (supplierId) => {
               </Row>
             </Col>
             <Col>
-              <Button type="default" onClick={exportToPDF}>
+              <Button type="default" onClick={exportAllToExcel}>
                 📄 Export to PDF
               </Button>
             </Col>

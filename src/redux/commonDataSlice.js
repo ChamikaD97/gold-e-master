@@ -8,6 +8,10 @@ const initialState = {
   automaticalyInactive: 10, selectedSupplierId: '',
   selectedRoute: '',
   notification: true, // Default to true
+  week1Target: 20,
+  week2Target: 25,
+  week3Target: 25,
+  week4Target: 30,
   monthMap: {
     "01": "January", "02": "February", "03": "March", "04": "April",
     "05": "May", "06": "June", "07": "July", "08": "August",
@@ -25,7 +29,7 @@ const commonDataSlice = createSlice({
     },
     setNotificationsVisible: (state, action) => {
       state.notification = action.payload;
-      
+
     },
     setLeafRound: (state, action) => {
       state.leafRound = action.payload;
@@ -58,5 +62,5 @@ const commonDataSlice = createSlice({
   }
 });
 
-export const { setNotificationDate,setDateRangeYears, setRange6DaysMarkers,setNotificationsVisible, setAutomaticalyInactive, setLeafRound, clearMarkers, setSelectedSupplier, setSelectedRoute } = commonDataSlice.actions;
+export const { setNotificationDate, setDateRangeYears, setRange6DaysMarkers, setNotificationsVisible, setAutomaticalyInactive, setLeafRound, clearMarkers, setSelectedSupplier, setSelectedRoute } = commonDataSlice.actions;
 export default commonDataSlice.reducer;

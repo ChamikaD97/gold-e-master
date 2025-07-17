@@ -23,6 +23,7 @@ import OfficerTargets from "./pages/OfficerTargets";
 import TodaySuppliers from "./pages/TodaySuppliers";
 import TodaySuppliersFull from "./pages/TodaySuppliersFull";
 import Summary from "./pages/Summery";
+import TodaySuppliersOfficer from "./pages/TodaySuppliersOfficer";
 
 const LayoutWithHeader = () => (
   <>
@@ -74,7 +75,7 @@ const App = () => {
             <Route path="/leaf/lastSupply" element={<LastSupply />} />
             <Route path="/leaf/todaySupply/route" element={<TodaySuppliers />} />
             <Route path="/leaf/todaySupply/full" element={<TodaySuppliersFull />} />
-
+     <Route path="/leaf/todaySupply/officer" element={<TodaySuppliersOfficer />} />
             <Route path="/meal" element={<MealManagement />} />
 
             <Route path="/suppliers/routes" element={<Suppliers />} />

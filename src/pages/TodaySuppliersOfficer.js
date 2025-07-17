@@ -17,16 +17,33 @@ import jsPDF from "jspdf";
 import CircularLoader from "../components/CircularLoader";
 import { Space } from "antd";
 
-const TodaySuppliers = () => {
+const TodaySuppliersOfficer = () => {
   const { Option } = Select;
   const dispatch = useDispatch();
+
+
+  const ajithLines = ['60,154,129', '65', '146', '152', '33', '8', '98', '145', '81,97'];
+  const udaraLines = ['23', '72', '96', '149', '21', '9','162'];
+  const udayangaLines = ['6', '7', '25', '61', '150', '155', '36', '102,161', '48,64,62', '129'];
+  const gaminiLines = ['70', '31,157', '34', '12,109,127'];
+  const chamodLines = ['91', '67,68,69', '138,124'];
+
+  const officerList = [
+    { name: "Ajith", line: ajithLines },
+    { name: "Udara", line: udaraLines },
+    { name: "Udayanga", line: udayangaLines },
+    { name: "Gamini", line: gaminiLines },
+    { name: "Chamod", line: chamodLines }
+
+  ];
+
   const leafRound = useSelector((state) => state.commonData?.leafRound);
 
   const dateRangeYears = useSelector((state) => state.commonData?.dateRangeYears);
   const [filters, setFilters] = useState({ line: "All" });
   const [supplierWithDataList, setSupplierWithDataList] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
-
+  const [selectedOfficer, setSelectedOfficer] = useState({ name: "All", line: "All" });
   const [isToday, setIsToday] = useState(true);
   const [supplierLength, setSuppliersLength] = useState([]);
 
@@ -41,7 +58,12 @@ const TodaySuppliers = () => {
   const { isLoading } = useSelector((state) => state.loader);
   const [progressVisible, setProgressVisible] = useState(false);
 
+  const getLineNameByCode = (code) => {
+    console.log("getLineNameByCode called with code:", code);
 
+    const entry = lineIdCodeMapForAll.find(item => item.lineId === code);
+    return entry?.lineCode || code; // fallback to code if name not found
+  };
   const [isCancel, setIsCancel] = useState(false);
 
 
@@ -55,26 +77,45 @@ const TodaySuppliers = () => {
   const [cancelDownload, setCancelDownload] = useState(false);
   const [processingLine, setProcessingLine] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [totalLines, setTotalLines] = useState(0);
   const [progressPercent, setProgressPercent] = useState(0);
-
   const downloadAllLeafReports = async (day) => {
     setProgressVisible(true)
     setCancelDownload(false);
     setIsDownloading(true);
+    let totalLines = 0;
+    let selectedOfficerLines = selectedOfficer.line;
 
-    const uniqueLines = lineIdCodeMapForAll
-      .filter(l => l.lineCode && l.lineId)
-      .map(l => ({ label: l.lineCode, id: l.lineId, officer: l.officer }));
+    if (selectedOfficer === 'Ajith') {
+      totalLines = ajithLines.length;
+      selectedOfficerLines = ajithLines;
 
-    const total = uniqueLines.length;
-    setTotalLines(total);
+    } else if (selectedOfficer === 'Udara') {
+      selectedOfficerLines = udaraLines;
 
+      totalLines = udaraLines.length;
+    } else if (selectedOfficer === 'Udayanga') {
+      selectedOfficerLines = udayangaLines;
+
+      totalLines = udayangaLines.length;
+    } else if (selectedOfficer === 'Gamini') {
+      selectedOfficerLines = gaminiLines;
+
+      totalLines = gaminiLines.length;
+    } else if (selectedOfficer === 'Chamod') {
+      selectedOfficerLines = chamodLines;
+
+
+      totalLines = chamodLines.length;
+    } else {
+      totalLines = 0;
+    }
+
+
+    console.log(`Total lines to process: ${totalLines}`);
 
     const startDate = day.subtract(leafRound, "day").format("YYYY-MM-DD");
 
-    for (let i = 0; i < total; i++) {
-      console.log(i);
+    for (let i = 0; i < totalLines; i++) {
 
       setCurrentIndex(i);
 
@@ -88,12 +129,18 @@ const TodaySuppliers = () => {
         await new Promise(res => setTimeout(res, 300));
       }
 
-      const line = uniqueLines[i];
-      setProcessingLine(line.label);
-      setProgressPercent(Math.round(((i + 1) / total) * 100));
+      const line = selectedOfficerLines[i];
+      setProcessingLine(getLineNameByCode(line));
+
+      console.log(`Processing line ${i + 1}/${totalLines}: ${line}`, getLineNameByCode(line));
+
+
+      setProgressPercent(Math.round(((i + 1) / totalLines) * 100));
+
 
       try {
-        const leafDataUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line.id}&d=${startDate}`;
+        const leafDataUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line}&d=${startDate}`;
+
         const response = await fetch(leafDataUrl);
         if (!response.ok) continue;
 
@@ -129,7 +176,7 @@ const TodaySuppliers = () => {
         const supplierIdsWithData = Object.keys(leafMap);
         if (supplierIdsWithData.length === 0) continue;
 
-        const supRes = await fetch(`/quiX/ControllerV1/supdata?k=${API_KEY}&r=${line.id}`);
+        const supRes = await fetch(`/quiX/ControllerV1/supdata?k=${API_KEY}&r=${line}`);
         if (!supRes.ok) continue;
 
         const allSuppliers = await supRes.json();
@@ -157,7 +204,7 @@ const TodaySuppliers = () => {
         let glfHistory = [];
         try {
           const dateRange = `${dayjs().subtract(dateRangeYears, 'year').format("YYYY-MM-DD")}~${dayjs().subtract(leafRound, 'days').format("YYYY-MM-DD")}`;
-          const glfHistoryRes = await fetch(`/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line.id}&d=${dateRange}`);
+          const glfHistoryRes = await fetch(`/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${selectedOfficerLines}&d=${dateRange}`);
           glfHistory = await glfHistoryRes.json();
         } catch (e) {
           console.warn("Failed to fetch GLF history for missing suppliers", e);
@@ -222,7 +269,9 @@ const TodaySuppliers = () => {
 
         // 🔽 Export complete list
         if (withData.length > 0) {
-          downloadXSupplierListAsPDFAuto(line.label, withData, enrichedWithoutData, startDate, line.officer);
+          downloadXSupplierListAsPDFAuto(getLineNameByCode(line), withData, enrichedWithoutData, startDate, selectedOfficer
+
+          );
         }
 
 
@@ -492,12 +541,28 @@ const TodaySuppliers = () => {
               }}
             />
           </Col>
-
           <Col md={7} style={{ display: "flex", alignItems: "center", height: "100%" }}>
-            <div style={{ fontSize: 15, color: "#fff" }}>
-              Download All Suppliers That Need To Supply Leaf
-            </div>
+            <Select
+              placeholder="Select Officer"
+              style={{
+                width: "100%",
+                backgroundColor: "rgb(0, 0, 0)",
+                color: "#000",
+                border: "1px solid #333",
+                borderRadius: 6
+              }}
+              bordered={false}
+              value={filters.officer}
+              onChange={(value) => setSelectedOfficer(value)}
+            >
+              {officerList.map((officer) => (
+                <Option value={officer.name} >
+                  Mr.  {officer.name}
+                </Option>
+              ))}
+            </Select>
           </Col>
+
 
           <Col md={3}>
             <Button type="primary" block onClick={() => downloadAllLeafReports(dayjs())}>
@@ -690,4 +755,4 @@ const TodaySuppliers = () => {
   );
 };
 
-export default TodaySuppliers;
+export default TodaySuppliersOfficer;
