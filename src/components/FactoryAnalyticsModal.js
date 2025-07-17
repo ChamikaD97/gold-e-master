@@ -286,11 +286,26 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                 }}
             >
                 <Row gutter={[16, 16]}>
-                    <Col xs={12} sm={8} md={22}>
+                    <Col xs={12} sm={8} md={20}>
                         Overall Factory Analytics
                     </Col>
 
-
+<Col xs={12} sm={8} md={2}>
+                        <Button
+                            icon={<ReloadOutlined />}
+                            type="primary"
+                            block
+                            danger
+                            onClick={() => {
+                                setIsLine(false)
+                                setFilters({
+                                    year: currentYear,
+                                    month: dayjs().month() + 1
+                                })
+                            }
+                            }
+                        />
+                    </Col>
                     <Col xs={12} sm={8} md={2}>
                         <Button
                             icon={<ReloadOutlined />}
@@ -567,6 +582,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                 </div>
 
             )}
+
             <div style={{ textAlign: "center", marginBottom: 16 }}>
                 <Button
                     type={chartType === "monthly" ? "primary" : "default"}
