@@ -6,8 +6,8 @@
   },
   {
     "officer": "Ajith",
-    "lineCode": "C-15",
-    "lineId": "129"
+    "lineCode": "C-19",
+    "lineId": "133"
   },
   {
     "officer": "Ajith",
@@ -19,7 +19,6 @@
     "lineCode": "PH2",
     "lineId": "154"
   },
-  
   {
     "officer": "Ajith",
     "lineCode": "PH/PH2/C-15",
@@ -135,7 +134,7 @@
     "lineCode": "D",
     "lineId": "9"
   },
-    {
+  {
     "officer": "Udara",
     "lineCode": "SP",
     "lineId": "162"

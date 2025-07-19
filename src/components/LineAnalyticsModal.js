@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import {
     Modal,
     Typography,
-    Descriptions,
-    Divider,
     Select,
     Button,
     Row,
-    Col
+    Col,
+    InputNumber
 } from "antd";
 import { showLoader, hideLoader } from "../redux/loaderSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,7 +17,7 @@ import CountUp from "react-countup";
 import {
     PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, LineChart, Line, XAxis, YAxis
 } from 'recharts';
-import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
+import { ReloadOutlined } from "@ant-design/icons";
 import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
 const { Title } = Typography;
 const { Option } = Select;
@@ -31,6 +30,9 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
         { name: 'Super', value: totals.super },
         { name: 'Normal', value: totals.normal }
     ];
+    const [monthlyTarget, setMonthlyTarget] = useState(0);
+
+    const actualTotal = totals.super + totals.normal;
 
     const COLORS = ['#ffa347', '#47a3ff'];
     const currentDate = new Date();
@@ -38,10 +40,36 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
     const { isLoading } = useSelector((state) => state.loader);
 
+    const [targets, setTargets] = useState([]);
+
+    const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
+
+    const loadTargetsForMonth = async (data) => {
+        console.log(data);
+
+        const formatted =
+            (data.year + '_0' + data.month);
+        try {
+            const data = await import(`../data/targets/targets_${formatted}.json`);
+
+            // setTargets(data.default.filters((d) => d.lineCode == lineCode));
+
+
+            console.log
+                (data.default.filters((d) => d.lineCode == lineCode));
+        } catch (err) {
+            console.error("Target file not found for:", formatted, err);
+            setTargets([]); // or fallback to default
+        }
+    };
     const [filters, setFilters] = useState({
         year: currentYear,
         month: dayjs().month() + 1
     });
+
+    useEffect(() => {
+        loadTargetsForMonth(filters);
+    }, [filters.month]);
 
     const monthMap = useSelector((state) => state.commonData?.monthMap);
 
@@ -50,10 +78,42 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
         .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
 
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
-
-
     const [chartType, setChartType] = useState("monthly");
+    const [showMore, setShowMore] = useState(false);
 
+
+    const getWeeklyDateRanges = (year, month) => {
+        const startOfMonth = dayjs(`${year}-${String(month).padStart(2, "0")}-01`);
+        const endOfMonth = startOfMonth.endOf("month");
+
+        const weeks = [];
+
+        let current = startOfMonth;
+        for (let i = 0; i < 4; i++) {
+            const start = current;
+            const end = i < 3 ? current.add(6, "day") : endOfMonth; // Last week may be longer
+
+            weeks.push({
+                week: `Week ${i + 1}`,
+                startDate: start.format("YYYY-MM-DD"),
+                endDate: end.format("YYYY-MM-DD")
+            });
+
+            current = end.add(1, "day");
+        }
+
+        return weeks;
+    };
+
+    const calculateSummery = async () => {
+
+
+
+        getWeeklySummaries();
+
+    }
+
+    const [weeklySummery, setWeeklySummery] = useState([]);
 
     const getLeafRecordsByDates = async () => {
         const { year, month } = filters;
@@ -99,10 +159,79 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
             dispatch(hideLoader());
         }
     };
+    const getWeeklySummaries = async () => {
+        const { year, month } = filters;
+
+        const weekRanges = getWeeklyDateRanges(year, month);
+        const weeklyResults = [];
+
+
+        for (const range of weekRanges) {
+            const id = filteredLines.lineId;
+            const dd = `${range.startDate}~${range.endDate}`;
+            const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${id}&d=${dd}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Fetch failed for ${range.week}`);
+
+                const result = await response.json();
+
+                const transformed = result.map(item => ({
+                    supplier_id: item["Supplier Id"],
+                    date: item["Leaf Date"],
+                    leaf_type: item["Leaf Type"] === 2 ? "Super" : "Normal",
+                    lineCode: parseInt(item["Route"]),
+                    net_kg: parseFloat(item["Net"]),
+                }));
+
+                const totals = transformed.reduce(
+                    (acc, item) => {
+                        if (item.leaf_type === "Super") acc.super += item.net_kg;
+                        else acc.normal += item.net_kg;
+                        return acc;
+                    },
+                    { super: 0, normal: 0 }
+                );
+
+
+
+                const totalLeaves = totals.super + totals.normal;
+
+                weeklyResults.push({
+
+                    start: range.startDate,
+                    end: range.endDate,
+                    super: parseFloat(totals.super.toFixed(2)),
+                    normal: parseFloat(totals.normal.toFixed(2)),
+                    total: parseFloat(totalLeaves.toFixed(2)),
+
+                });
+
+
+            } catch (err) {
+                console.error(err);
+                weeklyResults.push({
+                    week: range.week,
+                    start: range.startDate,
+                    end: range.endDate,
+                    error: true,
+                    super: 0,
+                    normal: 0,
+                    total: 0
+                });
+            }
+        }
+        console.log(weeklyResults);
+
+        setWeeklySummery(weeklyResults)
+        return weeklyResults;
+    };
 
     useEffect(() => {
         if (visible && lineCode) {
             getLeafRecordsByDates();
+            calculateSummery()
         }
     }, [visible, chartType, filters.month]);
 
@@ -126,8 +255,6 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
             return { ...prev, month: newMonth };
         });
     };
-
-
 
     useEffect(() => {
         const getYearlyData = async () => {
@@ -198,16 +325,12 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
             getYearlyData();
         }
     }, [chartType, filters.year, visible]);
-
-
-
     return (
         <Modal
             open={visible}
             onCancel={onClose}
             footer={null}
             width={850}
-            //bodyStyle={{ background: "#1e1e1e", color: "#fff", borderRadius: 8 }}
             destroyOnClose
         >
             <div
@@ -295,7 +418,6 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                             ))}
                         </Select>
                     </Col>
-
                     <Col xs={12} sm={8} md={10}>
                         <Select
                             showSearch
@@ -339,43 +461,260 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
 
 
+                        {!showMore && (
+                            <div
+                                style={{
+                                    margin: "16px 0",
+                                    textAlign: "center",
+                                    borderRadius: 10,
+                                    backgroundColor: "#222",
+                                    padding: 10,
+                                    color: "#fff",
+                                    fontWeight: "bold"
+                                }}
+                            >
+                                <Row gutter={[16, 16]} justify="center" >
 
-                        <div
-                            style={{
-                                margin: "16px 0",
-                                textAlign: "center",
-                                borderRadius: 10,
-                                backgroundColor: "#222",
-                                padding: 10,
-                                color: "#fff",
-                                fontWeight: "bold"
-                            }}
-                        >
-                            <Row gutter={[16, 16]} justify="center" >
+                                    {!isLoading &&
+                                        <>
 
-                                {!isLoading &&
+                                            <Col xs={24} sm={12} md={8}>
+                                                <div
+                                                    style={{
+                                                        backgroundColor: "#ffa347",
+                                                        borderRadius: 10,
+                                                        padding: "14px 24px",
+                                                        textAlign: "center",
+                                                        fontWeight: 600,
+                                                        color: "#000",
+                                                        boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                                                    }}
+                                                >
+                                                    Super Total<br />
+                                                    <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={1.2} separator="," /> kg
+                                                </div>
+                                            </Col>
+
+                                            <Col xs={24} sm={12} md={8}>
+                                                <div
+                                                    style={{
+                                                        backgroundColor: "#47a3ff",
+                                                        borderRadius: 10,
+                                                        padding: "14px 24px",
+                                                        textAlign: "center",
+                                                        fontWeight: 600,
+                                                        color: "#000",
+                                                        boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                                                    }}
+                                                >
+                                                    Normal Total<br />
+
+                                                    <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={1.2} separator="," /> kg
+
+                                                </div>
+                                            </Col>
+
+                                            <Col xs={24} sm={24} md={8}>
+                                                <div
+                                                    style={{
+                                                        backgroundColor: "#28a745",
+                                                        borderRadius: 10,
+                                                        padding: "14px 24px",
+                                                        textAlign: "center",
+                                                        fontWeight: 600,
+                                                        color: "#000",
+                                                        textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
+                                                        boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)"
+                                                    }}
+                                                >
+                                                    Overall Total<br />
+                                                    <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super + totals.normal)} duration={1.2} separator="," /> kg
 
 
-                                    <>
+                                                </div>
+                                            </Col>
+                                        </>
+                                    }
 
-                                        <Col xs={24} sm={12} md={8}>
-                                            <div
-                                                style={{
-                                                    backgroundColor: "#ffa347",
-                                                    borderRadius: 10,
-                                                    padding: "14px 24px",
-                                                    textAlign: "center",
-                                                    fontWeight: 600,
-                                                    color: "#000",
-                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                                }}
-                                            >
-                                                Super Total<br />
-                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={1.2} separator="," /> kg
-                                            </div>
+                                </Row>
+
+
+                            </div>
+
+
+
+                        )}
+
+                        {!showMore ? (
+                            <div
+                                style={{
+                                    margin: "16px 0",
+                                    textAlign: "center",
+                                    borderRadius: 10,
+                                    backgroundColor: "#222",
+                                    padding: 10,
+                                    color: "#fff",
+                                    fontWeight: "bold"
+                                }}
+                            >
+
+                                <Row gutter={[16, 16]} justify="center" >
+                                    {!isLoading &&
+
+                                        <div style={{ width: "100%", height: 300 }}>
+                                            <ResponsiveContainer>
+                                                {chartType === "monthly" ? (
+                                                    <PieChart>
+                                                        <Pie
+
+                                                            data={pieData}
+                                                            cx="50%"
+                                                            cy="50%"
+                                                            outerRadius={80}
+                                                            label={({ value, percent }) => `${(percent * 100).toFixed(0)}%`} // ✅ Show % inside
+                                                            dataKey="value"
+                                                        >
+                                                            {pieData.map((entry, index) => (
+                                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                            ))}
+                                                        </Pie>
+                                                        <Tooltip
+                                                            contentStyle={{ backgroundColor: "#1e1e1e", borderColor: "#555", color: "#fff" }}
+                                                            labelStyle={{ color: "#fff" }}
+                                                            itemStyle={{ color: "#fff" }}
+                                                        />
+                                                        <Legend wrapperStyle={{ color: "#fff" }} />
+                                                    </PieChart>
+
+                                                ) : (
+                                                    <LineChart data={data}>
+                                                        <XAxis dataKey="name" />
+                                                        <YAxis />
+                                                        <Tooltip
+                                                            contentStyle={{
+                                                                backgroundColor: "#1e1e1e",   // Dark background
+                                                                borderColor: "#555",          // Darker border
+                                                                color: "#fff"                 // Text color inside tooltip
+                                                            }}
+                                                            labelStyle={{ color: "#fff" }}  // Label (e.g., month name)
+                                                            itemStyle={{ color: "#fff" }}   // Items (e.g., Super, Normal, Total values)
+                                                        />
+                                                        <Legend />
+
+                                                        <Line type="monotone" dataKey="Super" stroke="#ffa347" />
+                                                        <Line type="monotone" dataKey="Normal" stroke="#47a3ff" />
+                                                        <Line type="monotone" dataKey="Total" stroke="#28a745" strokeWidth={2} dot={{ r: 3 }} />
+                                                    </LineChart>
+                                                )}
+                                            </ResponsiveContainer>
+
+
+                                        </div>
+                                    }
+                                    {!isLoading &&
+
+                                        <div style={{ width: "100%" }}>
+
+
+                                        </div>
+                                    }
+
+                                </Row>
+                            </div>
+
+                        ) : (
+                            <div
+                                style={{
+                                    margin: "16px 0",
+                                    textAlign: "center",
+                                    borderRadius: 10,
+                                    backgroundColor: "#222",
+                                    padding: 10,
+                                    color: "#fff",
+                                    fontWeight: "bold"
+                                }}
+                            >
+
+                                <Row gutter={[16, 16]} justify="center">
+                                    {!isLoading && (
+                                        <Col xs={24} sm={24} md={10}>
+                                            <Row gutter={[8, 8]} align="middle">
+                                                {/* Label */}
+                                                <Col span={6}>
+                                                    <div
+                                                        style={{
+                                                            borderRadius: 6,
+                                                            color: "#fff",
+                                                            textAlign: "center",
+                                                            fontWeight: "bold"
+                                                        }}
+                                                    >
+                                                        Target
+                                                    </div>
+                                                </Col>
+
+                                                {/* Input */}
+                                                <Col md={12}>
+                                                    <InputNumber
+                                                        min={0}
+                                                        value={monthlyTarget}
+                                                        onChange={(value) => setMonthlyTarget(Number(value))}
+                                                        style={{ width: "100%" }}
+                                                    />
+                                                </Col>
+
+                                                {/* Button */}
+                                                <Col md={6}>
+
+                                                    <Button
+                                                        type="primary"
+                                                        block
+                                                        onClick={() => {
+                                                            // Optional: trigger any action
+                                                            calculateSummery()
+                                                            console.log("Target submitted:", monthlyTarget);
+                                                        }}
+                                                    >
+                                                        Apply
+                                                    </Button>
+                                                </Col>
+                                            </Row>
                                         </Col>
+                                    )}
 
-                                        <Col xs={24} sm={12} md={8}>
+
+
+
+
+
+
+
+
+                                    <Col xs={24} md={14}>
+
+                                        <div
+                                            style={{
+                                                backgroundColor: "#47a3ff",
+                                                borderRadius: 10,
+                                                padding: "14px 24px",
+                                                textAlign: "center",
+                                                fontWeight: 600,
+                                                color: "#000",
+                                                boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                                            }}
+                                        >
+                                            Full Summery<br />
+
+
+                                        </div>
+                                    </Col>
+
+                                </Row>
+                                <br />
+                                {weeklySummery.length && (
+
+                                    <Row gutter={[16, 16]}>
+                                        <Col xs={24} sm={6}>
                                             <div
                                                 style={{
                                                     backgroundColor: "#47a3ff",
@@ -387,114 +726,76 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                     boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                                                 }}
                                             >
-                                                Normal Total<br />
-
-                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={1.2} separator="," /> kg
+                                                {weeklySummery[0].total}  / {week1Target * monthlyTarget / 100} - {weeklySummery[0].total / week1Target * monthlyTarget / 100} %
 
                                             </div>
                                         </Col>
 
-                                        <Col xs={24} sm={24} md={8}>
+                                        <Col xs={24} sm={6}>
                                             <div
                                                 style={{
-                                                    backgroundColor: "#28a745",
+                                                    backgroundColor: "#ffc547ff",
                                                     borderRadius: 10,
                                                     padding: "14px 24px",
                                                     textAlign: "center",
                                                     fontWeight: 600,
                                                     color: "#000",
-                                                    textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
-                                                    boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)"
+                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                                                 }}
                                             >
-                                                Overall Total<br />
-                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super + totals.normal)} duration={1.2} separator="," /> kg
+                                                {weeklySummery[1].total}  / {
+                                                    week2Target * monthlyTarget / 100} -
+
+                                                {weeklySummery[1].total / week2Target * monthlyTarget / 10000} %
+
 
 
                                             </div>
                                         </Col>
-                                    </>
-                                }
 
-                            </Row>
+                                        <Col xs={24} sm={6}>
+                                            <div
+                                                style={{
+                                                    backgroundColor: "#ff6b8bff",
+                                                    borderRadius: 10,
+                                                    padding: "14px 24px",
+                                                    textAlign: "center",
+                                                    fontWeight: 600,
+                                                    color: "#000",
+                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                                                }}
+                                            >
+                                                {weeklySummery[2].total}  / {week3Target * monthlyTarget / 100} - {weeklySummery[2].total / week3Target * monthlyTarget / 10000} %
 
+                                            </div>
+                                        </Col>
 
-                        </div>
+                                        <Col xs={24} sm={6}>
+                                            <div
+                                                style={{
+                                                    backgroundColor: "#47a3ff",
+                                                    borderRadius: 10,
+                                                    padding: "14px 24px",
+                                                    textAlign: "center",
+                                                    fontWeight: 600,
+                                                    color: "#000",
+                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                                                }}
+                                            >
+                                                {weeklySummery[3].total}  / {week4Target * monthlyTarget / 100} - {weeklySummery[3].total / week4Target * monthlyTarget / 10000} %
 
-                        <div
-                            style={{
-                                margin: "16px 0",
-                                textAlign: "center",
-                                borderRadius: 10,
-                                backgroundColor: "#222",
-                                padding: 10,
-                                color: "#fff",
-                                fontWeight: "bold"
-                            }}
-                        >
+                                            </div>
+                                        </Col>
+                                    </Row>
 
-                            <Row gutter={[16, 16]} justify="center" >
-                                {!isLoading &&
-
-                                    <div style={{ width: "100%", height: 300 }}>
-                                        <ResponsiveContainer>
-                                            {chartType === "monthly" ? (
-                                                <PieChart>
-                                                    <Pie
-
-                                                        data={pieData}
-                                                        cx="50%"
-                                                        cy="50%"
-                                                        outerRadius={80}
-                                                        label={({ value, percent }) => `${(percent * 100).toFixed(0)}%`} // ✅ Show % inside
-                                                        dataKey="value"
-                                                    >
-                                                        {pieData.map((entry, index) => (
-                                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                        ))}
-                                                    </Pie>
-                                                    <Tooltip
-                                                        contentStyle={{ backgroundColor: "#1e1e1e", borderColor: "#555", color: "#fff" }}
-                                                        labelStyle={{ color: "#fff" }}
-                                                        itemStyle={{ color: "#fff" }}
-                                                    />
-                                                    <Legend wrapperStyle={{ color: "#fff" }} />
-                                                </PieChart>
-
-                                            ) : (
-                                                <LineChart data={data}>
-                                                    <XAxis dataKey="name" />
-                                                    <YAxis />
-                                                    <Tooltip
-                                                        contentStyle={{
-                                                            backgroundColor: "#1e1e1e",   // Dark background
-                                                            borderColor: "#555",          // Darker border
-                                                            color: "#fff"                 // Text color inside tooltip
-                                                        }}
-                                                        labelStyle={{ color: "#fff" }}  // Label (e.g., month name)
-                                                        itemStyle={{ color: "#fff" }}   // Items (e.g., Super, Normal, Total values)
-                                                    />
-                                                    <Legend />
-
-                                                    <Line type="monotone" dataKey="Super" stroke="#ffa347" />
-                                                    <Line type="monotone" dataKey="Normal" stroke="#47a3ff" />
-                                                    <Line type="monotone" dataKey="Total" stroke="#28a745" strokeWidth={2} dot={{ r: 3 }} />
-                                                </LineChart>
-
-                                            )}
-                                        </ResponsiveContainer>
-
-
-                                    </div>
-                                }
-
-
-                            </Row>
+                                )}
 
 
 
+                            </div>
+                        )}
 
-                        </div>
+
                     </>
                 )
 
@@ -511,36 +812,43 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                         color: "#fff",
                         fontWeight: "bold"
                     }}
-
                 >
-
-
-
-
-
-
                     {<CircularLoader />}
-
-
-
                 </div>
 
             )}
             <div style={{ textAlign: "center", marginBottom: 16 }}>
                 <Button
                     type={chartType === "monthly" ? "primary" : "default"}
-                    onClick={() => setChartType("monthly")}
+                    onClick={() => {
+                        setShowMore(false)
+                        setChartType("monthly")
+                    }}
                     style={{ marginRight: 8 }}
                 >
                     Monthly Summary
                 </Button>
                 <Button
                     type={chartType === "yearly" ? "primary" : "default"}
-                    onClick={() => setChartType("yearly")}
+                    onClick={() => {
+
+                        setShowMore(false
+
+                        )
+                        setChartType("yearly")
+                    }}
                 >
                     Yearly Summary
                 </Button>
-
+                <Button
+                    type={showMore ? "primary" : "default"}
+                    onClick={() => {
+                        setWeeklySummery([])
+                        setChartType("")
+                        setShowMore(true)
+                    }}
+                >                    Targets And Achievements
+                </Button>
 
             </div>
 

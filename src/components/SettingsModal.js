@@ -12,7 +12,7 @@ import {
   Col,
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { setAutomaticalyInactive, setLeafRound, setNotificationsVisible, clearMarkers, setDateRangeYears } from "../redux/commonDataSlice";
+import { setAutomaticalyInactive, setLeafRound, setNotificationsVisible, clearMarkers, setdateRangeMonths } from "../redux/commonDataSlice";
 
 /**
  * SettingsModal
@@ -26,7 +26,7 @@ const SettingsModal = ({ open, onClose }) => {
   // Redux values
   const leafRound = useSelector((state) => state.commonData?.leafRound);
   const automaticalyInactive = useSelector((state) => state.commonData?.automaticalyInactive);
-  const dateRangeYears = useSelector((state) => state.commonData?.dateRangeYears);
+  const dateRangeMonths = useSelector((state) => state.commonData?.dateRangeMonths);
   const week1Target = useSelector((state) => state.commonData?.week1Target);
   const week2Target = useSelector((state) => state.commonData?.week2Target);
   const week3Target = useSelector((state) => state.commonData?.week3Target);
@@ -37,7 +37,7 @@ const SettingsModal = ({ open, onClose }) => {
     dispatch(setLeafRound(values.leafRound));
     dispatch(setAutomaticalyInactive(values.automaticalyInactive));
     dispatch(setNotificationsVisible(values.notifications));
-    dispatch(setDateRangeYears(values.dateRangeYears)); // Reset to default value
+    dispatch(setdateRangeMonths(values.dateRangeMonths)); // Reset to default value
     onClose();
   };
 
@@ -82,7 +82,7 @@ const SettingsModal = ({ open, onClose }) => {
             notifications: true,
             leafRound,
             automaticalyInactive,
-            dateRangeYears,
+            dateRangeMonths,
             week1Target,
             week2Target,
             week3Target,
@@ -102,7 +102,7 @@ const SettingsModal = ({ open, onClose }) => {
             <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
           </Form.Item>
 
-          <Form.Item label="Missing Range" name="dateRangeYears">
+          <Form.Item label="Missing Range" name="dateRangeMonths">
             <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
           </Form.Item>
           <Form.Item label="Automatically Inactive (days)" name="automaticalyInactive">

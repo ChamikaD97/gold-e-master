@@ -290,7 +290,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                         Overall Factory Analytics
                     </Col>
 
-<Col xs={12} sm={8} md={2}>
+                    <Col xs={12} sm={8} md={2}>
                         <Button
                             icon={<ReloadOutlined />}
                             type="primary"

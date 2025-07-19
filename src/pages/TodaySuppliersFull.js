@@ -22,7 +22,7 @@ const TodaySuppliers = () => {
   const dispatch = useDispatch();
   const leafRound = useSelector((state) => state.commonData?.leafRound);
 
-  const dateRangeYears = useSelector((state) => state.commonData?.dateRangeYears);
+  const dateRangeMonths = useSelector((state) => state.commonData?.dateRangeMonths);
   const [filters, setFilters] = useState({ line: "All" });
   const [supplierWithDataList, setSupplierWithDataList] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
@@ -91,7 +91,7 @@ const TodaySuppliers = () => {
       const line = uniqueLines[i];
       setProcessingLine(line.label);
       setProgressPercent(Math.round(((i + 1) / total) * 100));
-
+console.log('****************************************************');
       try {
         const leafDataUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line.id}&d=${startDate}`;
         const response = await fetch(leafDataUrl);
@@ -128,7 +128,7 @@ const TodaySuppliers = () => {
 
         const supplierIdsWithData = Object.keys(leafMap);
         if (supplierIdsWithData.length === 0) continue;
-
+console.log('****************************************************');
         const supRes = await fetch(`/quiX/ControllerV1/supdata?k=${API_KEY}&r=${line.id}`);
         if (!supRes.ok) continue;
 
@@ -155,10 +155,14 @@ const TodaySuppliers = () => {
 
         // Fetch last record for each missing supplier
         let glfHistory = [];
+        
+        
         try {
-          const dateRange = `${dayjs().subtract(dateRangeYears, 'year').format("YYYY-MM-DD")}~${dayjs().subtract(leafRound, 'days').format("YYYY-MM-DD")}`;
+          const dateRange = `${dayjs().subtract(dateRangeMonths, 'month').format("YYYY-MM-DD")}~${dayjs().format("YYYY-MM-DD")}`;
           const glfHistoryRes = await fetch(`/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line.id}&d=${dateRange}`);
           glfHistory = await glfHistoryRes.json();
+          console.log(dateRange);
+          
         } catch (e) {
           console.warn("Failed to fetch GLF history for missing suppliers", e);
         }
@@ -267,7 +271,7 @@ const TodaySuppliers = () => {
 
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
-    doc.text(`Report Generated: ${todayStr}`, 14, 68);
+    doc.text(`Suppliers For : ${day}`, 14, 68);
     doc.line(14, 71, 196, 71);
 
     // === TODAY SUPPLIERS TABLE ===
@@ -329,7 +333,7 @@ const TodaySuppliers = () => {
 
       doc.setFontSize(13);
       doc.setFont(undefined, 'bold');
-      doc.text(`Suppliers with Last Supply Record Within ${dateRangeYears} Year`, 14, 25);
+      doc.text(`Suppliers with Last Supply Record Within ${dateRangeMonths} Year`, 14, 25);
       doc.line(14, 28, 196, 28);
 
       const missingHead = [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Inactive For"]];

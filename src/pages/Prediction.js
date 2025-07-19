@@ -432,12 +432,13 @@ const Prediction = () => {
 
     return map;
   };
+
   const downloadPredictionPDF = async (print = false, withName = false) => {
     if (withName) {
       const supplierInfoMap = await buildSupplierInfoMap();
       downloadXSupplierListAsPDF(supplierInfoMap, print);
     } else {
-      downloadXSupplierListAsPDF([],print);
+      downloadXSupplierListAsPDF([], print);
     }
 
   };
@@ -769,8 +770,8 @@ const Prediction = () => {
           <Card bordered={false} style={cardStyle}>
             {isLoading ? <CircularLoader /> : (
               <Table
-                
-                 className="sup-bordered-table"
+
+                className="sup-bordered-table"
                 columns={columns}
                 dataSource={filteredTableData}
                 pagination={false}

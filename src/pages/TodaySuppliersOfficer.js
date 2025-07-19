@@ -23,7 +23,7 @@ const TodaySuppliersOfficer = () => {
 
 
   const ajithLines = ['60,154,129', '65', '146', '152', '33', '8', '98', '145', '81,97'];
-  const udaraLines = ['23', '72', '96', '149', '21', '9','162'];
+  const udaraLines = ['23', '72', '96', '149', '21', '9', '162'];
   const udayangaLines = ['6', '7', '25', '61', '150', '155', '36', '102,161', '48,64,62', '129'];
   const gaminiLines = ['70', '31,157', '34', '12,109,127'];
   const chamodLines = ['91', '67,68,69', '138,124'];
@@ -39,7 +39,7 @@ const TodaySuppliersOfficer = () => {
 
   const leafRound = useSelector((state) => state.commonData?.leafRound);
 
-  const dateRangeYears = useSelector((state) => state.commonData?.dateRangeYears);
+  const dateRangeMonths = useSelector((state) => state.commonData?.dateRangeMonths);
   const [filters, setFilters] = useState({ line: "All" });
   const [supplierWithDataList, setSupplierWithDataList] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
@@ -78,7 +78,22 @@ const TodaySuppliersOfficer = () => {
   const [processingLine, setProcessingLine] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progressPercent, setProgressPercent] = useState(0);
+
+  const getInactiveDays = (str) => {
+    if (!str || str === "-") return 0;
+    const years = parseInt((str.match(/(\d+)\s*year[s]?/) || [])[1] || 0);
+    const months = parseInt((str.match(/(\d+)\s*month[s]?/) || [])[1] || 0);
+    const days = parseInt((str.match(/(\d+)\s*day[s]?/) || [])[1] || 0);
+    return (years * 365) + (months * 30) + days;
+  };
+
+
   const downloadAllLeafReports = async (day) => {
+
+
+
+
+
     setProgressVisible(true)
     setCancelDownload(false);
     setIsDownloading(true);
@@ -203,7 +218,7 @@ const TodaySuppliersOfficer = () => {
         // Fetch last record for each missing supplier
         let glfHistory = [];
         try {
-          const dateRange = `${dayjs().subtract(dateRangeYears, 'year').format("YYYY-MM-DD")}~${dayjs().subtract(leafRound, 'days').format("YYYY-MM-DD")}`;
+          const dateRange = `${dayjs().subtract(dateRangeMonths, 'month').format("YYYY-MM-DD")}~${dayjs().format("YYYY-MM-DD")}`;
           const glfHistoryRes = await fetch(`/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${selectedOfficerLines}&d=${dateRange}`);
           glfHistory = await glfHistoryRes.json();
         } catch (e) {
@@ -230,7 +245,7 @@ const TodaySuppliersOfficer = () => {
           .filter(sup => {
             const sid = sup["Supplier Id"];
             const lastInfo = latestSupplyMap[sid];
-            return !!lastInfo?.lastDate; // only include if lastDate exists
+            return !!lastInfo?.lastDate;
           })
           .map(sup => {
             const sid = sup["Supplier Id"];
@@ -261,7 +276,8 @@ const TodaySuppliersOfficer = () => {
               total_kg: lastInfo?.total_kg || 0,
               inactiveFor,
             };
-          });
+          })
+          .filter(sup => getInactiveDays(sup.inactiveFor) > 30); // ✅ Only keep >1 month
 
 
 
@@ -292,6 +308,7 @@ const TodaySuppliersOfficer = () => {
   const downloadXSupplierListAsPDFAuto = (lineCode, todaySuppliers, missingSuppliers, day, officer) => {
     const doc = new jsPDF("p", "mm", "a4");
     const todayStr = dayjs().format("YYYY-MM-DD");
+    const reportIn = dayjs(day).add(leafRound, "day").format("YYYY-MM-DD");
 
     // === HEADER ===
     doc.setFontSize(14);
@@ -316,7 +333,7 @@ const TodaySuppliersOfficer = () => {
 
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
-    doc.text(`Report Generated: ${todayStr}`, 14, 68);
+    doc.text(`Supplier List For : ${reportIn}`, 14, 68);
     doc.line(14, 71, 196, 71);
 
     // === TODAY SUPPLIERS TABLE ===
@@ -366,19 +383,13 @@ const TodaySuppliersOfficer = () => {
       doc.addPage();
 
       const sortedMissing = [...missingSuppliers].sort((b, a) => {
-        const getInactiveDays = (str) => {
-          if (!str || str === "-") return 0;
-          const years = parseInt((str.match(/(\d+)\s*year[s]?/) || [])[1] || 0);
-          const months = parseInt((str.match(/(\d+)\s*month[s]?/) || [])[1] || 0);
-          const days = parseInt((str.match(/(\d+)\s*day[s]?/) || [])[1] || 0);
-          return (years * 365) + (months * 30) + days;
-        };
         return getInactiveDays(b.inactiveFor) - getInactiveDays(a.inactiveFor);
       });
 
+
       doc.setFontSize(13);
       doc.setFont(undefined, 'bold');
-      doc.text(`Suppliers with Last Supply Record Within ${dateRangeYears} Year`, 14, 25);
+      doc.text(`Suppliers with Last Supply Record Within ${dateRangeMonths} Months`, 14, 25);
       doc.line(14, 28, 196, 28);
 
       const missingHead = [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Inactive For"]];
