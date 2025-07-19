@@ -6,7 +6,7 @@
   },
   {
     "officer": "Ajith",
-    "lineCode": "C-19",
+    "lineCode": "PH",
     "lineId": "133"
   },
   {
@@ -15,13 +15,18 @@
     "lineId": "60"
   },
   {
+    "officer": "Udara",
+    "lineCode": "SP",
+    "lineId": "162"
+  },
+  {
     "officer": "Ajith",
     "lineCode": "PH2",
     "lineId": "154"
   },
   {
     "officer": "Ajith",
-    "lineCode": "PH/PH2/C-15",
+    "lineCode": "PH",
     "lineId": "60,154,129"
   },
   {
@@ -231,7 +236,7 @@
   },
   {
     "officer": "Chamod",
-    "lineCode": "DR-01/DR-02",
+    "lineCode": "DR",
     "lineId": "124,138"
   },
   {
@@ -241,7 +246,7 @@
   },
   {
     "officer": "Udayanga",
-    "lineCode": "O-18/PT/PT2",
+    "lineCode": "PT",
     "lineId": "48,64,62"
   },
   {
@@ -251,36 +256,36 @@
   },
   {
     "lineId": "12,109,127",
-    "lineCode": "DG/EL/C-13",
+    "lineCode": "DG",
     "officer": "Gamini"
   },
   {
     "officer": "Chamod",
-    "lineCode": "S / S2/S2 II",
+    "lineCode": "S",
     "lineId": "67,68,69"
   },
   {
     "officer": "Gamini",
-    "lineCode": "ML / ML2",
+    "lineCode": "ML",
     "lineId": "31,157"
   },
   {
     "officer": "Udayanga",
-    "lineCode": "DM/DM-2",
+    "lineCode": "DM",
     "lineId": "102,161"
   },
   {
     "officer": "Ajith",
-    "lineCode": "MT / MULATIYANA",
+    "lineCode": "MT",
     "lineId": "  81,97"
   },
   {
-    "officer": "New",
+    "officer": "Other",
     "lineCode": "New Supplier",
     "lineId": "160"
   },
   {
-    "officer": "Malinduwa",
+    "officer": "Other",
     "lineCode": "Malinduwa",
     "lineId": "151"
   }

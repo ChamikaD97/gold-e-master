@@ -1,11 +1,7 @@
 import { useDispatch } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 
-import Ajith from "../data/Ajith.json";
-import Udara from "../data/Udara.json";
-import Udayanga from "../data/Udayanga.json";
-import Gamini from "../data/Gamini.json";
-import Chamod from "../data/Chamod.json";
+
 // api.js
 export const BASE_URL = "http://newserver:46597/quiX/ControllerV1";
 export const API_KEY = "quix717244";

@@ -5,12 +5,11 @@ import {
 import { ReloadOutlined, UserOutlined } from "@ant-design/icons";
 import '../App.css';
 
-import lineIdCodeMap from "../data/lineIdCodeMap.json";
-import Ajith from "../data/Ajith.json";
-import Udara from "../data/Udara.json";
-import Udayanga from "../data/Udayanga.json";
-import Gamini from "../data/Gamini.json";
-import Chamod from "../data/Chamod.json";
+import Ajith from "../data/officers/Ajith.json";
+import Udara from "../data/officers/Udara.json";
+import Udayanga from "../data/officers/Udayanga.json";
+import Gamini from "../data/officers/Gamini.json";
+import Chamod from "../data/officers/Chamod.json";
 
 const Officers = () => {
   const [officerDataMap] = useState({
@@ -45,13 +44,13 @@ const Officers = () => {
                 type="primary"
                 block
                 onClick={() => {
- setFilters({ officer: "All", line: "" })
+                  setFilters({ officer: "All", line: "" })
 
                   setTimeout(() => {
                     setFilters({ officer, line: "" })
                   }, 100);
 
-                 
+
                 }}
               >
                 Mr. {officer}
