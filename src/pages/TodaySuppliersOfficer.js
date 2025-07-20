@@ -596,6 +596,7 @@ const TodaySuppliersOfficer = () => {
 
           <Col md={4} style={{ display: "flex", alignItems: "center", height: "100%" }}>
             <Select
+              showSearch
               placeholder="Select Line"
               style={{
                 width: "100%",

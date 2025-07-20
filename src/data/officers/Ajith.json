@@ -5,21 +5,7 @@
       "lineId": "81,60,154,65,146,152,33,8,98,145,97,133"
     },
     {
-      "lineBelongsTo": "Private",
-      "lineCode": "MT",
-      "lineId": "81"
-    },
-    {
-      "lineBelongsTo": "Factory",
       "lineCode": "PH",
-      "lineId": "60"
-    },
-    {
-      "lineCode": "PH2",
-      "lineId": "154"
-    },
-    {
-      "lineCode": "PH/PH2/C19",
       "lineId": "60,154,133"
     },
     {
@@ -55,11 +41,7 @@
       "lineId": "145"
     },
     {
-      "lineCode": "MULATIYANA",
-      "lineId": "97"
-    },
-    {
-      "lineCode": "MT / MULATIYANA",
+      "lineCode": "MT",
       "lineId": "81,97"
     }
   ]

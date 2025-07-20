@@ -6,7 +6,7 @@ import {
   Tag
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMap from "../data/lineIdCodeMap.json";
+import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
 import CircularLoader from "../components/CircularLoader";
 import { Pagination } from "antd"; // ✅ make sure to import this
 import { useDispatch } from "react-redux";
@@ -135,7 +135,7 @@ const Suppliers = () => {
 
   const lineIdToCodeMap = useMemo(() => {
     const map = {};
-    lineIdCodeMap.forEach(item => {
+    lineIdCodeMapForAll.forEach(item => {
       map[item.lineId] = item.lineCode;
     });
     return map;
@@ -143,7 +143,7 @@ const Suppliers = () => {
 
   const uniqueLines = [
     { label: "All", value: "All" },
-    ...lineIdCodeMap
+    ...lineIdCodeMapForAll
       .filter(l => l.lineCode && l.lineId)
       .map(l => ({ label: l.lineCode, value: l.lineId }))
   ];

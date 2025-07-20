@@ -1,6 +1,6 @@
 {
   "lines": [
-        {
+    {
       "lineCode": "All",
       "lineId": "6,7,25,62,61,150,155,36,102,161,64,48,129"
     },
@@ -37,31 +37,16 @@
       "lineId": "36"
     },
     {
-      "lineCode": "DM",
-      "lineId": "102"
-    },
-    {
-      "lineCode": "DM-2",
-      "lineId": "161"
-    },
-    {
-      "lineCode": "PT2",
-      "lineId": "64"
-    },
-    {
-      "lineCode": "O-18",
-      "lineId": "48"
-    },
-    {
       "lineCode": "O-18/PT/PT2",
       "lineId": "48,64,62"
     },
+    
     {
-      "lineCode": "C 13",
+      "lineCode": "C 15",
       "lineId": "129"
     },
     {
-      "lineCode": "DM/DM-2",
+      "lineCode": "DM",
       "lineId": "102,161"
     }
   ]

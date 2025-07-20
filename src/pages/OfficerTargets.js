@@ -68,7 +68,7 @@ const OfficerTargets = () => {
       />
 
       <Card bordered={false} style={cardStyle} className="fade-in">
-        
+
         <Row gutter={[16, 16]}>
           <Col xs={12} sm={8} md={1}>
             <Button
@@ -111,7 +111,7 @@ const OfficerTargets = () => {
               </Button>
             </Col>
           ))}
-          
+
         </Row>
       </Card>
 

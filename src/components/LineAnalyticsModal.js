@@ -19,6 +19,7 @@ import {
 } from 'recharts';
 import { ReloadOutlined } from "@ant-design/icons";
 import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
+
 const { Title } = Typography;
 const { Option } = Select;
 
@@ -45,20 +46,19 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
     const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
 
     const loadTargetsForMonth = async (data) => {
-        console.log(data);
-
-        const formatted =
-            (data.year + '_0' + data.month);
+        setTargets([]); // or fallback to default
+        const formatted = data.month > 10 ?
+            (data.year + '_' + data.month) : (data.year + '_0' + data.month);
         try {
+
+
             const data = await import(`../data/targets/targets_${formatted}.json`);
 
-            // setTargets(data.default.filters((d) => d.lineCode == lineCode));
+            setTargets(data.default.filter((d) => lineCode == d.lineCode)[0].target);
+            setMonthlyTarget(data.default.filter((d) => lineCode == d.lineCode)[0].target);
 
-
-            console.log
-                (data.default.filters((d) => d.lineCode == lineCode));
         } catch (err) {
-            console.error("Target file not found for:", formatted, err);
+            console.error(err);
             setTargets([]); // or fallback to default
         }
     };
@@ -69,7 +69,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
     useEffect(() => {
         loadTargetsForMonth(filters);
-    }, [filters.month]);
+    }, [filters.month,visible]);
 
     const monthMap = useSelector((state) => state.commonData?.monthMap);
 
@@ -636,51 +636,6 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                             >
 
                                 <Row gutter={[16, 16]} justify="center">
-                                    {!isLoading && (
-                                        <Col xs={24} sm={24} md={10}>
-                                            <Row gutter={[8, 8]} align="middle">
-                                                {/* Label */}
-                                                <Col span={6}>
-                                                    <div
-                                                        style={{
-                                                            borderRadius: 6,
-                                                            color: "#fff",
-                                                            textAlign: "center",
-                                                            fontWeight: "bold"
-                                                        }}
-                                                    >
-                                                        Target
-                                                    </div>
-                                                </Col>
-
-                                                {/* Input */}
-                                                <Col md={12}>
-                                                    <InputNumber
-                                                        min={0}
-                                                        value={monthlyTarget}
-                                                        onChange={(value) => setMonthlyTarget(Number(value))}
-                                                        style={{ width: "100%" }}
-                                                    />
-                                                </Col>
-
-                                                {/* Button */}
-                                                <Col md={6}>
-
-                                                    <Button
-                                                        type="primary"
-                                                        block
-                                                        onClick={() => {
-                                                            // Optional: trigger any action
-                                                            calculateSummery()
-                                                            console.log("Target submitted:", monthlyTarget);
-                                                        }}
-                                                    >
-                                                        Apply
-                                                    </Button>
-                                                </Col>
-                                            </Row>
-                                        </Col>
-                                    )}
 
 
 
@@ -703,7 +658,9 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                 boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                                             }}
                                         >
-                                            Full Summery<br />
+                                            {targets}-{lineCode}
+
+                                            <br />
 
 
                                         </div>

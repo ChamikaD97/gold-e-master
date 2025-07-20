@@ -63,7 +63,8 @@
     "officer": "Udara",
     "lineCode": "T",
     "lineId": "72"
-  }, {
+  },
+  {
     "officer": "Udara",
     "lineCode": "SP",
     "lineId": "162"
@@ -161,7 +162,7 @@
   {
     "officer": "Udayanga",
     "lineCode": "C 13",
-    "lineId": "129"
+    "lineId": "127"
   },
   {
     "lineId": "12,109,127",
@@ -180,8 +181,8 @@
   },
   {
     "officer": "Udayanga",
-    "lineCode": "DM/DM-2",
-    "lineId": "102,161"
+    "lineCode": "DM/DM-2/C 15",
+    "lineId": "102,161,129"
   },
   {
     "officer": "Ajith",

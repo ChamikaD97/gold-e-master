@@ -93,22 +93,17 @@ const HeaderComponent = () => {
             <Menu.Item key="officer-targets">
               <Link to="/factory-targets/officer">Officer Targets</Link>
             </Menu.Item>
-           
+
           </SubMenu>
 
           <SubMenu key="leaf" icon={<FundOutlined />} title="Leaf">
             <Menu.Item key="leaf-supply">
               <Link to="/leaf/supply">Leaf Supply</Link>
             </Menu.Item>
-            <Menu.SubMenu key="todaySupply" title="Today Suppliers">
-              <Menu.Item key="todaySupplyR">
-                <Link to="/leaf/todaySupply/route">Route Wise</Link>
-              </Menu.Item>
-            
-              <Menu.Item key="todaySupplyO">
-                <Link to="/leaf/todaySupply/officer">Officer Wise</Link>
-              </Menu.Item>
-            </Menu.SubMenu>
+            <Menu.Item key="todaySupply">
+              <Link to="/leaf/todaySupply/officer">Today Suppliers</Link>
+            </Menu.Item>
+
 
             <Menu.Item key="leaf-counts">
               <Link to="/leaf/count">Leaf Counts</Link>

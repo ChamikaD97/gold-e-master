@@ -1,6 +1,6 @@
 {
   "lines": [
-        {
+    {
       "lineCode": "All",
       "lineId": "91,67,68,69,138,124"
     },
@@ -9,31 +9,11 @@
       "lineId": "91"
     },
     {
-      "lineCode": "S",
-      "lineId": "67"
-    },
-    {
-      "lineCode": "S2",
-      "lineId": "68"
-    },
-    {
-      "lineCode": "S2 II",
-      "lineId": "69"
-    },
-    {
-      "lineCode": "DR-02",
-      "lineId": "138"
-    },
-    {
-      "lineCode": "DR-01",
-      "lineId": "124"
-    },
-    {
-      "lineCode": "DR-01/DR-02",
+      "lineCode": "DR",
       "lineId": "124,138"
     },
     {
-      "lineCode": "S / S2/S2 II",
+      "lineCode": "S",
       "lineId": "67,68,69"
     }
   ]
