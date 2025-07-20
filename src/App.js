@@ -62,7 +62,6 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/factory-targets" element={<FactoryTargetAchievemenets />} />
 
-            <Route path="/officers" element={<OfficersPage />} />
 
             <Route path="/employees" element={<EmployeeManagementPage />} />
 

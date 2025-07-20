@@ -3,7 +3,7 @@ import {
   Card, Col, Row, Button, Select, Table,
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMap from "../data/lineIdCodeMap.json";
+import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import { API_KEY } from "../api/api";
@@ -28,7 +28,7 @@ const LastSupply = () => {
 
   const uniqueLines = [
     { label: "All", value: "All" },
-    ...lineIdCodeMap
+    ...lineIdCodeMapForAll
       .filter(l => l.lineCode && l.lineId)
       .map(l => ({ label: l.lineCode, value: l.lineId }))
   ];

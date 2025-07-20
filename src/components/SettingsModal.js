@@ -102,7 +102,7 @@ const SettingsModal = ({ open, onClose }) => {
             <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
           </Form.Item>
 
-          <Form.Item label="Missing Range" name="dateRangeMonths">
+          <Form.Item label="Missing Range (Months)" name="dateRangeMonths">
             <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
           </Form.Item>
           <Form.Item label="Automatically Inactive (days)" name="automaticalyInactive">

@@ -9,7 +9,6 @@ import { ReloadOutlined } from "@ant-design/icons";
 import lineIdCodeMap from "../data/lineIdCodeMap.json";
 import CircularLoader from "../components/CircularLoader";
 import { Pagination } from "antd"; // ✅ make sure to import this
-import { SearchRounded } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { setSelectedSupplier } from "../redux/commonDataSlice";
 import { useNavigate } from "react-router-dom";
@@ -28,9 +27,9 @@ const Suppliers = () => {
   const dispatch = useDispatch();
 
   const [filters, setFilters] = useState({
-    year: "2024",
-    month: "All",
-    line: "All",
+
+
+    line: "Select Line",
     search: "",
     searchById: "",
   });
@@ -74,7 +73,7 @@ const Suppliers = () => {
       margin: { top: 16, left: 10, right: 10 }
     });
 
-    const selectedLine = filters.line === "All" ? "AllLines" : lineIdToCodeMap[filters.line] || filters.line;
+    const selectedLine = filters.line === "Select Line" ? "AllLines" : lineIdToCodeMap[filters.line] || filters.line;
     doc.save(`Supplier_List_${selectedLine}.pdf`);
   };
 
@@ -109,7 +108,6 @@ const Suppliers = () => {
 
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [showSingleModel, setShowSingleModel] = useState(false);
 
 
@@ -119,7 +117,6 @@ const Suppliers = () => {
     const url = `${baseUrl}?${params.toString()}`;
 
     setLoading(true);
-    setError(null);
 
     try {
       const response = await fetch(url);
@@ -128,39 +125,13 @@ const Suppliers = () => {
       const data = await response.json();
       setSuppliers(Array.isArray(data) ? data : data ? [data] : []);
     } catch (err) {
-      console.error(err);
-      setError("Failed to load supplier data");
       toast.error("❌ Failed to load suppliers for the selected line.");
       setSuppliers([]);
     } finally {
       setLoading(false);
     }
   };
-  const fetchSupplierDataFromId = async (supplierId) => {
-    const baseUrl = "/quiX/ControllerV1/supdata";
-    const params = new URLSearchParams({ k: API_KEY, s: supplierId });
-    const url = `${baseUrl}?${params.toString()}`;
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch supplier data");
-
-      const data = await response.json();
-      setSingleSupplier(Array.isArray(data) ? data[0] : data[0] ? [data] : []);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load supplier data");
-      toast.error("❌ Supplier ID not found or error occurred.");
-      setSingleSupplier([]);
-    } finally {
-      setLoading(false);
-      dispatch(setSelectedSupplier(singleSupplier));
-      navigate(`/supplier/${supplierId}`);
-    }
-  };
 
   const lineIdToCodeMap = useMemo(() => {
     const map = {};
@@ -178,7 +149,7 @@ const Suppliers = () => {
   ];
 
   useEffect(() => {
-    if (filters.line !== "All") {
+    if (filters.line !== "Select Line") {
       fetchSupplierDataFromAPI(filters.line);
     } else {
       setSuppliers([]);
@@ -219,21 +190,28 @@ const Suppliers = () => {
       fixed: "left",             // ✅ make it fixed
       width: 130,                // ✅ width is required when using fixed
       sorter: (a, b) => a["Supplier Id"].localeCompare(b["Supplier Id"]),
-      render: (text) => (
-        <Button
-
-          onClick={() => handleSearchSupplier(text)}
+      render: text => (
+        <span
           style={{
-            backgroundColor: "#006623",
+            background: "#ff000e",
             color: "#fff",
-            border: "none",
-            fontSize: 15,
-
-            fontWeight: "normal"
+            padding: "6px 12px",
+            borderRadius: "24px",
+            fontWeight: 600,
+            fontSize: 13,
+            display: "inline-block",
+            minWidth: "60px",
+            textAlign: "center",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+            transition: "transform 0.2s",
           }}
+          onClick={() => handleSearchSupplier(text)}
+
+          onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
         >
           {text}
-        </Button>
+        </span>
       )
     },
 
@@ -316,7 +294,7 @@ const Suppliers = () => {
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", padding: 16 }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
         <Card bordered={false} style={cardStyle}>
           <Row justify="space-between" gutter={[16, 16]}>
@@ -329,7 +307,7 @@ const Suppliers = () => {
                     danger
                     type="primary"
                     block
-                    onClick={() => setFilters({ year: "2024", month: "All", line: "All", search: "" })}
+                    onClick={() => setFilters({ line: "Select Line", search: "" })}
                   />
                 </Col>
                 <Col md={8}>
@@ -363,51 +341,43 @@ const Suppliers = () => {
               </Row>
             </Col>
 
+
+
+            {suppliers.length > 0 && (
+              <Col span={12}>
+                <Row gutter={[8, 8]} justify="end">
+
+
+
+                  <Col md={8}>
+                    <Input
+                      className="custom-supplier-input"
+                      value={filters.search}
+                      onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+
+                      placeholder="Search by ID or Name"
+                      style={{
+                        width: "100%",
+                        backgroundColor: "rgb(0, 0, 0)",
+                        color: "#fff",
+                        border: "1px solid #333",
+                        borderRadius: 6
+                      }}
+                      allowClear
+                    />
+                  </Col>
+
+                  <Col>
+                    <Button type="primary" onClick={exportAllToExcel}>
+                      Download PDF
+                    </Button>
+                  </Col>
+                </Row>
+              </Col>
+            )}
             {/* Right Side: Search */}
-            <Col span={12}>
-              <Row gutter={[8, 8]} justify="end">
-                <Col md={6}>
-                  <Text style={{ color: "#fff", paddingTop: 6, display: "inline-block" }}>
-                    {filteredData.length} - Search Supplier
-                  </Text>
-                </Col>
 
 
-                <Col md={8}>
-                  <Input
-                    className="custom-supplier-input"
-                    value={filters.search}
-                    onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-
-                    placeholder="Search by ID or Name"
-                    style={{
-                      width: "100%",
-                      backgroundColor: "rgb(0, 0, 0)",
-                      color: "#fff",
-                      border: "1px solid #333",
-                      borderRadius: 6
-                    }}
-                    allowClear
-                  />
-                </Col>
-                <Col md={2}>
-                  <Button
-                    icon={<SearchRounded />}
-
-                    type="primary"
-                    block
-                    onClick={() => {
-                      fetchSupplierDataFromId(filters.searchById);
-                    }}
-                  />
-                </Col>
-              </Row>
-            </Col>
-            <Col>
-              <Button type="default" onClick={exportAllToExcel}>
-                📄 Export to PDF
-              </Button>
-            </Col>
 
           </Row>
 
@@ -456,7 +426,6 @@ const Suppliers = () => {
 
 
         {loading && <CircularLoader />}
-        {error && <p style={{ color: "red" }}>Error: {error}</p>}
 
         {!loading && filteredData.length > 0 && (
           <Card

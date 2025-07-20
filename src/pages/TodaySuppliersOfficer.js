@@ -22,6 +22,22 @@ const TodaySuppliersOfficer = () => {
   const dispatch = useDispatch();
 
 
+
+
+
+
+  const leafRound = useSelector((state) => state.commonData?.leafRound);
+
+  const dateRangeMonths = useSelector((state) => state.commonData?.dateRangeMonths);
+  const [filters, setFilters] = useState({ line: "All" });
+  const [supplierWithDataList, setSupplierWithDataList] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [selectedOfficer, setSelectedOfficer] = useState({ name: "Select Officer", line: "All" });
+  const [supplierLength, setSuppliersLength] = useState([]);
+  const [selectedLine, setSelectedLine] = useState(null);
+  const [selectedOfficerLines, setSelectedOfficerLines] = useState([]);
+  const [totals, setTotals] = useState({ super: 0, normal: 0, total: 0 });
+
   const ajithLines = ['60,154,129', '65', '146', '152', '33', '8', '98', '145', '81,97'];
   const udaraLines = ['23', '72', '96', '149', '21', '9', '162'];
   const udayangaLines = ['6', '7', '25', '61', '150', '155', '36', '102,161', '48,64,62', '129'];
@@ -36,18 +52,34 @@ const TodaySuppliersOfficer = () => {
     { name: "Chamod", line: chamodLines }
 
   ];
+  useEffect(() => {
+    if (!selectedOfficer) {
+      setSelectedOfficerLines([]);
+      return;
+    }
 
-  const leafRound = useSelector((state) => state.commonData?.leafRound);
+    switch (selectedOfficer.name) {
+      case 'Ajith':
+        setSelectedOfficerLines(ajithLines);
+        break;
+      case 'Udara':
+        setSelectedOfficerLines(udaraLines);
+        break;
+      case 'Udayanga':
+        setSelectedOfficerLines(udayangaLines);
+        break;
+      case 'Gamini':
+        setSelectedOfficerLines(gaminiLines);
+        break;
+      case 'Chamod':
+        setSelectedOfficerLines(chamodLines);
+        break;
+      default:
+        setSelectedOfficerLines([]);
+    }
+    console.log();
 
-  const dateRangeMonths = useSelector((state) => state.commonData?.dateRangeMonths);
-  const [filters, setFilters] = useState({ line: "All" });
-  const [supplierWithDataList, setSupplierWithDataList] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
-  const [selectedOfficer, setSelectedOfficer] = useState({ name: "All", line: "All" });
-  const [isToday, setIsToday] = useState(true);
-  const [supplierLength, setSuppliersLength] = useState([]);
-
-  const [totals, setTotals] = useState({ super: 0, normal: 0, total: 0 });
+  }, [selectedOfficer]);
 
   const uniqueLines = [
     { label: "All", value: "All" },
@@ -59,16 +91,9 @@ const TodaySuppliersOfficer = () => {
   const [progressVisible, setProgressVisible] = useState(false);
 
   const getLineNameByCode = (code) => {
-    console.log("getLineNameByCode called with code:", code);
-
     const entry = lineIdCodeMapForAll.find(item => item.lineId === code);
     return entry?.lineCode || code; // fallback to code if name not found
   };
-  const [isCancel, setIsCancel] = useState(false);
-
-
-
-
 
   const { Title, Text } = Typography
 
@@ -89,34 +114,30 @@ const TodaySuppliersOfficer = () => {
 
 
   const downloadAllLeafReports = async (day) => {
-
-
-
-
-
     setProgressVisible(true)
     setCancelDownload(false);
     setIsDownloading(true);
     let totalLines = 0;
     let selectedOfficerLines = selectedOfficer.line;
 
-    if (selectedOfficer === 'Ajith') {
+
+    if (selectedOfficer.name === 'Ajith') {
       totalLines = ajithLines.length;
       selectedOfficerLines = ajithLines;
 
-    } else if (selectedOfficer === 'Udara') {
+    } else if (selectedOfficer.name === 'Udara') {
       selectedOfficerLines = udaraLines;
 
       totalLines = udaraLines.length;
-    } else if (selectedOfficer === 'Udayanga') {
+    } else if (selectedOfficer.name === 'Udayanga') {
       selectedOfficerLines = udayangaLines;
 
       totalLines = udayangaLines.length;
-    } else if (selectedOfficer === 'Gamini') {
+    } else if (selectedOfficer.name === 'Gamini') {
       selectedOfficerLines = gaminiLines;
 
       totalLines = gaminiLines.length;
-    } else if (selectedOfficer === 'Chamod') {
+    } else if (selectedOfficer.name === 'Chamod') {
       selectedOfficerLines = chamodLines;
 
 
@@ -124,9 +145,11 @@ const TodaySuppliersOfficer = () => {
     } else {
       totalLines = 0;
     }
-
-
-    console.log(`Total lines to process: ${totalLines}`);
+    if (selectedLine) {
+      selectedOfficerLines = [selectedLine]
+      totalLines = 1;
+    }
+    console.log(selectedOfficerLines);
 
     const startDate = day.subtract(leafRound, "day").format("YYYY-MM-DD");
 
@@ -146,10 +169,6 @@ const TodaySuppliersOfficer = () => {
 
       const line = selectedOfficerLines[i];
       setProcessingLine(getLineNameByCode(line));
-
-      console.log(`Processing line ${i + 1}/${totalLines}: ${line}`, getLineNameByCode(line));
-
-
       setProgressPercent(Math.round(((i + 1) / totalLines) * 100));
 
 
@@ -278,14 +297,9 @@ const TodaySuppliersOfficer = () => {
             };
           })
           .filter(sup => getInactiveDays(sup.inactiveFor) > 30); // ✅ Only keep >1 month
-
-
-
-
-
         // 🔽 Export complete list
         if (withData.length > 0) {
-          downloadXSupplierListAsPDFAuto(getLineNameByCode(line), withData, enrichedWithoutData, startDate, selectedOfficer
+          downloadXSupplierListAsPDFAuto(getLineNameByCode(line), withData, enrichedWithoutData, startDate, selectedOfficer.name
 
           );
         }
@@ -532,9 +546,8 @@ const TodaySuppliersOfficer = () => {
   ];
 
   return (
+
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-
-
       <Card bordered={false} style={cardStyle}>
         <Row gutter={[16, 16]} align="middle">
 
@@ -546,13 +559,16 @@ const TodaySuppliersOfficer = () => {
               block
 
               onClick={() => {
+                setSelectedOfficerLines([])
+                setSelectedLine(null)
+                setSelectedOfficer({ name: "Select Officer", line: "All" });
                 setFilters({ line: "All" });
                 setSupplierWithDataList([]);
                 setProgressVisible(false)
               }}
             />
           </Col>
-          <Col md={7} style={{ display: "flex", alignItems: "center", height: "100%" }}>
+          <Col md={3} style={{ display: "flex", alignItems: "center", height: "100%" }}>
             <Select
               placeholder="Select Officer"
               style={{
@@ -563,16 +579,47 @@ const TodaySuppliersOfficer = () => {
                 borderRadius: 6
               }}
               bordered={false}
-              value={filters.officer}
-              onChange={(value) => setSelectedOfficer(value)}
+              value={selectedOfficer?.name}
+              onChange={(value) => {
+                const officer = officerList.find(o => o.name === value);
+                setSelectedOfficer(officer);
+                setSelectedLine(null);
+              }}
             >
               {officerList.map((officer) => (
-                <Option value={officer.name} >
-                  Mr.  {officer.name}
+                <Option key={officer.name} value={officer.name}>
+                  Mr. {officer.name}
                 </Option>
               ))}
             </Select>
           </Col>
+
+          <Col md={4} style={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Select
+              placeholder="Select Line"
+              style={{
+                width: "100%",
+                backgroundColor: "rgb(0, 0, 0)",
+                color: "#000",
+                border: "1px solid #333",
+                borderRadius: 6
+              }}
+              bordered={false}
+              value={selectedLine}
+              onChange={(value) => setSelectedLine(value)}
+              disabled={!selectedOfficer}
+            >
+              {selectedOfficerLines.map((lineId, index) => {
+                const lineName = getLineNameByCode(lineId);
+                return (
+                  <Option key={index} value={lineId}>
+                    {lineName ? `${lineName}` : `${lineId}`}
+                  </Option>
+                );
+              })}
+            </Select>
+          </Col>
+
 
 
           <Col md={3}>
@@ -700,7 +747,7 @@ const TodaySuppliersOfficer = () => {
 
         !isLoading && (
           <>
-            {supplierWithDataList.length && (
+            {supplierWithDataList.length > 0 && (
 
               <Card bordered={false} style={cardStyle}>
                 <Row gutter={[16, 16]} justify="space-between">

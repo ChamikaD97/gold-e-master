@@ -84,9 +84,7 @@ const HeaderComponent = () => {
 
 
 
-          <Menu.Item key="officers" icon={<UserOutlined />}>
-            <Link to="/officers">Officers</Link>
-          </Menu.Item>
+
 
           <SubMenu key="factory-targets" icon={<FileOutlined />} title="Targets & Achievements">
             <Menu.Item key="target-prediction">
@@ -95,9 +93,7 @@ const HeaderComponent = () => {
             <Menu.Item key="officer-targets">
               <Link to="/factory-targets/officer">Officer Targets</Link>
             </Menu.Item>
-            <Menu.Item key="line-targets">
-              <Link to="/factory-targets/line">Line Targets</Link>
-            </Menu.Item>
+           
           </SubMenu>
 
           <SubMenu key="leaf" icon={<FundOutlined />} title="Leaf">
@@ -108,9 +104,7 @@ const HeaderComponent = () => {
               <Menu.Item key="todaySupplyR">
                 <Link to="/leaf/todaySupply/route">Route Wise</Link>
               </Menu.Item>
-              <Menu.Item key="todaySupplyF">
-                <Link to="/leaf/todaySupply/full">Full Wise</Link>
-              </Menu.Item>
+            
               <Menu.Item key="todaySupplyO">
                 <Link to="/leaf/todaySupply/officer">Officer Wise</Link>
               </Menu.Item>

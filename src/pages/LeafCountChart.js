@@ -1002,7 +1002,6 @@ const LeafSupply = () => {
                 <Option value="2021">2021</Option>
                 <Option value="2022">2022</Option>
                 <Option value="2023">2023</Option>
-
                 <Option value="2024">2024</Option>
                 <Option value="2025">2025</Option>
               </Select>
@@ -1100,7 +1099,6 @@ const LeafSupply = () => {
                                 Suppliers<br />
 
                                 <CountUp style={{ fontSize: 30 }} end={Math.round(allSuppliers.length)} duration={1.2} separator="," /> <br />
-                                {remainingSuppliers.length}
 
                               </div>
                             </Col>

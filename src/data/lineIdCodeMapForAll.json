@@ -63,10 +63,14 @@
     "officer": "Udara",
     "lineCode": "T",
     "lineId": "72"
+  }, {
+    "officer": "Udara",
+    "lineCode": "SP",
+    "lineId": "162"
   },
   {
     "officer": "Udara",
-    "lineCode": "SLF",
+    "lineCode": "SELF 2",
     "lineId": "96"
   },
   {

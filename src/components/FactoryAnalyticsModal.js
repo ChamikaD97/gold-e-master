@@ -306,22 +306,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                             }
                         />
                     </Col>
-                    <Col xs={12} sm={8} md={2}>
-                        <Button
-                            icon={<ReloadOutlined />}
-                            type="primary"
-                            block
-                            danger
-                            onClick={() => {
-                                setIsLine(false)
-                                setFilters({
-                                    year: currentYear,
-                                    month: dayjs().month() + 1
-                                })
-                            }
-                            }
-                        />
-                    </Col>
+
                 </Row>
 
             </div>

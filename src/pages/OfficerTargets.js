@@ -37,7 +37,6 @@ const OfficerTargets = () => {
     color: "#fff",
     borderRadius: 12,
     marginBottom: 6,
-    padding: 20,
   };
 
 
@@ -45,7 +44,7 @@ const OfficerTargets = () => {
 
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
 
 
       <LineAnalyticsModal
@@ -69,7 +68,19 @@ const OfficerTargets = () => {
       />
 
       <Card bordered={false} style={cardStyle} className="fade-in">
+        
         <Row gutter={[16, 16]}>
+          <Col xs={12} sm={8} md={1}>
+            <Button
+              icon={<ReloadOutlined />}
+              type="primary"
+              block
+              danger
+              onClick={() => setFilters({ officer: "All", line: "" })}
+            >
+
+            </Button>
+          </Col>
           <Col xs={12} sm={8} md={3}>
             <Button
               type="primary"
@@ -100,17 +111,7 @@ const OfficerTargets = () => {
               </Button>
             </Col>
           ))}
-          <Col xs={12} sm={8} md={1}>
-            <Button
-              icon={<ReloadOutlined />}
-              type="primary"
-              block
-              danger
-              onClick={() => setFilters({ officer: "All", line: "" })}
-            >
-
-            </Button>
-          </Col>
+          
         </Row>
       </Card>
 

@@ -541,8 +541,6 @@ const Prediction = () => {
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <SupplierLeafModal open={modalOpen} filters={filters} onClose={() => setModalOpen(false)} supplierId={selectedSupplierId} selectedDate={selectedDate} />
 
-      {filteredTableData.length}
-
       <div style={{ flex: "0 0 auto" }} className="fade-in">
         <Card bordered={false} style={cardStyle}>
           <Row gutter={[16, 16]}>

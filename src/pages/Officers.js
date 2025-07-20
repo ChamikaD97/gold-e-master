@@ -29,11 +29,10 @@ const Officers = () => {
     color: "#fff",
     borderRadius: 12,
     marginBottom: 6,
-    padding: 20,
   };
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       {/* Officer selection row */}
       <Card bordered={false} style={cardStyle} className="fade-in">
         <Row gutter={[16, 16]}>
