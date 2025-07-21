@@ -4,7 +4,7 @@ import { notification } from "antd";
 const initialState = {
   notificationDate: 1,
   leafRound: 7,
-  dateRangeMonths: 1,
+  dateRangeMonths: 12,
   automaticalyInactive: 10, selectedSupplierId: '',
   selectedRoute: '',
   notification: true, // Default to true

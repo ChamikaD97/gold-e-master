@@ -1,24 +1,45 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Button, Table, Tooltip, DatePicker } from "antd";
+import { Card, Col, Row, Button, Table, Select, DatePicker } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import lineIdCodeMap from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import { API_KEY } from "../api/api";
 import dayjs from "dayjs";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
+const { Option } = Select;
 const Summary = () => {
+
   const dispatch = useDispatch();
   const [routeSummary, setRouteSummary] = useState([]);
 
   const [summery, setSummery] = useState([])
+
+  const [week1Summary, setWeek1Summary] = useState([]);
+  const [week2Summary, setWeek2Summary] = useState([]);
+  const [week3Summary, setWeek3Summary] = useState([]);
+  const [week4Summary, setWeek4Summary] = useState([]);
+
+  const [week1Totals, setWeek1Totals] = useState({});
+  const [week2Totals, setWeek2Totals] = useState({});
+  const [week3Totals, setWeek3Totals] = useState({});
+  const [week4Totals, setWeek4Totals] = useState({});
+
+
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(dayjs()); // default to current month
   const [targets, setTargets] = useState([]);
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
+
+  const [filters, setFilters] = useState({ year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: '', officer: '' });
+  const monthMap = useSelector((state) => state.commonData?.monthMap);
+  const filteredMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+    .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
 
   const officerOrder = ["Ajith", "Chamod", "Udara", "Gamini", "Udayanga", "Other"];
   const customLineCodeOrder = [
@@ -29,10 +50,15 @@ const Summary = () => {
     "SLF", "DG", "ML", "MV"
   ];
 
-  const loadTargetsForMonth = async (month) => {
-    
-    const formatted = dayjs(month).format("YYYY_MM");
-    console.log(formatted);
+  const loadTargetsForMonth = async (filter) => {
+
+    const formatted =
+      (filter.year + '_' + filter.month)
+
+
+
+
+
 
     try {
       const data = await import(`../data/targets/targets_${formatted}.json`);
@@ -44,13 +70,9 @@ const Summary = () => {
   };
 
   useEffect(() => {
-    loadTargetsForMonth(selectedMonth);
-  }, [selectedMonth]);
+    loadTargetsForMonth(filters);
+  }, [filters.month]);
 
-  
-  useEffect(() => {
-    loadTargetsForMonth(selectedMonth);
-  }, [selectedMonth]);
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -101,7 +123,7 @@ const Summary = () => {
 
         return [
           lineCode,
-          row.super.toLocaleString(),
+          //     row.super.toLocaleString(),
           row.target.toLocaleString(),
           row.total.toLocaleString(),
           row.difference.toLocaleString()
@@ -110,7 +132,7 @@ const Summary = () => {
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Super", "Target", "Received", "Difference"]],
+        head: [["Line", "Target", "Received", "Difference"]],
         body: tableData,
         styles: {
           fontSize: 10,
@@ -519,7 +541,6 @@ const Summary = () => {
     const dateRange = `${fromDate}~${toDate}`;
     const ids = Array.from({ length: 162 }, (_, i) => i + 1).join(",");
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${dateRange}`;
-
     dispatch(showLoader());
     setLoading(true);
     setError(null);
@@ -582,9 +603,6 @@ const Summary = () => {
 
       // Set state
       setSummery(summaryData);
-
-      console.log(summaryData);
-
       const groupedTotals = {};
       transformed.forEach(item => {
         const key = `${item.officer}__${item.lineCode}`;
@@ -695,9 +713,223 @@ const Summary = () => {
     }
   };
 
+  const getLeafRecordsByWeeks = async () => {
+    const ids = Array.from({ length: 162 }, (_, i) => i + 1).join(",");
+    const weeklyRanges = getWeeklyRanges();
+
+    const weekUrls = [
+      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week1}`, setSummary: setWeek1Summary, setTotals: setWeek1Totals },
+      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week2}`, setSummary: setWeek2Summary, setTotals: setWeek2Totals },
+      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week3}`, setSummary: setWeek3Summary, setTotals: setWeek3Totals },
+      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week4}`, setSummary: setWeek4Summary, setTotals: setWeek4Totals },
+    ];
+
+    dispatch(showLoader());
+    setLoading(true);
+    setError(null);
+
+    try {
+      for (const { url, setSummary, setTotals } of weekUrls) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Failed to fetch leaf records");
+        const result = await response.json();
+
+        const idToMergedCode = getMergedMap();
+        const mergeDisplayMap = getMergeDisplayMap();
+
+        const transformed = result.map(item => {
+          const lineId = String(item["Route"]).trim();
+          const lineCode = idToMergedCode[lineId] || "Unknown";
+          const net_kg = parseFloat(item["Net"]);
+          const isSuper = item["Leaf Type"] === 2;
+          const target = getTargetByLineCode(lineCode) || 0;
+
+          return {
+            supplier_id: item["Supplier Id"],
+            date: item["Leaf Date"],
+            leaf_type: isSuper ? "Super" : "Normal",
+            lineId,
+            lineCode,
+            displayLine: mergeDisplayMap[lineCode] || lineCode,
+            net_kg,
+            isSuper,
+            target,
+            officer: getOfficerByLineCode(lineCode),
+          };
+        });
+
+        let totalSuper = 0;
+        let totalReceived = 0;
+        let totalTarget = 0;
+        const uniqueLineCodes = new Set();
+
+        transformed.forEach(record => {
+          totalReceived += record.net_kg;
+          if (record.isSuper) totalSuper += record.net_kg;
+          if (!uniqueLineCodes.has(record.lineCode)) {
+            totalTarget += record.target;
+            uniqueLineCodes.add(record.lineCode);
+          }
+        });
+
+        const summaryData = {
+          records: transformed,
+          totalSuper,
+          totalTarget,
+          totalReceived,
+          totalDifference: totalTarget - totalReceived,
+        };
+
+        setTotals(summaryData);
+
+        // Build summary table grouped by officer
+        const groupedTotals = {};
+        transformed.forEach(item => {
+          const key = `${item.officer}__${item.lineCode}`;
+          if (!groupedTotals[key]) {
+            groupedTotals[key] = {
+              officer: item.officer,
+              line: item.displayLine,
+              lineCode: item.lineCode,
+              super: 0,
+              total: 0,
+              target: getTargetByLineCode(item.lineCode),
+              difference: 0,
+            };
+          }
+          if (item.leaf_type === "Super") groupedTotals[key].super += item.net_kg;
+          groupedTotals[key].total += item.net_kg;
+          groupedTotals[key].difference = groupedTotals[key].target - groupedTotals[key].total;
+        });
+
+        const groupedByOfficer = {};
+        Object.values(groupedTotals).forEach(row => {
+          if (!groupedByOfficer[row.officer]) groupedByOfficer[row.officer] = [];
+          groupedByOfficer[row.officer].push(row);
+        });
+
+        const finalTableData = [];
+        let keyCounter = 0;
+
+        officerOrder.forEach(officer => {
+          const group = (groupedByOfficer[officer] || []).sort((a, b) => {
+            const indexA = customLineCodeOrder.indexOf(a.lineCode);
+            const indexB = customLineCodeOrder.indexOf(b.lineCode);
+            if (indexA === -1 && indexB === -1) return a.lineCode.localeCompare(b.lineCode);
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
+          });
+
+          group.forEach((entry, index) => {
+            finalTableData.push({
+              key: keyCounter++,
+              ...entry,
+              officerRowSpan: index === 0 ? group.length + 1 : 0,
+              isTotal: false,
+            });
+          });
+
+          const total = group.reduce(
+            (acc, row) => {
+              acc.super += row.super;
+              acc.total += row.total;
+              acc.target += row.target;
+              acc.difference += row.difference;
+              return acc;
+            },
+            { super: 0, total: 0, target: 0, difference: 0 }
+          );
+
+          finalTableData.push({
+            key: keyCounter++,
+            officer,
+            line: "Total",
+            lineCode: "",
+            super: total.super,
+            total: total.total,
+            target: total.target,
+            difference: total.difference,
+            officerRowSpan: 0,
+            isTotal: true,
+          });
+        });
+
+        const grandTotal = finalTableData.reduce(
+          (acc, row) => {
+            if (!row.isTotal) return acc;
+            acc.super += row.super;
+            acc.total += row.total;
+            acc.target += row.target;
+            acc.difference += row.difference;
+            return acc;
+          },
+          { super: 0, total: 0, target: 0, difference: 0 }
+        );
+
+        finalTableData.push({
+          key: keyCounter++,
+          officer: "Grand Total",
+          line: "",
+          lineCode: "",
+          super: grandTotal.super,
+          total: grandTotal.total,
+          target: grandTotal.target,
+          difference: grandTotal.difference,
+          officerRowSpan: 0,
+          isTotal: true,
+        });
+
+        setSummary(finalTableData);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      dispatch(hideLoader());
+      setLoading(false);
+    }
+  };
+
+
+
+  const getWeeklyRanges = () => {
+    const { year, month } = filters;
+
+    // Check if year or month are not properly selected
+    if (year === "Select Year" || month === "Select Month") {
+      console.warn("Invalid year or month selected for weekly range calculation");
+      return [];
+    }
+
+    const yearNum = Number(year);
+    const monthNum = Number(month) - 1; // dayjs is 
+    // 0-indexed
+
+    const firstDay = dayjs(new Date(yearNum, monthNum, 1));
+    const lastDay = firstDay.endOf("month");
+
+
+
+
+    const week1 = `${firstDay.format("YYYY-MM-DD")}~${firstDay.add(6, "day").format("YYYY-MM-DD")}`;
+    const week2 = `${firstDay.add(7, "day").format("YYYY-MM-DD")}~${firstDay.add(13, "day").format("YYYY-MM-DD")}`;
+    const week3 = `${firstDay.add(14, "day").format("YYYY-MM-DD")}~${firstDay.add(20, "day").format("YYYY-MM-DD")}`;
+    const week4 = `${firstDay.add(21, "day").format("YYYY-MM-DD")}~${lastDay.format("YYYY-MM-DD")}`;
+
+
+
+    return {
+
+
+      week1, week2, week3, week4
+    };
+  };
+
+
   useEffect(() => {
     getLeafRecordsByDates(dayjs().subtract(1, "day"));
-  }, []);
+    getLeafRecordsByWeeks()
+  }, [filters.month]);
 
   const cardStyle = {
     background: "rgba(0, 0, 0, 0.6)",
@@ -711,44 +943,85 @@ const Summary = () => {
       <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
         <Card bordered={false} style={cardStyle}>
           <Row justify="space-between" gutter={[16, 16]}>
-            <Col span={12}>
+            <Col span={24}>
               <Row gutter={[8, 8]}>
-                <Col md={2}>
-                  <Button
-                    icon={<ReloadOutlined />}
-                    danger
-                    type="primary"
-                    block
-                    onClick={() => getLeafRecordsByDates(dayjs().subtract(1, "day"))}
-                  />
-                </Col>
-                <Col md={2}>
+
+                <Col md={4}>
                   <Button
                     type="primary"
                     style={{ marginLeft: 8 }}
                     onClick={exportToPDF}
                   >
-                    Export to PDF
+                    Export to PDF All
                   </Button>
                 </Col>
-
-                <Col md={6}>
-
-
-                  <DatePicker
-                    picker="month"
-                    value={selectedMonth}
-                    onChange={(date) => {
-                      if (date) {
-                        setSelectedMonth(date);
-                        getLeafRecordsByDates(date.endOf("month")); // trigger reload
-                      }
-                    }}
-                    style={{ marginRight: 12 }}
-                  />
-
-
+                <Col md={4}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={exportToPDF}
+                  >
+                    Export to Week 1
+                  </Button>
                 </Col>
+                <Col md={4}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={exportToPDF}
+                  >
+                    Export to Week 2
+                  </Button>
+                </Col>
+                <Col md={4}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={exportToPDF}
+                  >
+                    Export to Week 3
+                  </Button>
+                </Col>
+                <Col md={4}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={exportToPDF}
+                  >
+                    Export to Week 4
+                  </Button>
+                </Col>
+                <Col md={4}>
+                  <Select showSearch
+                    style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+
+                    value={filters.year}
+                    bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
+
+                    <Option value="2021">2021</Option>
+                    <Option value="2022">2022</Option>
+                    <Option value="2023">2023</Option>
+                    <Option value="2024">2024</Option>
+                    <Option value="2025">2025</Option>
+
+                  </Select>
+                </Col>
+                <Col md={4}>
+                  <Select
+                    showSearch
+
+                    value={filters.month}
+                    onChange={val => setFilters(prev => ({ ...prev, month: val }))}
+                    style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                    bordered={false}
+                  >
+                    {filteredMonths.map(m => (
+                      <Option key={m} value={m}>{monthMap[m]}</Option>
+                    ))}
+                  </Select>
+                </Col>
+
+
 
 
 
@@ -756,17 +1029,8 @@ const Summary = () => {
               </Row>
             </Col>
 
-            {/* 👉 Summary display on right */}
-            <Col span={12} style={{ textAlign: "right" }}>
-              <div style={{ color: "white", fontSize: 12, lineHeight: 1.5 }}>
-                <div><strong>Total Super:</strong> {summery?.totalSuper?.toLocaleString() || 0} kg</div>
-                <div><strong>Total Target:</strong> {summery?.totalTarget?.toLocaleString() || 0} kg</div>
-                <div><strong>Total Received:</strong> {summery?.totalReceived?.toLocaleString() || 0} kg</div>
-                <div><strong>Difference:</strong> <span style={{ color: summery?.totalDifference >= 0 ? "lime" : "red" }}>
-                  {summery?.totalDifference?.toLocaleString() || 0} kg
-                </span></div>
-              </div>
-            </Col>
+
+
           </Row>
 
         </Card>

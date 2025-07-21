@@ -19,7 +19,7 @@ import { API_KEY } from "../api/api";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedSupplier } from "../redux/commonDataSlice";
-import {  toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -36,7 +36,7 @@ const SupplierInfo = () => {
   const [data, setData] = useState([]);
   const dispatch = useDispatch();
   const supplierId = useSelector((state) => state.commonData?.selectedSupplierId);
-  
+
   const { isLoading } = useSelector((state) => state.loader);
 
   const [totals, setTotals] = useState({ super: 0, normal: 0 });
@@ -86,7 +86,7 @@ const SupplierInfo = () => {
     if (supplierId && supplierId.length === 5) {
       console.log('useEffect: Fetching supplier data for ID:', supplierId);
       dispatch(showLoader());
-setFilters({ searchById: supplierId });  // Set the search input to the supplier ID
+      setFilters({ searchById: supplierId });  // Set the search input to the supplier ID
       fetchSupplierDataFromId(supplierId);  // Fetch supplier data when component mounts or supplierId changes    
       dispatch(hideLoader());
 
@@ -362,8 +362,10 @@ setFilters({ searchById: supplierId });  // Set the search input to the supplier
                           }}
                         >
                           <Text style={{ fontSize: 16, color: "#fff" }}>
-                            🌿 Super Total: <strong>{totals.super.toFixed(2)} kg</strong>&nbsp;&nbsp;|&nbsp;&nbsp;
-                            🌿 Normal Total: <strong>{totals.normal.toFixed(2)} kg</strong>
+                            Super Total: <strong>{totals.super.toFixed(2)} kg</strong>&nbsp;&nbsp;|&nbsp;&nbsp;
+                            Normal Total: <strong>{totals.normal.toFixed(2)} kg</strong>&nbsp;&nbsp;|&nbsp;&nbsp;
+                            Total: <strong>{totals.super + totals.normal} kg</strong>
+
                           </Text>
                         </Card>
                       </Col>

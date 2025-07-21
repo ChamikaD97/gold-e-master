@@ -155,6 +155,28 @@ export const getMonthDateRangeFromParts = (year, month) => {
   return `${formatDate(firstDate)}~${formatDate(lastDate)}`;
 };
 
+export const getPreviousMonthDateRange = (year, month) => {
+  const yearNum = Number(year);
+  const monthNum = Number(month);
+
+  // Calculate the previous month and adjust year if needed
+  const prevMonth = monthNum - 1;
+  const prevMonthYear = prevMonth === 0 ? yearNum - 1 : yearNum;
+  const prevMonthNum = prevMonth === 0 ? 12 : prevMonth;
+
+  const firstDate = new Date(prevMonthYear, prevMonthNum - 1, 1);
+  const lastDate = new Date(prevMonthYear, prevMonthNum, 0); // last day of prev month
+
+  const formatDate = (date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  return `${formatDate(firstDate)}~${formatDate(lastDate)}`;
+};
+
 
 export const getLeafRecordsBySupplierId = async ({ filters, supplierId, dispatch } = {}) => {
   console.log('getLeafRecordsBySupplierId............');
@@ -196,7 +218,7 @@ export const getIssueRecords = async ({ dateRange, supplierNos, issueTypes, head
 };
 
 
-export const ajithLines = '81,60,154,65,146,152,33,8,98,145,97';
+export const ajithLines = '81,60,154,65,146,74,33,8,98,145,97';
 export const udaraLines = '23, 72, 96, 149, 21, 9,162';
 export const udayangaLines = '6, 7, 25, 62, 61, 150, 155, 36, 102, 161, 64, 48, 129';
 export const gaminiLines = '109, 70, 12, 31, 157, 34, 127';

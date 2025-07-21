@@ -252,10 +252,10 @@
   {
     "officer": "Udayanga",
     "lineCode": "C 13",
-    "lineId": "129"
+    "lineId": "127"
   },
   {
-    "lineId": "12,109,129",
+    "lineId": "12,109,127",
     "lineCode": "DG",
     "officer": "Gamini"
   },
@@ -272,7 +272,7 @@
   {
     "officer": "Udayanga",
     "lineCode": "DM",
-    "lineId": "102,161"
+    "lineId": "102,161,127"
   },
   {
     "officer": "Ajith",

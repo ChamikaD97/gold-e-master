@@ -5,7 +5,6 @@ import Dashboard from "./pages/Dashboard";
 import HeaderComponent from "./components/Header";
 import MainLayout from "./components/MainLayout";
 import EmployeeManagementPage from "./pages/Employees";
-import FactoryTargetAchievemenets from "./pages/FactoryTargetAchievemenets";
 import LeafCountChart from "./pages/LeafCountChart";
 import RegisterPage from "./pages/RegistrationForm";
 import MealManagement from "./pages/MealManagement";
@@ -60,7 +59,6 @@ const App = () => {
           <Route element={<LayoutWithHeader />}>
             <Route index element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/factory-targets" element={<FactoryTargetAchievemenets />} />
 
 
             <Route path="/employees" element={<EmployeeManagementPage />} />

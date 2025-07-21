@@ -5,15 +5,18 @@ import {
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import '../App.css';
-import lineIdCodeMap from "../data/lineIdCodeMap.json";
+import lineIdCodeMap from "../data/SummeryData.json";
+
+import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
 import CircularLoader from "../components/CircularLoader";
 import SupplierLeafModal from "../components/SupplierLeafModal";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { API_KEY, getMonthDateRangeFromParts } from "../api/api";
+import { API_KEY, getMonthDateRangeFromParts, getPreviousMonthDateRange } from "../api/api";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import CountUp from "react-countup";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -32,9 +35,35 @@ const Prediction = () => {
     const match = lineIdCodeMap.find((line) => line.lineId === lineId);
     return match ? match.officer : null;
   };
+  const [targets, setTargets] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(dayjs()); // default to current month
+
+  const loadTargetsForMonth = async (filters) => {
+
+    const formatted = dayjs(filters.year).format("YYYY") + '_' + dayjs(filters.month).format("MM");
+
+    console.log(formatted);
+
+    try {
+      const data = await import(`../data/targets/targets_${formatted}.json`);
+      const lineCode = filters.lineCode
+      const target = data.default.filter(item => item.lineCode === lineCode)
+      setTargets(target[0].target);
+
+
+    } catch (err) {
+      console.error("Target file not found for:", formatted, err);
+      setTargets([]); // or fallback to default
+    }
+  };
+
+  useEffect(() => {
+    loadTargetsForMonth(filters);
+
+  }, [filters.month]);
 
   const handleTargetSearch = () => {
-    const enteredTarget = filters.lineTarget?.trim();
+    const enteredTarget = targets
     if (!enteredTarget) {
       message.warning("Please enter a target value to search.");
       return;
@@ -76,110 +105,8 @@ const Prediction = () => {
   const { isLoading } = useSelector((state) => state.loader);
   const [lineWiseTotals, setLineWiseTotals] = useState({});
 
-  const getLeafRecordsByRoutes = async () => {
-    dispatch(showLoader());
-    const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
-    const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${filters.line}&d=${dateRange}`;
-    setError(null);
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch supplier data");
-      const result = await response.json();
-
-      const groupedMap = {};
-
-      result.forEach(item => {
-        const key = `${item["Supplier Id"]}_${item["Leaf Date"]}`;
-        if (!groupedMap[key]) {
-          groupedMap[key] = {
-            supplier_id: item["Supplier Id"],
-            date: item["Leaf Date"],
-            lineCode: parseInt(item["Route"]),
-            line: filters.lineCode,
-            super_kg: 0,
-            normal_kg: 0,
-          };
-        }
-
-        const net = parseFloat(item["Net"] || 0);
-        const isSuper = item["Leaf Type"] === 2;
-        if (isSuper) {
-          groupedMap[key].super_kg += net;
-        } else {
-          groupedMap[key].normal_kg += net;
-        }
-      });
-
-      const transformed = Object.values(groupedMap).map(item => {
-        const total_kg = item.super_kg + item.normal_kg;
-        return {
-          ...item,
-          leaf_type:
-            item.super_kg > 0 && item.normal_kg > 0
-              ? "Both"
-              : item.super_kg > 0
-                ? "Super"
-                : "Normal",
-          net_kg: {
-            Super: item.super_kg || null,
-            Normal: item.normal_kg || null,
-          },
-          total_kg: total_kg.toFixed(0),
-        };
-      });
-
-      // Supplier-wise monthly totals
-      const supplierMonthlyTotalMap = {};
-      transformed.forEach(item => {
-        const sid = item.supplier_id;
-        if (!supplierMonthlyTotalMap[sid]) {
-          supplierMonthlyTotalMap[sid] = { total: 0, super: 0, normal: 0 };
-        }
-        supplierMonthlyTotalMap[sid].total += parseFloat(item.total_kg);
-        supplierMonthlyTotalMap[sid].super += item.super_kg;
-        supplierMonthlyTotalMap[sid].normal += item.normal_kg;
-      });
 
 
-      // ✅ Merge all line-wise totals into first lineCode
-      const firstLineCode = transformed[0]?.lineCode;
-      const lineWiseTotalMap = {
-        [firstLineCode]: { super: 0, normal: 0, overall: 0 }
-      };
-
-      transformed.forEach(item => {
-        lineWiseTotalMap[firstLineCode].super += item.super_kg;
-        lineWiseTotalMap[firstLineCode].normal += item.normal_kg;
-        lineWiseTotalMap[firstLineCode].overall += item.super_kg + item.normal_kg;
-      });
-
-      setLineWiseTotals(lineWiseTotalMap);
-
-      // Line-wide totals
-      const lineSuperTotal = transformed.reduce((sum, item) => sum + item.super_kg, 0);
-      const lineNormalTotal = transformed.reduce((sum, item) => sum + item.normal_kg, 0);
-      const lineOverallTotal = lineSuperTotal + lineNormalTotal;
-
-      setLineTotal({
-        super: lineSuperTotal,
-        normal: lineNormalTotal,
-        overall: lineOverallTotal,
-      });
-
-      setData(transformed);
-      setColData(transformed, filters.lineTarget);
-
-    } catch (err) {
-      console.error(err);
-      setError("❌ Failed to load supplier data");
-      setData([]);
-      setColData([]);
-      setLineTotal({ super: 0, normal: 0, overall: 0 });
-    } finally {
-      dispatch(hideLoader());
-    }
-  };
 
 
   const setColData = (transformedData, userEnteredLineTotal) => {
@@ -220,19 +147,22 @@ const Prediction = () => {
     const supplierTotalsMap = {};
     const rows = suppliers.map(supplier_id => {
       const entries = transformedData.filter(item => item.supplier_id === supplier_id);
-
       const total_kg = entries.reduce((sum, item) => sum + parseFloat(item.total_kg || 0), 0);
       const super_kg = entries.reduce((sum, item) => sum + (item.super_kg || 0), 0);
       const normal_kg = entries.reduce((sum, item) => sum + (item.normal_kg || 0), 0);
 
       supplierTotalsMap[supplier_id] = total_kg;
 
+      const supplierEntry = entries[0]; // Safe to assume at least one entry exists
       const row = {
         supplier_id,
+        supplier_name: supplierEntry.supplier_name || "-",
+        supplier_contact: supplierEntry.supplier_contact,
         total_kg,
         super_kg,
         normal_kg
       };
+
 
       entries.forEach(item => {
         const day = new Date(item.date).getDate();
@@ -290,6 +220,35 @@ const Prediction = () => {
           </span>
         )
       },
+      {
+        title: "Name",
+        dataIndex: "supplier_name",
+        key: "supplier_name",
+        align: "center",
+        width: 160,
+        render: text => (
+          <span style={{
+            background: "#e0f7fa",
+            color: "#006064",
+            padding: "6px 12px",
+            borderRadius: "24px",
+            fontWeight: 600,
+            fontSize: 13,
+            display: "inline-block",
+            minWidth: "60px",
+            textAlign: "center",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+            transition: "transform 0.2s"
+          }}
+            onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+            onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+          >
+            {text}
+          </span>
+        )
+      },
+
+
       {
         title: "Total (kg)",
         dataIndex: "total_kg",
@@ -406,50 +365,176 @@ const Prediction = () => {
   const cardStyle = {
     background: "rgba(0, 0, 0, 0.6)", color: "#fff", borderRadius: 12, marginBottom: 6
   };
-  const buildSupplierInfoMap = async () => {
-    const map = {};
 
-    for (const row of tableData) {
-      const id = row.supplier_id?.toString().padStart(5, "0");
-      const url = `/quiX/ControllerV1/supdata?k=${API_KEY}&s=${id}`;
 
-      try {
-        const res = await fetch(url);
-        if (!res.ok) continue;
-        const json = await res.json();
-        const supplier = Array.isArray(json) ? json[0] : json;
+  const downloadPredictionPDF = async (status) => {
+    downloadXSupplierListAsPDF(data, status);
+  };
 
-        if (supplier) {
-          map[row.supplier_id] = {
-            name: supplier["Supplier Name"] || "-",
-            contact: supplier["Contact"] || "-"
+  const getLeafRecordsByRoutes = async () => {
+
+    dispatch(showLoader());
+    const dateRange = getPreviousMonthDateRange(filters.year, filters.month);
+    console.log(dateRange);
+
+    const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${filters.line}&d=${dateRange}`;
+    const allSuppliersInSelectedLine = `/quiX/ControllerV1/supdata?k=${API_KEY}&r=${filters.line}`;
+    setError(null);
+
+    try {
+      // Fetch supplier leaf records
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch leaf data");
+
+      // Fetch all supplier info for selected line
+      const supplierRes = await fetch(allSuppliersInSelectedLine);
+      if (!supplierRes.ok) throw new Error("Failed to fetch supplier details");
+      const result = await response.json();
+      const supplierData = await supplierRes.json();
+
+      // 🔧 Create map from supplierData for quick lookup
+      const supplierInfoMap = {};
+      supplierData.forEach(s => {
+        const sid = s["Supplier Id"];
+        supplierInfoMap[sid] = {
+          name: s["Supplier Name"] || "-",
+          contact: s["Contact"] || "-"
+        };
+      });
+
+      // 🧠 Merge name/contact into each leaf result item
+      const enrichedResult = result.map(item => {
+        const sid = item["Supplier Id"];
+        const supplierInfo = supplierInfoMap[sid] || { name: "-", contact: "-" };
+
+        return {
+          ...item,
+          supplier_name: supplierInfo.name,
+          supplier_contact: supplierInfo.contact
+        };
+      });
+
+      // Build supplier info map
+
+
+      const groupedMap = {};
+
+      result.forEach(item => {
+        const key = `${item["Supplier Id"]}_${item["Leaf Date"]}`;
+        if (!groupedMap[key]) {
+          groupedMap[key] = {
+            supplier_id: item["Supplier Id"],
+            date: item["Leaf Date"],
+            lineCode: parseInt(item["Route"]),
+            line: filters.lineCode,
+            super_kg: 0,
+            normal_kg: 0,
           };
         }
-      } catch (err) {
-        console.error(`Error fetching supplier ${id}:`, err);
-      }
+
+        const net = parseFloat(item["Net"] || 0);
+        const isSuper = item["Leaf Type"] === 2;
+        if (isSuper) {
+          groupedMap[key].super_kg += net;
+        } else {
+          groupedMap[key].normal_kg += net;
+        }
+      });
+
+      const transformed = Object.values(groupedMap).map(item => {
+        const total_kg = item.super_kg + item.normal_kg;
+        const supplierInfo = supplierInfoMap[item.supplier_id] || {};
+
+        return {
+          ...item,
+          leaf_type:
+            item.super_kg > 0 && item.normal_kg > 0
+              ? "Both"
+              : item.super_kg > 0
+                ? "Super"
+                : "Normal",
+          net_kg: {
+            Super: item.super_kg || null,
+            Normal: item.normal_kg || null,
+          },
+          total_kg: total_kg.toFixed(0),
+          supplier_name: supplierInfo.name || "-",
+          supplier_contact: supplierInfo.contact || "-"
+        };
+      });
+
+      // Supplier-wise monthly totals
+      const supplierMonthlyTotalMap = {};
+      transformed.forEach(item => {
+        const sid = item.supplier_id;
+        if (!supplierMonthlyTotalMap[sid]) {
+          supplierMonthlyTotalMap[sid] = { total: 0, super: 0, normal: 0 };
+        }
+        supplierMonthlyTotalMap[sid].total += parseFloat(item.total_kg);
+        supplierMonthlyTotalMap[sid].super += item.super_kg;
+        supplierMonthlyTotalMap[sid].normal += item.normal_kg;
+      });
+
+      // Merge all line-wise totals into first lineCode
+      const firstLineCode = transformed[0]?.lineCode;
+      const lineWiseTotalMap = {
+        [firstLineCode]: { super: 0, normal: 0, overall: 0 }
+      };
+
+      transformed.forEach(item => {
+        lineWiseTotalMap[firstLineCode].super += item.super_kg;
+        lineWiseTotalMap[firstLineCode].normal += item.normal_kg;
+        lineWiseTotalMap[firstLineCode].overall += item.super_kg + item.normal_kg;
+      });
+
+      setLineWiseTotals(lineWiseTotalMap);
+
+      const lineSuperTotal = transformed.reduce((sum, item) => sum + item.super_kg, 0);
+      const lineNormalTotal = transformed.reduce((sum, item) => sum + item.normal_kg, 0);
+      const lineOverallTotal = lineSuperTotal + lineNormalTotal;
+
+      setLineTotal({
+        super: lineSuperTotal,
+        normal: lineNormalTotal,
+        overall: lineOverallTotal,
+      });
+
+      setData(transformed);
+      //downloadXSupplierListAsPDF(transformed, false);
+      setColData(transformed, targets);
+
+    } catch (err) {
+      setError("❌ Failed to load supplier data");
+      setData([]);
+      setColData([]);
+      setLineTotal({ super: 0, normal: 0, overall: 0 });
     }
-
-    return map;
-  };
-
-  const downloadPredictionPDF = async (print = false, withName = false) => {
-    if (withName) {
-      const supplierInfoMap = await buildSupplierInfoMap();
-      downloadXSupplierListAsPDF(supplierInfoMap, print);
-    } else {
-      downloadXSupplierListAsPDF([], print);
+    finally {
+      dispatch(hideLoader());
     }
-
   };
+  const downloadXSupplierListAsPDF = (supplierInfoMap, status) => {
 
-  const downloadXSupplierListAsPDF = (supplierInfoMap, p) => {
     const doc = new jsPDF();
     const today = new Date().toLocaleDateString();
     const selectedLine = filters.lineCode || "All";
-    const target = filters.lineTarget || "N/A";
+    const target = targets;
     const firstLineKey = Object.keys(lineWiseTotals)[0];
     const lastMonthAchievement = lineWiseTotals?.[firstLineKey]?.overall?.toFixed(0) || "N/A";
+
+
+
+    const year = Number(filters.year); // 2025
+    const month = Number(filters.month); // 6
+
+    // Current month
+    const currentMonthDate = new Date(year, month - 1); // "2025-06-01"
+    const currentMonthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(currentMonthDate);
+
+    // Previous month
+    const prevMonthDate = new Date(year, month - 2); // "2025-05-01"
+    const prevMonthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(prevMonthDate);
+
 
 
     // --- Header ---
@@ -468,32 +553,48 @@ const Prediction = () => {
     doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
     doc.text("Monthly Leaf Supply Prediction", 14, 52);
-    doc.text(`${selectedLine} Line Suppliers that need to Supply In July`, 14, 58);
+    doc.text(`${selectedLine} Line Suppliers that need to Supply In ${currentMonthName}`, 14, 58);
 
     doc.setFont(undefined, 'normal');
     doc.line(14, 63, 196, 63);
-    doc.text(`July Target: ${target} kg`, 14, 69);
-    doc.text(`June Achievement: ${lastMonthAchievement} kg`, 105, 69);
+    doc.text(`${currentMonthName} Target: ${target} kg`, 14, 69);
+    doc.text(`${prevMonthName} Achievement: ${lastMonthAchievement} kg`, 105, 69);
     doc.line(14, 72, 196, 72);
 
     // --- Table Body ---
     const predictionTableRows = tableData.map((row) => {
-      const info = supplierInfoMap[row.supplier_id] || { name: "-", contact: "-" };
       return [
         row.supplier_id,
-        info.name,
-        info.contact,
+        row.supplier_name,
+        row.supplier_contact,
         `${Number(row.total_kg).toFixed(0)}`,
         `${Number(row.weekValue).toFixed(0)}`,
+        `${Number(row.week1).toFixed(0)}`,
+        `${Number(row.week2).toFixed(0)}`,
+        `${Number(row.week3).toFixed(0)}`,
+        `${Number(row.week4).toFixed(0)}`,
 
       ];
     });
+    const predictionTableRowsWithout = tableData.map((row) => {
+      return [
+        row.supplier_id,
+        row.supplier_name,
+        row.supplier_contact,
+        `${Number(row.total_kg).toFixed(0)}`,
+        `${Number(row.weekValue).toFixed(0)}`,
+        ` `,
+        ` `,
+        ` `,
+        ``,
 
+      ];
+    });
     // --- Table ---
     doc.autoTable({
       startY: 78,
       head: [["ID", "Name", "Mobile", "Total (kg)", "Predicted (kg)", "Week 1 (kg)", "Week 2 (kg)", "Week 3 (kg)", "Week 4 (kg)"]],
-      body: predictionTableRows,
+      body: status ? predictionTableRows : predictionTableRowsWithout,
       styles: {
         fillColor: [255, 255, 255],
         textColor: [0, 0, 0],
@@ -553,8 +654,7 @@ const Prediction = () => {
                 setFilters({ year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: "" })
               }} />
             </Col>
-
-            <Col md={4}>
+            <Col md={3}>
               <Select
                 showSearch
                 placeholder="Select Line"
@@ -576,7 +676,7 @@ const Prediction = () => {
                 ))}
               </Select>
             </Col>
-            <Col md={4}>
+            <Col md={3}>
               <Select showSearch
                 style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
@@ -591,7 +691,7 @@ const Prediction = () => {
                 <Option value="2025">2025</Option>
               </Select>
             </Col>
-            <Col md={4}>
+            <Col md={3}>
               <Select
                 showSearch
 
@@ -605,23 +705,11 @@ const Prediction = () => {
                 ))}
               </Select>
             </Col>
-            <Col md={3}><Text style={{ color: "#fff" }}>Line Target</Text></Col>
-            <Col md={4}>
-              <Input
-                placeholder="Enter Line Target"
-                value={filters.lineTarget || ""}
-                onChange={(e) => setFilters(prev => ({ ...prev, lineTarget: e.target.value }))}
-                style={{
-                  width: "100%",
-                  backgroundColor: "rgb(0, 0, 0)",
-                  color: "#fff",
-                  border: "1px solid #333",
-                  borderRadius: 6
-                }}
-                allowClear
-              />
+            <Col md={3}>
+
+              {targets}
             </Col>
-            <Col md={2}>
+            <Col md={3}>
               <Button
                 type="primary"
                 onClick={handleTargetSearch}
@@ -630,22 +718,28 @@ const Prediction = () => {
                 Search
               </Button>
             </Col>
-            <Col md={2}>
+            <Col md={4}>
               <Button
                 type="primary"
-                onClick={downloadPredictionPDF}
+                onClick={() => downloadPredictionPDF(false)}
                 style={{ borderRadius: 6 }}
               >
-                Download
+                Download Without Data
+              </Button>
+            </Col>
+            <Col md={4}>
+              <Button
+                type="primary"
+                onClick={() => downloadPredictionPDF(true)}
+                style={{ borderRadius: 6 }}
+              >
+                Download With Data
               </Button>
             </Col>
 
           </Row>
         </Card>
       </div>
-
-
-
 
       {filters.line !== "M" && filters.officer !== "All" && (
         <Card bordered={false} style={cardStyle}>
