@@ -48,18 +48,14 @@ const EmployeeManagementPage = () => {
   const handleFormSubmit = () => {
 
     form.validateFields().then((values) => {
-      console.log("✅ All form data submitted:", values); // 👈 Logs everything
 
       // Optional: format file info
       if (values.image_upload && values.image_upload.length > 0) {
         const file = values.image_upload[0].originFileObj;
-        console.log("📦 Uploaded file object:", file);
       }
 
       // You can now send `values` to your backend or Firebase
     }).catch((errorInfo) => {
-
-      console.warn("⚠️ Validation failed:", errorInfo);
     });
 
     setTimeout(() => {
@@ -70,17 +66,15 @@ const EmployeeManagementPage = () => {
   };
   const handleFinalSubmit = () => {
     form.validateFields().then((values) => {
-      console.log("✅ All form data submitted:", values); // 👈 Logs everything
 
       // Optional: format file info
       if (values.image_upload && values.image_upload.length > 0) {
         const file = values.image_upload[0].originFileObj;
-        console.log("📦 Uploaded file object:", file);
       }
 
       // You can now send `values` to your backend or Firebase
     }).catch((errorInfo) => {
-      console.warn("⚠️ Validation failed:", errorInfo);
+
     });
     setTimeout(() => {
       setModalVisible(false);

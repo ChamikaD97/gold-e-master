@@ -29,43 +29,19 @@ const EmployeeStepperModal = ({ open, onCancel, onSubmit, form, currentStep, set
 
       switch (currentStep) {
         case 0:
-          console.log("🟦 Basic Info:", {
-            name: currentValues.name,
-            nic: currentValues.nic,
-            dob: currentValues.dob,
-            contact: currentValues.contact,
-            emergency_contact: currentValues.emergency_contact,
-            address: currentValues.address
-          });
+    
           break;
 
         case 1:
-          console.log("🟨 Work Info:", {
-            emp_id: currentValues.emp_id,
-            joined_date: currentValues.joined_date,
-            staff: currentValues.staff,
-            section: currentValues.section,
-            job_title: currentValues.job_title,
-            shift: currentValues.shift,
-            leaves: currentValues.leaves
-          });
+          
           break;
 
         case 2:
-          console.log("🟩 Salary Info:", {
-            salary: currentValues.salary,
-            salary_method: currentValues.salary_method,
-            bank_name: currentValues.bank_name,
-            account_number: currentValues.account_number
-          });
+    
           break;
 
         case 3:
-          console.log("🟪 Other Info:", {
-            image_upload: currentValues.image_upload,
-            location: currentValues.location,
-            description: currentValues.description
-          });
+        
           break;
 
         default:
@@ -382,9 +358,7 @@ const EmployeeStepperModal = ({ open, onCancel, onSubmit, form, currentStep, set
              onClick={() => {
                form.validateFields().then((values) => {
                  setSubmitting(true);
-           
-                 console.log("✅ Final Submitted Data:", values); // ✅ Log all data here
-           
+                     
                  setTimeout(() => {
                    setSubmitting(false);
                    setSubmitted(true);

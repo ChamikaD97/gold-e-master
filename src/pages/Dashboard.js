@@ -13,6 +13,7 @@ import LeafPieChart from "../components/dashboardCards/LeafPieChart";
 import LeafLineChart from "../components/dashboardCards/LeafLineChart";
 import TotalCard from "../components/dashboardCards/TotalCard";
 import OfficerSummaryList from "../components/dashboardCards/OfficerSummaryList";
+import { toast } from "react-toastify";
 
 const { Text, Title } = Typography;
 
@@ -85,7 +86,8 @@ const Dashboard = () => {
 
       setOfficerSummaries(results);
     } catch (err) {
-      console.error("Failed to load officer summaries", err);
+                        toast.error("Error While Loading Data,Please Try Again");
+
       setOfficerSummaries([]);
     } finally {
       dispatch(hideLoader());
@@ -141,7 +143,7 @@ const Dashboard = () => {
       setTotals(calculatedTotals);
       setData(transformed);
     } catch (err) {
-      console.error(err);
+                  toast.error("Error While Loading Data,Please Try Again");
       setData([]);
       setTotals({ super: 0, normal: 0 });
     } finally {

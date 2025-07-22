@@ -24,7 +24,7 @@ const TotalCard = ({ label, value, type }) => {
     <div style={{ ...cardStyles.base, ...cardStyles[type] }}>
       {label}
       <br />
-      <CountUp style={{ fontSize: 30 }} end={Math.round(value)} duration={1.2} separator="," /> kg
+      <CountUp style={{ fontSize: 30 }} end={Math.round(value)} duration={0.5} separator="," /> kg
     </div>
   );
 };

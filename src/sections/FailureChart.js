@@ -3,6 +3,7 @@ import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, BarElement, Tooltip, Legend, CategoryScale, LinearScale } from "chart.js";
 import axios from "axios";
 import "../styles/FailureChart.css";
+import { toast } from "react-toastify";
 
 ChartJS.register(BarElement, Tooltip, Legend, CategoryScale, LinearScale);
 
@@ -28,13 +29,11 @@ const FailureChart = () => {
       // Update the state with the processed data
       setFailures({ labels, data });
     } catch (error) {
-      console.error("Error fetching failures:", error.message);
+                  toast.error("Error While Loading Data,Please Try Again");
     }
   };
 
   const processFailureData = (failures) => {
-    console.log(failures);
-
     const statusCounts = {
       pending: 0,
       inProgress: 0,

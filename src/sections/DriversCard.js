@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setSelectedKey } from "../redux/authSlice";
 import axios, { Axios } from "axios";
+import { toast } from "react-toastify";
 const DriversCard = () => {
 
   const API_URL = "http://13.61.26.58:5000";
@@ -23,7 +24,7 @@ const [users, setUserData] = useState([]);
 
 
     } catch (error) {
-      console.error("Error fetching trip Cards:", error.message);
+                  toast.error("Error While Loading Data,Please Try Again");
     }
   };
   useEffect(() => {

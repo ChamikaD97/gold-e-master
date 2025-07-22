@@ -16,6 +16,7 @@ import CountUp from "react-countup";
 import jsPDF from "jspdf";
 import CircularLoader from "../components/CircularLoader";
 import { Space } from "antd";
+import { toast } from "react-toastify";
 
 const TodaySuppliers = () => {
   const { Option } = Select;
@@ -74,7 +75,6 @@ const TodaySuppliers = () => {
     const startDate = day.subtract(leafRound, "day").format("YYYY-MM-DD");
 
     for (let i = 0; i < total; i++) {
-      console.log(i);
 
       setCurrentIndex(i);
 
@@ -91,7 +91,6 @@ const TodaySuppliers = () => {
       const line = uniqueLines[i];
       setProcessingLine(line.label);
       setProgressPercent(Math.round(((i + 1) / total) * 100));
-console.log('****************************************************');
       try {
         const leafDataUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line.id}&d=${startDate}`;
         const response = await fetch(leafDataUrl);
@@ -128,7 +127,6 @@ console.log('****************************************************');
 
         const supplierIdsWithData = Object.keys(leafMap);
         if (supplierIdsWithData.length === 0) continue;
-console.log('****************************************************');
         const supRes = await fetch(`/quiX/ControllerV1/supdata?k=${API_KEY}&r=${line.id}`);
         if (!supRes.ok) continue;
 
@@ -161,7 +159,6 @@ console.log('****************************************************');
           const dateRange = `${dayjs().subtract(dateRangeMonths, 'month').format("YYYY-MM-DD")}~${dayjs().format("YYYY-MM-DD")}`;
           const glfHistoryRes = await fetch(`/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${line.id}&d=${dateRange}`);
           glfHistory = await glfHistoryRes.json();
-          console.log(dateRange);
           
         } catch (e) {
           console.warn("Failed to fetch GLF history for missing suppliers", e);
@@ -231,7 +228,7 @@ console.log('****************************************************');
 
 
       } catch (err) {
-        console.error(`Error processing line ${line.label}:`, err);
+                  toast.error("Error While Loading Data,Please Try Again");
       }
     }
 
@@ -653,7 +650,7 @@ console.log('****************************************************');
                     <div style={{ color: "#fff", fontWeight: 500 }}>
                       <div>Total Leaf On That Day</div>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: "#00ff37" }}>
-                        <CountUp end={Math.round(totals.total)} duration={1.2} separator="," /> kg
+                        <CountUp end={Math.round(totals.total)} duration={0.5} separator="," /> kg
                       </div>
                     </div>
                   </Col>
@@ -664,7 +661,7 @@ console.log('****************************************************');
                     <div style={{ color: "#fff", fontWeight: 500 }}>
                       <div>Suppliers</div>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: "#ff000e" }}>
-                        <CountUp end={supplierWithDataList.length} duration={1.2} separator="," />
+                        <CountUp end={supplierWithDataList.length} duration={0.5} separator="," />
                       </div>
                     </div>
                   </Col>
@@ -673,7 +670,7 @@ console.log('****************************************************');
                     <div style={{ color: "#fff", fontWeight: 500 }}>
                       <div>All </div>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: "#ff000e" }}>
-                        <CountUp end={supplierLength} duration={1.2} separator="," />
+                        <CountUp end={supplierLength} duration={0.5} separator="," />
                       </div>
                     </div>
                   </Col>

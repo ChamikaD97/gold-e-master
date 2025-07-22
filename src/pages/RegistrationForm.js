@@ -6,12 +6,13 @@ import {
   Input,
   Typography,
   Form,
-  Select
+  Select,
+  message
 } from "antd";
 import FullPageLayout from "../components/FullPageLayout";
 import icon from "../images/logo.ico";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 const RegisterPage = () => {
@@ -25,7 +26,31 @@ const RegisterPage = () => {
 
   useEffect(() => {
     setTimeout(() => setVisible(true), 100);
+
+    import("../data/users/users.json")
+      .then((module) => {
+        const users = module.default || [];
+        localStorage.setItem("users", JSON.stringify(users));
+      })
+      .catch((err) => {
+        console.error("Failed to load users.json", err);
+        setError("Could not load initial user data.");
+      });
   }, []);
+
+  const downloadUsersFile = () => {
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    const blob = new Blob([JSON.stringify(users, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "user.json"; // keep same name as original
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleRegister = () => {
     const users = JSON.parse(localStorage.getItem("users") || "[]");
@@ -36,6 +61,7 @@ const RegisterPage = () => {
     } else {
       users.push({ name, userName, password, role });
       localStorage.setItem("users", JSON.stringify(users));
+      downloadUsersFile();
       navigate("/login");
     }
   };
@@ -52,17 +78,16 @@ const RegisterPage = () => {
           color: "white",
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0)" : "translateY(30px)",
-          transition: "opacity 0.6s ease, transform 0.6s ease"
+          transition: "opacity 0.6s ease, transform 0.6s ease",
         }}
       >
-        {/* Branding */}
         <div
           style={{
             marginBottom: 12,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
           <img
@@ -73,7 +98,7 @@ const RegisterPage = () => {
               height: 100,
               marginBottom: 8,
               borderRadius: 50,
-              border: "1px solid white"
+              border: "1px solid white",
             }}
           />
           <div>
@@ -96,32 +121,19 @@ const RegisterPage = () => {
           colon={false}
         >
           <Form.Item label={<span style={{ color: "white" }}>Name</span>} required>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
           </Form.Item>
 
           <Form.Item label={<span style={{ color: "white" }}>User Name</span>} required>
-            <Input
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-            />
+            <Input value={userName} onChange={(e) => setUserName(e.target.value)} />
           </Form.Item>
 
           <Form.Item label={<span style={{ color: "white" }}>Password</span>} required>
-            <Input.Password
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <Input.Password value={password} onChange={(e) => setPassword(e.target.value)} />
           </Form.Item>
 
           <Form.Item label={<span style={{ color: "white" }}>Role</span>} required>
-            <Select
-              value={role}
-              onChange={(value) => setRole(value)}
-              style={{ width: "100%" }}
-            >
+            <Select value={role} onChange={(value) => setRole(value)} style={{ width: "100%" }}>
               <Option value="Super Admin">Super Admin</Option>
               <Option value="Admin">Admin</Option>
               <Option value="User">User</Option>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Layout, Menu, Button, Tooltip } from "antd";
+import { Layout, Menu, Button, Tooltip, Avatar } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AppstoreOutlined,
@@ -28,12 +28,14 @@ const { SubMenu } = Menu;
 const HeaderComponent = () => {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
+  const users = JSON.parse(localStorage.getItem("users") || "[]");
+  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
     navigate("/login");
   };
-
   return (
     <>
       <Header
@@ -123,17 +125,18 @@ const HeaderComponent = () => {
             <Link to="/meal">Meal Management</Link>
           </Menu.Item> */}
         </Menu>
+        <Avatar style={{ backgroundColor: '#206b00ff' }} icon={<UserOutlined />} />
+        {loggedInUser && (
+          <Tooltip title="Logged in user">
+            <div style={{ color: "white", fontWeight: "bold", marginLeft: 16 }}>
+              {loggedInUser.name}
+            </div>
+          </Tooltip>
+        )}
 
         {/* Action Buttons */}
         <div style={{ padding: "0 25px", display: "flex", gap: 15 }}>
-          <Tooltip title="Notifications">
-            <Button
-              type="default"
-              shape="circle"
-              icon={<BellOutlined />}
-              onClick={() => navigate("/notifications")}
-            />
-          </Tooltip>
+
 
           <Tooltip title="Settings">
             <Button
@@ -153,7 +156,10 @@ const HeaderComponent = () => {
               onClick={handleLogout}
             />
           </Tooltip>
+
+
         </div>
+
       </Header>
 
       {/* Settings Modal */}

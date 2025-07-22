@@ -9,7 +9,6 @@ import LeafCountChart from "./pages/LeafCountChart";
 import RegisterPage from "./pages/RegistrationForm";
 import MealManagement from "./pages/MealManagement";
 import Suppliers from "./pages/Suppliers"; // Assuming this is the correct import for the Suppliers page
-import Vehicles from "./pages/Vehicles";
 import SupplierInfo from "./pages/SupplierInfo";
 import LeafSupply from "./pages/LeafCountChart";
 import { App as AntdApp } from 'antd';
@@ -80,7 +79,6 @@ const App = () => {
             <Route path="/factory-targets/officer" element={<OfficerTargets />} />
 
             <Route path="/summery" element={<Summary />} />
-            <Route path="/vehicles" element={<Vehicles />} />
             <Route path="/supplier/info" element={<SupplierInfo />} />
             {/* 404 Route */}
 

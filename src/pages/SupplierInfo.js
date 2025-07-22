@@ -65,13 +65,11 @@ const SupplierInfo = () => {
 
       if (supplierData) {
         setSupplier(supplierData);
-        console.log("Supplier data loaded:", supplierData);
         toast.success(`Supplier ID ${id} loaded successfully`);
       } else {
         toast.warning(`No supplier data found for ID ${id}`);
       }
     } catch (err) {
-      console.error(err);
       toast.error("Failed to load supplier data");
       setSupplier(null);
     } finally {
@@ -84,7 +82,6 @@ const SupplierInfo = () => {
 
   useEffect(() => {
     if (supplierId && supplierId.length === 5) {
-      console.log('useEffect: Fetching supplier data for ID:', supplierId);
       dispatch(showLoader());
       setFilters({ searchById: supplierId });  // Set the search input to the supplier ID
       fetchSupplierDataFromId(supplierId);  // Fetch supplier data when component mounts or supplierId changes    
@@ -148,12 +145,8 @@ const SupplierInfo = () => {
         { super: 0, normal: 0 }
       );
       setTotals(calculatedTotals);
-
-      console.log("Super Total:", totals.super.toFixed(2), "Normal Total:", totals.normal.toFixed(2));
-
       setData(transformed);
     } catch (err) {
-      console.error(err);
       message.error("❌ Failed to load leaf records");
       setData([]);
     } finally {

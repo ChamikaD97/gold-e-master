@@ -76,7 +76,6 @@ const LeafSupply = () => {
       const data = await response.json();
       return Array.isArray(data) ? data : data ? [data] : [];
     } catch (err) {
-      console.error(err);
       toast.error("❌ Failed to fetch supplier details from API");
       return [];
     }
@@ -128,7 +127,7 @@ const LeafSupply = () => {
 
       setXSupplierDetails(enriched);
     } catch (err) {
-      console.error(err);
+
       toast.error("❌ Failed to fetch supplier details for X markers");
       setXSupplierDetails([]);
     }
@@ -245,11 +244,9 @@ const LeafSupply = () => {
       setRemainingSuppliers(remainingSuppliers);
 
       // ✅ Optional debug logs
-      console.log("Active Supplier Example:", transformed[0]);
-      console.log("Remaining Supplier Example:", remainingSuppliers[0]);
+ 
 
     } catch (err) {
-      console.error(err);
       toast.error("❌ Failed to load leaf collection or supplier data");
       setError("Failed to load supplier data");
 
@@ -316,8 +313,6 @@ const LeafSupply = () => {
 
     // Now call the logic
     const inactiveFromLastMonth = getLastMonthInactiveSuppliers(remainingSuppliers, line, leafSupplies);
-
-    console.log("Inactive this month but active last month:", inactiveFromLastMonth);
   };
 
 
@@ -1098,7 +1093,7 @@ const LeafSupply = () => {
                               >
                                 Suppliers<br />
 
-                                <CountUp style={{ fontSize: 30 }} end={Math.round(allSuppliers.length)} duration={1.2} separator="," /> <br />
+                                <CountUp style={{ fontSize: 30 }} end={Math.round(allSuppliers.length)} duration={0.5} separator="," /> <br />
 
                               </div>
                             </Col>
@@ -1116,7 +1111,7 @@ const LeafSupply = () => {
                                 }}
                               >
                                 Super Total<br />
-                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={1.2} separator="," /> kg<br />
+                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={0.5} separator="," /> kg<br />
 
                               </div>
                             </Col>
@@ -1135,7 +1130,7 @@ const LeafSupply = () => {
                                 }}
                               >
                                 Normal Total<br />
-                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={1.2} separator="," /> kg
+                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={0.5} separator="," /> kg
                               </div>
                             </Col>
 
@@ -1153,7 +1148,7 @@ const LeafSupply = () => {
                                   boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)",
                                 }}
                               >
-                                Overall Total<br />                        <CountUp style={{ fontSize: 30 }} end={Math.round(totals.overall)} duration={1.2} separator="," /> kg<br />
+                                Overall Total<br />                        <CountUp style={{ fontSize: 30 }} end={Math.round(totals.overall)} duration={0.5} separator="," /> kg<br />
 
                               </div>
                             </Col>

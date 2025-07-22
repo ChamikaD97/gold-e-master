@@ -62,8 +62,6 @@ export const getAllSuppliers = async ({ dispatch } = {}) => {
 };
 
 export const getSuppliersByRoute = async ({ filters, dispatch } = {}) => {
-  console.log(filters);
-
   dispatch?.(showLoader());
 
   const query = {
@@ -111,7 +109,6 @@ export const getSuppliersByLine = async ({ lineCode, dispatch } = {}) => {
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("getSuppliersByLine error:", err);
     throw err;
   } finally {
     dispatch?.(hideLoader());
@@ -179,8 +176,6 @@ export const getPreviousMonthDateRange = (year, month) => {
 
 
 export const getLeafRecordsBySupplierId = async ({ filters, supplierId, dispatch } = {}) => {
-  console.log('getLeafRecordsBySupplierId............');
-
   dispatch?.(showLoader());
   const query = {
     k: API_KEY,

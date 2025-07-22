@@ -21,8 +21,7 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
     const dispatch = useDispatch();
     const fetchSupplierDataFromId = async (supId) => {
         dispatch(showLoader());
-        console.log
-            ("Fetching supplier data for ID:", supId);
+
         const id = supId?.toString().padStart(5, "0").trim();
         dispatch(setSelectedSupplier(id)); // Dispatch the selected supplier ID to the Redux store
         if (!id || id.length !== 5) {
@@ -40,7 +39,6 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
 
             if (supplierData) {
                 setSupplier(supplierData);
-                console.log("Supplier data loaded:", supplierData);
                 message.success(`✅ Supplier ID ${id} loaded successfully`);
                 dispatch(hideLoader());
             } else {
@@ -48,7 +46,6 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
                 dispatch(hideLoader());
             }
         } catch (err) {
-            console.error(err);
             message.error("❌ Failed to load supplier data");
             setSupplier(null);
         } finally {

@@ -14,6 +14,7 @@ import {
   PlusCircleOutlined,
   MoreOutlined,
 } from "@ant-design/icons"; // Import the icon
+import { toast } from "react-toastify";
 
 const Users = () => {
   const [filteredData, setFilteredData] = useState([]);
@@ -43,7 +44,7 @@ const Users = () => {
       }, 500);
     } catch (error) {
       dispatch(isLoading(false));
-      console.error("Error fetching users", error.message);
+                  toast.error("Error While Loading Data,Please Try Again");
     }
     dispatch(isLoading(false));
   };

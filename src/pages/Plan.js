@@ -93,7 +93,6 @@ const AddAchievement = () => {
     achievementForm.resetFields();
   };
   const handleAchievementSubmit = async (values) => {
-    console.log("12367817812", values);
 
     const date = new Date(values.date);
     const month = date
@@ -109,7 +108,6 @@ const AddAchievement = () => {
       gold_leaf: values.gold_leaf,
       value: parseFloat(values.target),
     };
-    console.log(data);
 
     await axios.post("http://localhost:5000/api/achievements", data);
     closeAchievementModal();
@@ -182,8 +180,6 @@ const AddAchievement = () => {
 
   const getMonthData = (value) => {
     
-    console.log(value);
-
     const filtered = filteredData.filter((item) =>
       Object.values(item).join(" ").toLowerCase().includes(value.id)
     );

@@ -45,11 +45,9 @@ const Vehicles = () => {
 
   const handleFinalSubmit = () => {
     form.validateFields().then((values) => {
-      console.log("✅ All form data submitted:", values);
 
       if (values.image_upload && values.image_upload.length > 0) {
         const file = values.image_upload[0].originFileObj;
-        console.log("📦 Uploaded file object:", file);
       }
     }).catch((errorInfo) => {
       console.warn("⚠️ Validation failed:", errorInfo);

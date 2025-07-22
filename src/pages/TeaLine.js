@@ -26,6 +26,7 @@ import {
   MoreOutlined,
 } from "@ant-design/icons"; // Import the icon
 import { CleanHands, CleanHandsOutlined, TrainOutlined } from "@mui/icons-material";
+import { toast } from "react-toastify";
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -74,7 +75,7 @@ const TeaLine = () => {
     } catch (error) {
       dispatch(isLoading(false));
       openNotificationWithIcon("error", "Failed to Add Engine");
-      console.error("Error adding engine:", error.message);
+                  toast.error("Error While Loading Data,Please Try Again");
     }
   };
   const columns = [
@@ -153,7 +154,7 @@ const TeaLine = () => {
         dispatch(isLoading(false));
       }, 500);
     } catch (error) {
-      console.error("Error fetching engines:", error.message);
+                  toast.error("Error While Loading Data,Please Try Again");
     }
   };
 

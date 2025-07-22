@@ -17,6 +17,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import CountUp from "react-countup";
 import dayjs from "dayjs";
+import { toast } from "react-toastify";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -42,8 +43,6 @@ const Prediction = () => {
 
     const formatted = dayjs(filters.year).format("YYYY") + '_' + dayjs(filters.month).format("MM");
 
-    console.log(formatted);
-
     try {
       const data = await import(`../data/targets/targets_${formatted}.json`);
       const lineCode = filters.lineCode
@@ -52,7 +51,8 @@ const Prediction = () => {
 
 
     } catch (err) {
-      console.error("Target file not found for:", formatted, err);
+      toast.error("❌ Target file not found");
+
       setTargets([]); // or fallback to default
     }
   };
@@ -375,7 +375,6 @@ const Prediction = () => {
 
     dispatch(showLoader());
     const dateRange = getPreviousMonthDateRange(filters.year, filters.month);
-    console.log(dateRange);
 
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${filters.line}&d=${dateRange}`;
     const allSuppliersInSelectedLine = `/quiX/ControllerV1/supdata?k=${API_KEY}&r=${filters.line}`;
@@ -806,7 +805,7 @@ const Prediction = () => {
                             }}
                           >
                             Super Total<br />
-                            <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={1.2} separator="," /> kg<br />
+                            <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={0.5} separator="," /> kg<br />
 
                           </div>
                         </Col>
@@ -825,7 +824,7 @@ const Prediction = () => {
                             }}
                           >
                             Normal Total<br />
-                            <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={1.2} separator="," /> kg
+                            <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={0.5} separator="," /> kg
                           </div>
                         </Col>
 
@@ -843,7 +842,7 @@ const Prediction = () => {
                               boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)",
                             }}
                           >
-                            Overall Total<br />                        <CountUp style={{ fontSize: 30 }} end={Math.round(totals.overall)} duration={1.2} separator="," /> kg<br />
+                            Overall Total<br />                        <CountUp style={{ fontSize: 30 }} end={Math.round(totals.overall)} duration={0.5} separator="," /> kg<br />
 
                           </div>
                         </Col>

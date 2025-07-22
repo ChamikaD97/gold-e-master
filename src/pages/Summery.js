@@ -746,8 +746,6 @@ const Summary = () => {
           },
           { super: 0, total: 0, target: 0, difference: 0 }
         );
-        console.log(total);
-
 
         finalTableData.push({
           key: keyCounter++,
@@ -818,6 +816,8 @@ const Summary = () => {
     setLoading(true);
     setError(null);
 
+    const previousLineDiffMap = {}; // Carry forward map
+
     try {
       for (const { url, setSummary, setTotals, weeklyPortion } of weekUrls) {
         const response = await fetch(url);
@@ -832,7 +832,11 @@ const Summary = () => {
           const lineCode = idToMergedCode[lineId] || "Unknown";
           const net_kg = parseFloat(item["Net"]);
           const isSuper = item["Leaf Type"] === 2;
-          const target = getTargetByLineCode(lineCode, targets) * weeklyPortion || 0;
+
+          const baseTarget = getTargetByLineCode(lineCode, targets) * weeklyPortion || 0;
+          const lastDiff = previousLineDiffMap[lineCode];
+          const carryOver = lastDiff > 0 ? lastDiff : 0;
+          const finalTarget = baseTarget + carryOver;
 
           return {
             supplier_id: item["Supplier Id"],
@@ -843,11 +847,12 @@ const Summary = () => {
             displayLine: mergeDisplayMap[lineCode] || lineCode,
             net_kg,
             isSuper,
-            target,
+            target: finalTarget,
             officer: getOfficerByLineCode(lineCode),
           };
         });
 
+        // Summary totals
         let totalSuper = 0;
         let totalReceived = 0;
         let totalTarget = 0;
@@ -862,17 +867,15 @@ const Summary = () => {
           }
         });
 
-        const summaryData = {
+        setTotals({
           records: transformed,
           totalSuper,
           totalTarget,
           totalReceived,
           totalDifference: totalTarget - totalReceived,
-        };
+        });
 
-        setTotals(summaryData);
-
-        // Build summary table grouped by officer
+        // Group and summarize per officer
         const groupedTotals = {};
         transformed.forEach(item => {
           const key = `${item.officer}__${item.lineCode}`;
@@ -883,15 +886,22 @@ const Summary = () => {
               lineCode: item.lineCode,
               super: 0,
               total: 0,
-              target: getTargetByLineCode(item.lineCode, targets) * weeklyPortion,
+              target: item.target,
               difference: 0,
             };
           }
           if (item.leaf_type === "Super") groupedTotals[key].super += item.net_kg;
           groupedTotals[key].total += item.net_kg;
+          const val = groupedTotals[key].target - groupedTotals[key].total;
           groupedTotals[key].difference = groupedTotals[key].target - groupedTotals[key].total;
         });
 
+        // Save differences for next week
+        for (const row of Object.values(groupedTotals)) {
+          previousLineDiffMap[row.lineCode] = row.difference;
+        }
+
+        // Sort and structure final table
         const groupedByOfficer = {};
         Object.values(groupedTotals).forEach(row => {
           if (!groupedByOfficer[row.officer]) groupedByOfficer[row.officer] = [];
@@ -973,8 +983,6 @@ const Summary = () => {
         setSummary(finalTableData);
       }
     } catch (err) {
-      console.log(err);
-
       setError(err.message);
     } finally {
       dispatch(hideLoader());

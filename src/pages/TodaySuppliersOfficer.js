@@ -16,6 +16,7 @@ import CountUp from "react-countup";
 import jsPDF from "jspdf";
 import CircularLoader from "../components/CircularLoader";
 import { Space } from "antd";
+import { toast } from "react-toastify";
 
 const TodaySuppliersOfficer = () => {
   const { Option } = Select;
@@ -77,7 +78,6 @@ const TodaySuppliersOfficer = () => {
       default:
         setSelectedOfficerLines([]);
     }
-    console.log();
 
   }, [selectedOfficer]);
 
@@ -149,7 +149,6 @@ const TodaySuppliersOfficer = () => {
       selectedOfficerLines = [selectedLine]
       totalLines = 1;
     }
-    console.log(selectedOfficerLines);
 
     const startDate = day.subtract(leafRound, "day").format("YYYY-MM-DD");
 
@@ -298,15 +297,13 @@ const TodaySuppliersOfficer = () => {
           })
           .filter(sup => getInactiveDays(sup.inactiveFor) > 30); // ✅ Only keep >1 month
         // 🔽 Export complete list
-        if (withData.length > 0) {
-          downloadXSupplierListAsPDFAuto(getLineNameByCode(line), withData, enrichedWithoutData, startDate, selectedOfficer.name
+        downloadXSupplierListAsPDFAuto(getLineNameByCode(line), withData, enrichedWithoutData, startDate, selectedOfficer.name
 
-          );
-        }
+        );
 
 
       } catch (err) {
-        console.error(`Error processing line ${line.label}:`, err);
+                  toast.error("Error While Loading Data,Please Try Again");
       }
     }
 
@@ -773,7 +770,7 @@ const TodaySuppliersOfficer = () => {
                     <div style={{ color: "#fff", fontWeight: 500 }}>
                       <div>Total Leaf On That Day</div>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: "#00ff37" }}>
-                        <CountUp end={Math.round(totals.total)} duration={1.2} separator="," /> kg
+                        <CountUp end={Math.round(totals.total)} duration={0.5} separator="," /> kg
                       </div>
                     </div>
                   </Col>
@@ -784,7 +781,7 @@ const TodaySuppliersOfficer = () => {
                     <div style={{ color: "#fff", fontWeight: 500 }}>
                       <div>Suppliers</div>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: "#ff000e" }}>
-                        <CountUp end={supplierWithDataList.length} duration={1.2} separator="," />
+                        <CountUp end={supplierWithDataList.length} duration={0.5} separator="," />
                       </div>
                     </div>
                   </Col>
@@ -793,7 +790,7 @@ const TodaySuppliersOfficer = () => {
                     <div style={{ color: "#fff", fontWeight: 500 }}>
                       <div>All </div>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: "#ff000e" }}>
-                        <CountUp end={supplierLength} duration={1.2} separator="," />
+                        <CountUp end={supplierLength} duration={0.5} separator="," />
                       </div>
                     </div>
                   </Col>

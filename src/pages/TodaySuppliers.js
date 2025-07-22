@@ -16,6 +16,7 @@ import '../App.css';
 import CountUp from "react-countup";
 import jsPDF from "jspdf";
 import CircularLoader from "../components/CircularLoader";
+import { toast } from "react-toastify";
 
 const TodaySuppliers = () => {
   const { Option } = Select;
@@ -145,7 +146,7 @@ const TodaySuppliers = () => {
           // downloadXSupplierListAsPDFAuto(line.label, withData);
         }
       } catch (err) {
-        console.error(`Error processing line ${line.label}:`, err);
+                  toast.error("Error While Loading Data,Please Try Again");
       }
     }
 
@@ -156,85 +157,6 @@ const TodaySuppliers = () => {
   };
 
 
-  const downloadXSupplierListAsPDFAuto = (lineCode, supplierWithDataList) => {
-    console.log(lineCode);
-
-    const doc = new jsPDF("p", "mm", "a4");
-    const today = dayjs().format("YYYY-MM-DD");
-
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.line(14, 20, 196, 20);
-    doc.setFont(undefined, 'bold');
-    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
-
-    doc.setFontSize(9);
-    doc.line(14, 32, 196, 32);
-    doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 40);
-    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
-
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Daily Leaf Supply Summary", 14, 52);
-    doc.text(`${lineCode} Line Suppliers that need to Supply Leaf`, 14, 58);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Date: ${today}    |    Line: ${lineCode}`, 14, 63);
-    doc.line(14, 66, 196, 66);
-
-    const tableData = supplierWithDataList.map((s, i) => [
-      s.id,
-      s.name,
-      s.tel || "-",
-      s.lastDate ? dayjs(s.lastDate).format("YYYY-MM-DD") : "",
-      `${Math.round(s.total_kg || 0)} kg`,
-      " ",
-    ]);
-    const numberedTableData = tableData.map((row, index) => [index + 1, ...row]);
-
-    const totalLeaf = tableData.reduce((sum, row) => sum + parseFloat(row[4]) || 0, 0);
-
-    const finalRow = [
-      { content: "Total", colSpan: 5, styles: { halign: "right", fontStyle: "bold" } },
-      { content: totalLeaf.toFixed(2), styles: { fontStyle: "bold" } },
-      { content: "", styles: {} },
-    ];
-    numberedTableData.push(finalRow);
-
-    doc.autoTable({
-      startY: 72,
-      head: [["#", "Supplier ID", "Name", "Contact", "Last Supply", "Total Leaf", "Availability"]],
-      body: numberedTableData,
-      styles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
-        fontSize: 9,
-        halign: "center",
-        lineColor: [0, 0, 0],
-        lineWidth: 0.1,
-      },
-      headStyles: {
-        fillColor: [230, 230, 230],
-        textColor: [0, 0, 0],
-        fontStyle: "bold",
-        lineColor: [0, 0, 0],
-        lineWidth: 0.2,
-      },
-      alternateRowStyles: { fillColor: [245, 245, 245] },
-    });
-
-    const lastPage = doc.internal.getNumberOfPages();
-    doc.setPage(lastPage);
-    doc.line(14, 275, 196, 275);
-    doc.setFontSize(8);
-    doc.setTextColor(5);
-    doc.setFont(undefined, 'normal');
-    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
-    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
-
-    const fileName = `${lineCode}_line_leaf_supply.pdf${today}`;
-    doc.save(fileName);
-  };
 
 
 
@@ -371,9 +293,7 @@ const TodaySuppliers = () => {
           .filter(l => l.lineCode && l.lineId)
           .map(l => ({ label: l.lineCode, value: l.lineId }))
       ];
-      console.log(uniqueLines);
 
-      console.log(filters);
 
       const today = dayjs();
       const startDate = today.subtract(leafRound, "day").format("YYYY-MM-DD");
@@ -387,7 +307,6 @@ const TodaySuppliers = () => {
 
       if (!response.ok) throw new Error("Failed to fetch leaf records");
       const result = await response.json();
-      console.log(result);
 
       // 2. Group by supplier and calculate total super/normal
       const leafMap = {};
@@ -443,7 +362,6 @@ const TodaySuppliers = () => {
           ...leafMap[sup.id]  // merge super_kg, normal_kg, lastDate
         }));
 
-      console.log("Suppliers with Leaf Data:", withData);
       setSupplierWithDataList(withData);
       // 5. Calculate overall totals
       let totalSuper = 0;
@@ -455,9 +373,6 @@ const TodaySuppliers = () => {
       });
 
       const total = totalSuper + totalNormal;
-
-      console.log("TOTALS => Super:", totalSuper, "Normal:", totalNormal, "Total:", total);
-
       // Optionally set state for UI display
       setTotals({
         super: totalSuper,
@@ -466,7 +381,7 @@ const TodaySuppliers = () => {
       });
 
     } catch (err) {
-      console.error("Error fetching today suppliers:", err);
+                  toast.error("Error While Loading Data,Please Try Again");
     } finally {
 
       dispatch(hideLoader());
@@ -491,8 +406,6 @@ const TodaySuppliers = () => {
 
       if (!response.ok) throw new Error("Failed to fetch leaf records");
       const result = await response.json();
-      console.log(result);
-
       // 2. Group by supplier and calculate total super/normal
       const leafMap = {};
       result.forEach(item => {
@@ -546,7 +459,6 @@ const TodaySuppliers = () => {
           ...leafMap[sup.id]  // merge super_kg, normal_kg, lastDate
         }));
 
-      console.log("Suppliers with Leaf Data:", withData);
       setSupplierWithDataList(withData);
       // 5. Calculate overall totals
       let totalSuper = 0;
@@ -558,9 +470,6 @@ const TodaySuppliers = () => {
       });
 
       const total = totalSuper + totalNormal;
-
-      console.log("TOTALS => Super:", totalSuper, "Normal:", totalNormal, "Total:", total);
-
       // Optionally set state for UI display
       setTotals({
         super: totalSuper,
@@ -569,7 +478,7 @@ const TodaySuppliers = () => {
       });
 
     } catch (err) {
-      console.error("Error fetching today suppliers:", err);
+                  toast.error("Error While Loading Data,Please Try Again");
     } finally {
       dispatch(hideLoader());
     }
@@ -837,7 +746,7 @@ const TodaySuppliers = () => {
                     <div style={{ color: "#fff", fontWeight: 500 }}>
                       <div>Total Leaf On That Day</div>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: "#00ff37" }}>
-                        <CountUp end={Math.round(totals.total)} duration={1.2} separator="," /> kg
+                        <CountUp end={Math.round(totals.total)} duration={0.5} separator="," /> kg
                       </div>
                     </div>
                   </Col>
@@ -848,7 +757,7 @@ const TodaySuppliers = () => {
                     <div style={{ color: "#fff", fontWeight: 500 }}>
                       <div>Suppliers</div>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: "#ff000e" }}>
-                        <CountUp end={supplierWithDataList.length} duration={1.2} separator="," />
+                        <CountUp end={supplierWithDataList.length} duration={0.5} separator="," />
                       </div>
                     </div>
                   </Col>
@@ -857,7 +766,7 @@ const TodaySuppliers = () => {
                     <div style={{ color: "#fff", fontWeight: 500 }}>
                       <div>All </div>
                       <div style={{ fontSize: 18, fontWeight: "bold", color: "#ff000e" }}>
-                        <CountUp end={supplierLength} duration={1.2} separator="," />
+                        <CountUp end={supplierLength} duration={0.5} separator="," />
                       </div>
                     </div>
                   </Col>

@@ -165,7 +165,6 @@ const VehicleStepperModal = ({ open, onCancel, onSubmit, form, currentStep, setC
                 onClick={() => {
                   form.validateFields().then((values) => {
                     setSubmitting(true);
-                    console.log("✅ Final Vehicle Data:", values);
                     setTimeout(() => {
                       setSubmitting(false);
                       setSubmitted(true);

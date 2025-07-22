@@ -174,8 +174,6 @@ const Suppliers = () => {
     currentPage * pageSize
   );
   const handleSearchSupplier = (supplierId) => {
-    console.log("Searching for supplier:", supplierId);
-
     dispatch(showLoader());
 
     const id = supplierId?.toString().padStart(5, "0").trim();

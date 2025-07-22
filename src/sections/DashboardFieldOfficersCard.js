@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setSelectedKey } from "../redux/authSlice";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const DashboardFieldOfficersCard = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const DashboardFieldOfficersCard = () => {
 
       setClassEngines(classEnginesData.data.length);
     } catch (error) {
-      console.error("Error fetching engines:", error.message);
+                  toast.error("Error While Loading Data,Please Try Again");
     }
   };
   useEffect(() => {

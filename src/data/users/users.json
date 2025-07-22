@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Mr. Chamika Deshan",
+        "userName": "Chamika",
+        "password": "Chamika@97",
+        "role": "Super Admin"
+    },
+    {
+        "name": "Mr. Chamika Deshan",
+        "userName": "Chamika",
+        "password": "Chamika",
+        "role": "Admin"
+    },
+    {
+        "name": "Mr. Chamika Deshan",
+        "userName": "Chamika",
+        "password": "Cha97",
+        "role": "User"
+    }
+]

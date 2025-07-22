@@ -24,8 +24,20 @@ const LoginPage = () => {
   }, []);
 
   const handleLogin = () => {
+
+    import("../data/users/users.json")
+      .then((module) => {
+        const users = module.default || [];
+        localStorage.setItem("users", JSON.stringify(users));
+      })
+      .catch((err) => {
+        console.error("Failed to load users.json", err);
+        setError("Could not load initial user data.");
+      });
     const users = JSON.parse(localStorage.getItem("users") || "[]");
+
     const user = users.find((u) => u.userName === userName && u.password === password);
+    console.log(user);
 
     if (user) {
       localStorage.setItem("loggedInUser", JSON.stringify(user));

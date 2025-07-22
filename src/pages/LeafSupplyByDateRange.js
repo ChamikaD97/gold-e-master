@@ -111,7 +111,6 @@ const LeafSupplyByDateRange = () => {
       setLineWiseSummary(Object.values(summaryMap));
       setData(transformed);
     } catch (err) {
-      console.error(err);
       message.error("❌ Failed to load leaf records");
       setData([]);
     } finally {
@@ -298,19 +297,19 @@ const LeafSupplyByDateRange = () => {
                   <Col xs={24} sm={12} md={8}>
                     <div style={{ backgroundColor: "#ffa347", borderRadius: 10, padding: "14px 24px", textAlign: "center", fontWeight: 600, color: "#000", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
                       Super Total<br />
-                      <CountUp style={{ fontSize: 30 }} end={Math.round(line.Super)} duration={1.2} separator="," /> kg
+                      <CountUp style={{ fontSize: 30 }} end={Math.round(line.Super)} duration={0.5} separator="," /> kg
                     </div>
                   </Col>
                   <Col xs={24} sm={12} md={8}>
                     <div style={{ backgroundColor: "#47a3ff", borderRadius: 15, padding: "14px 24px", textAlign: "center", fontWeight: 600, color: "#000", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
                       Normal Total<br />
-                      <CountUp style={{ fontSize: 30 }} end={Math.round(line.Normal)} duration={1.2} separator="," /> kg
+                      <CountUp style={{ fontSize: 30 }} end={Math.round(line.Normal)} duration={0.5} separator="," /> kg
                     </div>
                   </Col>
                   <Col xs={24} sm={24} md={8}>
                     <div style={{ backgroundColor: "#28a745", borderRadius: 10, padding: "14px 24px", textAlign: "center", fontWeight: 600, color: "#000", textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)", boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)" }}>
                       Overall Total<br />
-                      <CountUp style={{ fontSize: 30 }} end={Math.round(line.Super + line.Normal)} duration={1.2} separator="," /> kg
+                      <CountUp style={{ fontSize: 30 }} end={Math.round(line.Super + line.Normal)} duration={0.5} separator="," /> kg
                     </div>
                   </Col>
                 </Row>

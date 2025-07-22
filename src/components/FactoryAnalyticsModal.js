@@ -19,6 +19,7 @@ import {
 } from 'recharts';
 import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
 import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
+import { toast } from "react-toastify";
 
 
 
@@ -103,7 +104,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
             setTotals(calculatedTotals);
             setData(transformed);
         } catch (err) {
-            console.error(err);
+            toast.error("Error While Loading Data,Please Try Again");
             setData([]);
             setTotals({ super: 0, normal: 0 });
         } finally {
@@ -150,7 +151,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
             setTotals(calculatedTotals);
             setData(transformed);
         } catch (err) {
-            console.error(err);
+                  toast.error("Error While Loading Data,Please Try Again");
             setData([]);
             setTotals({ super: 0, normal: 0 });
         } finally {
@@ -250,7 +251,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                     normal: parseFloat(overallNormal.toFixed(2))
                 });
             } catch (err) {
-                console.error(err);
+                  toast.error("Error While Loading Data,Please Try Again");
                 setData([]);
                 setTotals({ super: 0, normal: 0 });
             } finally {
@@ -425,7 +426,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                                                 }}
                                             >
                                                 Super Total<br />
-                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={1.2} separator="," /> kg
+                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={0.5} separator="," /> kg
                                             </div>
                                         </Col>
 
@@ -443,7 +444,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                                             >
                                                 Normal Total<br />
 
-                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={1.2} separator="," /> kg
+                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={0.5} separator="," /> kg
 
                                             </div>
                                         </Col>
@@ -462,7 +463,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                                                 }}
                                             >
                                                 Overall Total<br />
-                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super + totals.normal)} duration={1.2} separator="," /> kg
+                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super + totals.normal)} duration={0.5} separator="," /> kg
 
 
                                             </div>

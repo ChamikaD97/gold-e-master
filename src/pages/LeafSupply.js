@@ -33,8 +33,6 @@ const LeafSupply = () => {
       // if (!token) return navigation.navigate("Login");
       dispatch(isLoading(true));
       const deliveries = await axios.get(`${API_URL}/api/leafSupply`);
-      console.log(deliveries.data);
-
       setSupplyData(deliveries.data);
       setFilteredData(deliveries.data);
 
@@ -42,7 +40,7 @@ const LeafSupply = () => {
         dispatch(isLoading(false));
       }, 500);
     } catch (error) {
-      console.error("Error fetching trip Cards:", error.message);
+                  toast.error("Error While Loading Data,Please Try Again");
     }
     dispatch(isLoading(false));
   };
@@ -162,7 +160,6 @@ const LeafSupply = () => {
   };
 
   const handleRowClick = (record) => {
-    console.log(record);
 
     navigate(`/supplier/${record.supplierId}`);
   };

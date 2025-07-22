@@ -8,6 +8,7 @@ import { LeftCircleOutlined, DeleteFilled } from "@ant-design/icons";
 import "./SingleTrip.css"; // Assuming you will create a separate CSS file
 import { Alert } from "antd";
 import { Iso } from "@mui/icons-material";
+import { toast } from "react-toastify";
 
 const SupplierLeafData = () => {
   const { Id } = useParams();
@@ -25,7 +26,6 @@ const SupplierLeafData = () => {
         headers: { Authorization: "token" },
       });
       setData(response.data[0]);
-      console.log(response.data[0]);
 
       const diff = getDateDifference(
         dayjs(),
@@ -42,7 +42,7 @@ const SupplierLeafData = () => {
       }
       setDiff(tagText);
     } catch (error) {
-      console.error("Error fetching data:", error.message);
+                  toast.error("Error While Loading Data,Please Try Again");
       notification.error({
         message: "Error",
         description: "Failed to fetch data details.",
@@ -68,7 +68,7 @@ const SupplierLeafData = () => {
         navigate("/trips"); // Redirect to trips page after deletion
       }, 1000);
     } catch (error) {
-      console.error("Failed to delete trip:", error);
+                  toast.error("Error While Loading Data,Please Try Again");
       notification.error({
         message: "Error",
         description: "An error occurred while deleting the trip.",

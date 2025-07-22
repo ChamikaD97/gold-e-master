@@ -17,7 +17,6 @@ export const fetchSupplierDataFromAPI = async (supplierId) => {
     const data = await response.json();
     return Array.isArray(data) ? data : data ? [data] : [];
   } catch (err) {
-    console.error(err);
     toast.error("❌ Failed to fetch supplier details from API");
     return [];
   }

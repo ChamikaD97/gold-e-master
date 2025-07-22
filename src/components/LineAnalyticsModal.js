@@ -19,6 +19,7 @@ import {
 } from 'recharts';
 import { ReloadOutlined } from "@ant-design/icons";
 import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
+import { toast } from "react-toastify";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -58,7 +59,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
             setMonthlyTarget(data.default.filter((d) => lineCode == d.lineCode)[0].target);
 
         } catch (err) {
-            console.error(err);
+                  toast.error("❌ Failed to load target files");
             setTargets([]); // or fallback to default
         }
     };
@@ -69,7 +70,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
     useEffect(() => {
         loadTargetsForMonth(filters);
-    }, [filters.month,visible]);
+    }, [filters.month, visible]);
 
     const monthMap = useSelector((state) => state.commonData?.monthMap);
 
@@ -101,16 +102,12 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
             current = end.add(1, "day");
         }
-
         return weeks;
     };
 
     const calculateSummery = async () => {
 
-
-
         getWeeklySummaries();
-
     }
 
     const [weeklySummery, setWeeklySummery] = useState([]);
@@ -151,8 +148,9 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
             setTotals(calculatedTotals);
             setData(transformed);
+
         } catch (err) {
-            console.error(err);
+                  toast.error("Error While Loading Data,Please Try Again");
             setData([]);
             setTotals({ super: 0, normal: 0 });
         } finally {
@@ -160,10 +158,12 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
         }
     };
     const getWeeklySummaries = async () => {
+
         const { year, month } = filters;
 
         const weekRanges = getWeeklyDateRanges(year, month);
         const weeklyResults = [];
+        dispatch(showLoader());
 
 
         for (const range of weekRanges) {
@@ -210,7 +210,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
 
             } catch (err) {
-                console.error(err);
+                  toast.error("Error While Loading Data,Please Try Again");
                 weeklyResults.push({
                     week: range.week,
                     start: range.startDate,
@@ -222,9 +222,9 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                 });
             }
         }
-        console.log(weeklyResults);
-
         setWeeklySummery(weeklyResults)
+        dispatch(hideLoader());
+
         return weeklyResults;
     };
 
@@ -313,7 +313,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                     normal: parseFloat(overallNormal.toFixed(2))
                 });
             } catch (err) {
-                console.error(err);
+                  toast.error("Error While Loading Data,Please Try Again");
                 setData([]);
                 setTotals({ super: 0, normal: 0 });
             } finally {
@@ -491,7 +491,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                     }}
                                                 >
                                                     Super Total<br />
-                                                    <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={1.2} separator="," /> kg
+                                                    <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={0.5} separator="," /> kg
                                                 </div>
                                             </Col>
 
@@ -509,7 +509,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                 >
                                                     Normal Total<br />
 
-                                                    <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={1.2} separator="," /> kg
+                                                    <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={0.5} separator="," /> kg
 
                                                 </div>
                                             </Col>
@@ -528,7 +528,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                     }}
                                                 >
                                                     Overall Total<br />
-                                                    <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super + totals.normal)} duration={1.2} separator="," /> kg
+                                                    <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super + totals.normal)} duration={0.5} separator="," /> kg
 
 
                                                 </div>
@@ -641,11 +641,27 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
 
 
+                                    <Col xs={24} md={10}>
+                                        <div
+                                            style={{
+                                                backgroundColor: "#ffa347",
+                                                borderRadius: 10,
+                                                padding: "14px 24px",
+                                                textAlign: "center",
+                                                fontWeight: 600,
+                                                color: "#000",
+                                                boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                                            }}
+                                        >
+                                            Target<br />
+                                            {targets}
+                                        </div>
 
 
 
 
-                                    <Col xs={24} md={14}>
+                                    </Col>
+                                    <Col xs={24} md={10}>
 
                                         <div
                                             style={{
@@ -658,12 +674,35 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                 boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                                             }}
                                         >
-                                            {targets}-{lineCode}
+                                            Achievement<br />
+
+                                            {totals.normal + totals.super}
 
                                             <br />
 
 
                                         </div>
+                                    </Col>
+
+
+                                    <Col xs={24} md={4}>
+                                        <div
+                                            style={{
+                                                backgroundColor: "#ffa347",
+                                                borderRadius: 10,
+                                                padding: "14px 24px",
+                                                textAlign: "center",
+                                                fontWeight: 600,
+                                                color: "#000",
+                                                boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                                            }}
+                                        >
+
+                                            {(((totals.normal + totals.super) / targets) * 100).toFixed(0)}%
+
+                                        </div>
+
+
                                     </Col>
 
                                 </Row>
@@ -683,7 +722,8 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                     boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                                                 }}
                                             >
-                                                {weeklySummery[0].total}  / {week1Target * monthlyTarget / 100} - {weeklySummery[0].total / week1Target * monthlyTarget / 100} %
+                                                {weeklySummery[0].total}  / {week1Target * monthlyTarget / 100} -
+                                                {((weeklySummery[0].total / (week1Target * monthlyTarget / 100)) * 100).toFixed(0)}%
 
                                             </div>
                                         </Col>
@@ -703,8 +743,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                 {weeklySummery[1].total}  / {
                                                     week2Target * monthlyTarget / 100} -
 
-                                                {weeklySummery[1].total / week2Target * monthlyTarget / 10000} %
-
+                                                {((weeklySummery[1].total / (week2Target * monthlyTarget / 100)) * 100).toFixed(0)}%
 
 
                                             </div>
@@ -722,7 +761,8 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                     boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                                                 }}
                                             >
-                                                {weeklySummery[2].total}  / {week3Target * monthlyTarget / 100} - {weeklySummery[2].total / week3Target * monthlyTarget / 10000} %
+                                                {weeklySummery[2].total}  / {week3Target * monthlyTarget / 100} -
+                                                {((weeklySummery[2].total / (week3Target * monthlyTarget / 100)) * 100).toFixed(0)}%
 
                                             </div>
                                         </Col>
@@ -739,7 +779,9 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                                     boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                                                 }}
                                             >
-                                                {weeklySummery[3].total}  / {week4Target * monthlyTarget / 100} - {weeklySummery[3].total / week4Target * monthlyTarget / 10000} %
+                                                {weeklySummery[3].total}  / {week4Target * monthlyTarget / 100}-
+                                                {((weeklySummery[3].total / (week4Target * monthlyTarget / 100)) * 100).toFixed(0)}%
+
 
                                             </div>
                                         </Col>

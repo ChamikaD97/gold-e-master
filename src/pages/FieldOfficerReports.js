@@ -91,8 +91,7 @@ const FieldOfficerReports = () => {
   const [monthlyVisible, setMonthlyVisible] = useState(false);
   const [performanceVisible, setPerformanceVisible] = useState(false);
   const handleRangeChange = (range, firstMonth) => {
-    console.log("Selected Range start:", range.start);
-    console.log("Selected end:", range.end);
+
     const filtered = achievements.filter(
       (item) => item.officer_id === officer.id
     );
@@ -104,20 +103,14 @@ const FieldOfficerReports = () => {
       startMonth = endMonth;
       endMonth = x;
 
-      console.log("same");
-
       const summary = calculateCumulative(filtered, range.start, range.start);
       setSummaryData(summary);
-      console.log(summary);
     } else {
       const summary = calculateCumulative(filtered, range.start, range.end);
       setSummaryData(summary);
-
-      console.log(summary);
     }
 
     if (range.start > selectedMonth.id) {
-      console.log("Invalid ******** selected");
       return;
     }
 
@@ -126,7 +119,6 @@ const FieldOfficerReports = () => {
     setShorMoreModelVisible(true);
 
     if (!range.start || !range.end) {
-      console.log("Invalid range selected");
       return;
     }
   };
@@ -229,7 +221,6 @@ const FieldOfficerReports = () => {
     const filtered = achievements.filter(
       (item) => item.officer_id === selectedOfficer.id
     );
-    console.log(monthData);
 
     if (!monthData.id) {
       alert("");
@@ -341,9 +332,6 @@ const FieldOfficerReports = () => {
       .slice(from, to + 1)
       .reduce((acc, month) => acc + (record[month] || 0), 0);
 
-    console.log("Summed Range:", monthOrder.slice(from, to + 1));
-    console.log("Total Sum:", sum);
-
     return sum;
   }
   function filterGoldLeftByMonthRange(data, startMonth, endMonth) {
@@ -377,8 +365,6 @@ const FieldOfficerReports = () => {
       .slice(from, to + 1)
       .reduce((acc, month) => acc + (record[month] || 0), 0);
 
-    console.log("Summed Range:", monthOrder.slice(from, to + 1));
-    console.log("Total Sum:", sum);
 
     return sum;
   }
@@ -435,7 +421,6 @@ const FieldOfficerReports = () => {
       startMonth,
       endMonth
     );
-    console.log(b, bob, p);
 
     const b_percentage = months > 0 ? Math.round(b / months) : 0;
     const bob_percentage = months > 0 ? Math.round(bob / months) : 0;
@@ -466,7 +451,6 @@ const FieldOfficerReports = () => {
       (item) => item.officer_id === officer.id
     );
     if (selectedMonth.id) {
-      console.log("///////////////////");
 
       const summary = calculateCumulative(
         filtered,

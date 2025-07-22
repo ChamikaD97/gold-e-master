@@ -117,7 +117,6 @@ const LastSupply = () => {
       setRemainingSuppliers(remainingSuppliers);
     } catch (err) {
       toast.error("❌ Failed to load leaf collection or supplier data");
-      console.error(err);
     } finally {
       dispatch(hideLoader());
     }
