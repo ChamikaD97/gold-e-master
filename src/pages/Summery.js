@@ -5,10 +5,11 @@ import lineIdCodeMap from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { API_KEY } from "../api/api";
+import { API_KEY, getMonthDateRangeFromParts } from "../api/api";
 import dayjs from "dayjs";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { SearchRounded } from "@mui/icons-material";
 const { Option } = Select;
 const Summary = () => {
 
@@ -40,6 +41,7 @@ const Summary = () => {
   const monthMap = useSelector((state) => state.commonData?.monthMap);
   const filteredMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
     .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
+  const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
 
   const officerOrder = ["Ajith", "Chamod", "Udara", "Gamini", "Udayanga", "Other"];
   const customLineCodeOrder = [
@@ -50,31 +52,9 @@ const Summary = () => {
     "SLF", "DG", "ML", "MV"
   ];
 
-  const loadTargetsForMonth = async (filter) => {
-
-    const formatted =
-      (filter.year + '_' + filter.month)
 
 
-
-
-
-
-    try {
-      const data = await import(`../data/targets/targets_${formatted}.json`);
-      setTargets(data.default);
-    } catch (err) {
-      console.error("Target file not found for:", formatted, err);
-      setTargets([]); // or fallback to default
-    }
-  };
-
-  useEffect(() => {
-    loadTargetsForMonth(filters);
-  }, [filters.month]);
-
-
-  const exportToPDF = () => {
+  const exportToPDF = (pdfData, title) => {
     const doc = new jsPDF();
 
     // Header
@@ -96,12 +76,18 @@ const Summary = () => {
     doc.setFont(undefined, 'normal');
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    doc.text(`Leaf Summary on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
+    if (title === 'Full Summery') {
+      doc.text(`Leaf Summary on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
+
+    } else {
+      doc.text(`${title}`, 14, 46);
+
+    }
 
     doc.line(14, 50, 196, 50);
     // First Page: Officers 0, 1, 2
     officerOrder.slice(0, 3).forEach(officer => {
-      const data = routeSummary.filter(row => row.officer === officer);
+      const data = pdfData.filter(row => row.officer === officer);
       if (!data.length) return;
 
       const title = `Mr. ${officer} Summary`;
@@ -126,13 +112,16 @@ const Summary = () => {
           //     row.super.toLocaleString(),
           row.target.toLocaleString(),
           row.total.toLocaleString(),
-          row.difference.toLocaleString()
+          row.difference.toLocaleString(),
+          row.target > 0 ?
+            ((row.total / row.target) * 100).toFixed(0) + "%" :
+            '-'
         ];
       });
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Target", "Received", "Difference"]],
+        head: [["Line", "Target", "Received", "Difference", "%"]],
         body: tableData,
         styles: {
           fontSize: 10,
@@ -158,7 +147,6 @@ const Summary = () => {
         verticalLineColor: [0, 0, 0],
         verticalLineWidth: 0.2,
         margin: { left: 14, right: 14 },
-
         didParseCell: function (data) {
           const columnIndex = data.column.index;
           const cellValue = data.cell.raw;
@@ -168,9 +156,9 @@ const Summary = () => {
           // ✅ Green background only for the first column, excluding header and "Total" row
           if (
             data.section === 'body' &&
-            columnIndex === 0 &&           // Only "Line" column
-            cellValue !== "Total" &&       // Skip "Total" row
-            rowIndex !== lastIndex         // Extra safety check
+            columnIndex === 0 &&
+            cellValue !== "Total" &&
+            rowIndex !== lastIndex
           ) {
             data.cell.styles.fillColor = [255, 255, 153]; // Light yellow
           }
@@ -185,7 +173,35 @@ const Summary = () => {
             data.cell.styles.fontStyle = "bold";
             data.cell.styles.fillColor = [255, 192, 203]; // Light pink
           }
+
+          // 🎯 % column styling
+          if (
+            data.section === 'body' &&
+            columnIndex === data.table.columns.length - 1 &&
+            typeof cellValue === 'string' &&
+            cellValue.endsWith('%')
+          ) {
+            const percent = parseFloat(cellValue.replace('%', ''));
+
+            // Adjust raw value to include emoji if ≥ 100%
+            if (percent >= 100) {
+              data.cell.raw = `${cellValue} ✅ Done`; // Add emoji & label
+              data.cell.styles.fillColor = [0, 255, 127]; // Bright green
+            } else if (percent >= 70) {
+              data.cell.styles.fillColor = [153, 255, 153]; // Light green
+            } else if (percent >= 50) {
+              data.cell.styles.fillColor = [255, 204, 102]; // Orange
+            } else if (percent >= 20) {
+              data.cell.styles.fillColor = [255, 255, 153]; // Yellow
+            } else {
+              data.cell.styles.fillColor = [255, 102, 102]; // Red
+            }
+
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
         }
+
       });
 
       startY = doc.lastAutoTable.finalY + 10;
@@ -195,7 +211,7 @@ const Summary = () => {
     startY = 20; // Reset Y for new page
     // Second Page: Officers 3 and 4
     officerOrder.slice(3, 5).forEach(officer => {
-      const data = routeSummary.filter(row => row.officer === officer);
+      const data = pdfData.filter(row => row.officer === officer);
       if (!data.length) return;
 
       const title = `Mr. ${officer} Summary`;
@@ -220,13 +236,16 @@ const Summary = () => {
           row.super.toLocaleString(),
           row.target.toLocaleString(),
           row.total.toLocaleString(),
-          row.difference.toLocaleString()
+          row.difference.toLocaleString(),
+          row.target > 0 ?
+            ((row.total / row.target) * 100).toFixed(0) + "%" :
+            ''
         ];
       });
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Super", "Target", "Received", "Difference"]],
+        head: [["Line", "Super", "Target", "Received", "Difference", "%"]],
         body: tableData,
         styles: {
           fontSize: 10,
@@ -261,9 +280,9 @@ const Summary = () => {
           // ✅ Green background only for the first column, excluding header and "Total" row
           if (
             data.section === 'body' &&
-            columnIndex === 0 &&           // Only "Line" column
-            cellValue !== "Total" &&       // Skip "Total" row
-            rowIndex !== lastIndex         // Extra safety check
+            columnIndex === 0 &&
+            cellValue !== "Total" &&
+            rowIndex !== lastIndex
           ) {
             data.cell.styles.fillColor = [255, 255, 153]; // Light yellow
           }
@@ -278,7 +297,35 @@ const Summary = () => {
             data.cell.styles.fontStyle = "bold";
             data.cell.styles.fillColor = [255, 192, 203]; // Light pink
           }
+
+          // 🎯 % column styling
+          if (
+            data.section === 'body' &&
+            columnIndex === data.table.columns.length - 1 &&
+            typeof cellValue === 'string' &&
+            cellValue.endsWith('%')
+          ) {
+            const percent = parseFloat(cellValue.replace('%', ''));
+
+            // Adjust raw value to include emoji if ≥ 100%
+            if (percent >= 100) {
+              data.cell.raw = `${cellValue} ✅ Done`; // Add emoji & label
+              data.cell.styles.fillColor = [0, 255, 127]; // Bright green
+            } else if (percent >= 70) {
+              data.cell.styles.fillColor = [153, 255, 153]; // Light green
+            } else if (percent >= 50) {
+              data.cell.styles.fillColor = [255, 204, 102]; // Orange
+            } else if (percent >= 20) {
+              data.cell.styles.fillColor = [255, 255, 153]; // Yellow
+            } else {
+              data.cell.styles.fillColor = [255, 102, 102]; // Red
+            }
+
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
         }
+
       });
 
       startY = doc.lastAutoTable.finalY + 10;
@@ -286,7 +333,7 @@ const Summary = () => {
 
 
     officerOrder.slice(5, 6).forEach(officer => {
-      const data = routeSummary.filter(row => row.officer === officer);
+      const data = pdfData.filter(row => row.officer === officer);
       if (!data.length) return;
 
 
@@ -310,13 +357,15 @@ const Summary = () => {
           row.super.toLocaleString(),
           row.target.toLocaleString(),
           row.total.toLocaleString(),
-          row.difference.toLocaleString()
-        ];
+          row.difference.toLocaleString(),
+          row.target > 0 ?
+            ((row.total / row.target) * 100).toFixed(0) + "%" :
+            ''];
       });
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Super", "Target", "Received", "Difference"]],
+        head: [["Line", "Super", "Target", "Received", "Difference", "%"]],
         body: tableData,
         styles: {
           fontSize: 10,
@@ -351,9 +400,9 @@ const Summary = () => {
           // ✅ Green background only for the first column, excluding header and "Total" row
           if (
             data.section === 'body' &&
-            columnIndex === 0 &&           // Only "Line" column
-            cellValue !== "Total" &&       // Skip "Total" row
-            rowIndex !== lastIndex         // Extra safety check
+            columnIndex === 0 &&
+            cellValue !== "Total" &&
+            rowIndex !== lastIndex
           ) {
             data.cell.styles.fillColor = [255, 255, 153]; // Light yellow
           }
@@ -368,14 +417,43 @@ const Summary = () => {
             data.cell.styles.fontStyle = "bold";
             data.cell.styles.fillColor = [255, 192, 203]; // Light pink
           }
+
+          // 🎯 % column styling
+          if (
+            data.section === 'body' &&
+            columnIndex === data.table.columns.length - 1 &&
+            typeof cellValue === 'string' &&
+            cellValue.endsWith('%')
+          ) {
+            const percent = parseFloat(cellValue.replace('%', ''));
+
+            // Adjust raw value to include emoji if ≥ 100%
+            if (percent >= 100) {
+              data.cell.raw = `${cellValue} ✅ Done`; // Add emoji & label
+              data.cell.styles.fillColor = [0, 255, 127]; // Bright green
+            } else if (percent >= 70) {
+              data.cell.styles.fillColor = [153, 255, 153]; // Light green
+            } else if (percent >= 50) {
+              data.cell.styles.fillColor = [255, 204, 102]; // Orange
+            } else if (percent >= 20) {
+              data.cell.styles.fillColor = [255, 255, 153]; // Yellow
+            } else {
+              data.cell.styles.fillColor = [255, 102, 102]; // Red
+            }
+
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
         }
+
+
 
       });
 
       startY = doc.lastAutoTable.finalY + 10;
     });
     officerOrder.slice(5, 7).forEach(officer => {
-      const data = routeSummary.filter(row => row.officer === officer);
+      const data = pdfData.filter(row => row.officer === officer);
       if (!data.length) return;
 
       doc.setFontSize(10);
@@ -530,34 +608,40 @@ const Summary = () => {
     return displayMap;
   };
 
-  const getTargetByLineCode = (lineCode) => {
-    const entry = targets.find(item => item.lineCode === lineCode);
+  const getTargetByLineCode = (lineCode, target) => {
+    const entry = target.find(item => item.lineCode === lineCode);
     return entry ? entry.target : "";
   };
 
-  const getLeafRecordsByDates = async (day) => {
-    const fromDate = day.startOf("month").format("YYYY-MM-DD");
-    const toDate = day.format("YYYY-MM-DD");
-    const dateRange = `${fromDate}~${toDate}`;
-    const ids = Array.from({ length: 162 }, (_, i) => i + 1).join(",");
+  const getLeafRecordsByDates = async () => {
+
+    const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
+
+    const ids = Array.from({ length: 170 }, (_, i) => i + 1).join(",");
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${dateRange}`;
     dispatch(showLoader());
     setLoading(true);
     setError(null);
-
+    const formatted =
+      (filters.year + '_' + filters.month)
     try {
+      const dataf = await import(`../data/targets/targets_${formatted}.json`);
+      setTargets(dataf.default);
+
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch leaf records");
       const result = await response.json();
 
       const idToMergedCode = getMergedMap();
       const mergeDisplayMap = getMergeDisplayMap();
+
+
       const transformed = result.map(item => {
         const lineId = String(item["Route"]).trim();
         const lineCode = idToMergedCode[lineId] || "Unknown";
         const net_kg = parseFloat(item["Net"]);
         const isSuper = item["Leaf Type"] === 2;
-        const target = getTargetByLineCode(lineCode) || 0;
+        const target = getTargetByLineCode(lineCode, dataf.default) || 0;
 
         return {
           supplier_id: item["Supplier Id"],
@@ -600,7 +684,6 @@ const Summary = () => {
         totalReceived,
         totalDifference,
       };
-
       // Set state
       setSummery(summaryData);
       const groupedTotals = {};
@@ -613,7 +696,7 @@ const Summary = () => {
             lineCode: item.lineCode,
             super: 0,
             total: 0,
-            target: getTargetByLineCode(item.lineCode),
+            target: getTargetByLineCode(item.lineCode, dataf.default),
             difference: 0,
           };
         }
@@ -663,6 +746,8 @@ const Summary = () => {
           },
           { super: 0, total: 0, target: 0, difference: 0 }
         );
+        console.log(total);
+
 
         finalTableData.push({
           key: keyCounter++,
@@ -703,8 +788,13 @@ const Summary = () => {
         officerRowSpan: 0,
         isTotal: true,
       });
+      getLeafRecordsByWeeks(dataf.default)
 
       setRouteSummary(finalTableData);
+
+      const data = await import(`../data/targets/targets_${formatted}.json`);
+      setTargets(data.default);
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -713,15 +803,15 @@ const Summary = () => {
     }
   };
 
-  const getLeafRecordsByWeeks = async () => {
-    const ids = Array.from({ length: 162 }, (_, i) => i + 1).join(",");
+  const getLeafRecordsByWeeks = async (targets) => {
+    const ids = Array.from({ length: 170 }, (_, i) => i + 1).join(",");
     const weeklyRanges = getWeeklyRanges();
 
     const weekUrls = [
-      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week1}`, setSummary: setWeek1Summary, setTotals: setWeek1Totals },
-      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week2}`, setSummary: setWeek2Summary, setTotals: setWeek2Totals },
-      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week3}`, setSummary: setWeek3Summary, setTotals: setWeek3Totals },
-      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week4}`, setSummary: setWeek4Summary, setTotals: setWeek4Totals },
+      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week1}`, setSummary: setWeek1Summary, setTotals: setWeek1Totals, weeklyPortion: week1Target / 100 },
+      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week2}`, setSummary: setWeek2Summary, setTotals: setWeek2Totals, weeklyPortion: week2Target / 100 },
+      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week3}`, setSummary: setWeek3Summary, setTotals: setWeek3Totals, weeklyPortion: week3Target / 100 },
+      { url: `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${weeklyRanges.week4}`, setSummary: setWeek4Summary, setTotals: setWeek4Totals, weeklyPortion: week4Target / 100 },
     ];
 
     dispatch(showLoader());
@@ -729,7 +819,7 @@ const Summary = () => {
     setError(null);
 
     try {
-      for (const { url, setSummary, setTotals } of weekUrls) {
+      for (const { url, setSummary, setTotals, weeklyPortion } of weekUrls) {
         const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch leaf records");
         const result = await response.json();
@@ -742,7 +832,7 @@ const Summary = () => {
           const lineCode = idToMergedCode[lineId] || "Unknown";
           const net_kg = parseFloat(item["Net"]);
           const isSuper = item["Leaf Type"] === 2;
-          const target = getTargetByLineCode(lineCode) || 0;
+          const target = getTargetByLineCode(lineCode, targets) * weeklyPortion || 0;
 
           return {
             supplier_id: item["Supplier Id"],
@@ -793,7 +883,7 @@ const Summary = () => {
               lineCode: item.lineCode,
               super: 0,
               total: 0,
-              target: getTargetByLineCode(item.lineCode),
+              target: getTargetByLineCode(item.lineCode, targets) * weeklyPortion,
               difference: 0,
             };
           }
@@ -883,13 +973,14 @@ const Summary = () => {
         setSummary(finalTableData);
       }
     } catch (err) {
+      console.log(err);
+
       setError(err.message);
     } finally {
       dispatch(hideLoader());
       setLoading(false);
     }
   };
-
 
 
   const getWeeklyRanges = () => {
@@ -926,11 +1017,6 @@ const Summary = () => {
   };
 
 
-  useEffect(() => {
-    getLeafRecordsByDates(dayjs().subtract(1, "day"));
-    getLeafRecordsByWeeks()
-  }, [filters.month]);
-
   const cardStyle = {
     background: "rgba(0, 0, 0, 0.6)",
     color: "#fff",
@@ -944,54 +1030,8 @@ const Summary = () => {
         <Card bordered={false} style={cardStyle}>
           <Row justify="space-between" gutter={[16, 16]}>
             <Col span={24}>
-              <Row gutter={[8, 8]}>
-
-                <Col md={4}>
-                  <Button
-                    type="primary"
-                    style={{ marginLeft: 8 }}
-                    onClick={exportToPDF}
-                  >
-                    Export to PDF All
-                  </Button>
-                </Col>
-                <Col md={4}>
-                  <Button
-                    type="primary"
-                    style={{ marginLeft: 8 }}
-                    onClick={exportToPDF}
-                  >
-                    Export to Week 1
-                  </Button>
-                </Col>
-                <Col md={4}>
-                  <Button
-                    type="primary"
-                    style={{ marginLeft: 8 }}
-                    onClick={exportToPDF}
-                  >
-                    Export to Week 2
-                  </Button>
-                </Col>
-                <Col md={4}>
-                  <Button
-                    type="primary"
-                    style={{ marginLeft: 8 }}
-                    onClick={exportToPDF}
-                  >
-                    Export to Week 3
-                  </Button>
-                </Col>
-                <Col md={4}>
-                  <Button
-                    type="primary"
-                    style={{ marginLeft: 8 }}
-                    onClick={exportToPDF}
-                  >
-                    Export to Week 4
-                  </Button>
-                </Col>
-                <Col md={4}>
+              <Row gutter={[16, 16]}>
+                <Col md={3}>
                   <Select showSearch
                     style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
@@ -1006,10 +1046,9 @@ const Summary = () => {
 
                   </Select>
                 </Col>
-                <Col md={4}>
+                <Col md={3}>
                   <Select
                     showSearch
-
                     value={filters.month}
                     onChange={val => setFilters(prev => ({ ...prev, month: val }))}
                     style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
@@ -1020,23 +1059,67 @@ const Summary = () => {
                     ))}
                   </Select>
                 </Col>
+                <Col md={3}>
 
-
-
-
-
+                  <Button
+                    icon={<SearchRounded />}
+                    type="primary"
+                    onClick={() => getLeafRecordsByDates()}
+                  />
+                </Col>
+                <Col md={3}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => exportToPDF(routeSummary, 'Full Summery')}
+                  >
+                    All
+                  </Button>
+                </Col>
+                <Col md={3}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => exportToPDF(week1Summary, '1st Week Summery')}
+                  >
+                    Week 1
+                  </Button>
+                </Col>
+                <Col md={3}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => exportToPDF(week2Summary, '2nd Week Summery')}
+                  >
+                    Week 2
+                  </Button>
+                </Col>
+                <Col md={3}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => exportToPDF(week3Summary, '3rd Week Summery')}
+                  >
+                    Week 3
+                  </Button>
+                </Col>
+                <Col md={3}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => exportToPDF(week4Summary, 'Last Week Summery')}
+                  >
+                    Week 4
+                  </Button>
+                </Col>
 
               </Row>
             </Col>
-
-
-
           </Row>
-
         </Card>
+
         {loading && <CircularLoader />}
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
-
 
         <Card bordered={false} style={cardStyle}>
           {officerOrder.map((officer) => {
@@ -1048,14 +1131,12 @@ const Summary = () => {
                 <Table
                   columns={columns}
                   className="sup-bordered-table"
-
                   dataSource={officerData}
                   pagination={false}
                   bordered
                   size="middle"
                   rowClassName={(record) => record.officer === "Grand Total" ? "grand-total-row" : record.isTotal ? "officer-total-row" : ""}
                 />
-
               </Card>
             );
           })}
