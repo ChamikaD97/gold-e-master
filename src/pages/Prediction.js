@@ -58,7 +58,10 @@ const Prediction = () => {
   };
 
   useEffect(() => {
-    loadTargetsForMonth(filters);
+    if (filters.month !== "Select Month") {
+      loadTargetsForMonth(filters);
+
+    }
 
   }, [filters.month]);
 
@@ -740,7 +743,7 @@ const Prediction = () => {
         </Card>
       </div>
 
-      {filters.line !== "M" && filters.officer !== "All" && (
+      {filters.line !== "M" && filters.officer !== "All" && filters.month !== "Select Month" && (
         <Card bordered={false} style={cardStyle}>
           <Row gutter={[12, 12]}>
             {filteredLines.filter(l => l !== "All").map(line => (

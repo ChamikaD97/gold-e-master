@@ -166,7 +166,7 @@ const SupplierInfo = () => {
   const valueStyle = { color: "#fff" };
 
   return (
-    <div id="root" style={{ padding: 24 }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       {/* Search Bar */}
       <Row gutter={[8, 8]} justify="center">
         <Col md={12}>

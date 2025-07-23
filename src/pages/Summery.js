@@ -1104,7 +1104,7 @@ const Summary = () => {
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column", padding: 16 }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
         <Card bordered={false} style={cardStyle}>
           <Row justify="space-between" gutter={[16, 16]}>

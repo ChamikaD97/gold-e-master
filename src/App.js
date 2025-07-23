@@ -19,7 +19,7 @@ import LeafSupplyByDateRange from "./pages/LeafSupplyByDateRange";
 import Prediction from "./pages/Prediction";
 import { ToastContainer } from "react-toastify";
 import OfficerTargets from "./pages/OfficerTargets";
-import TodaySuppliersFull from "./pages/TodaySuppliersFull";
+import TodaySuppliersFull from "./pages/TodaySuppliersOfficer.js";
 import Summary from "./pages/Summery";
 
 const LayoutWithHeader = () => (
@@ -74,7 +74,7 @@ const App = () => {
           <Route
             path="/login"
             element={
-              isSessionValid() ? <Navigate to="/dashboard" replace /> : <LoginForm />
+              isSessionValid() ? <Navigate to="/login" replace /> : <LoginForm />
             }
           />
 
@@ -103,7 +103,7 @@ const App = () => {
             />
 
             <Route
-              path="/leaf/todaySupply/full"
+              path="/leaf/todaySupply/officer"
               element={<PrivateRoute element={<TodaySuppliersFull />} />}
             />
 
