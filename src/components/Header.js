@@ -28,6 +28,7 @@ const HeaderComponent = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("users");
     navigate("/login");
   };
   return (

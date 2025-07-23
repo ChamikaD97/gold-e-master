@@ -368,6 +368,7 @@ const SupplierInfo = () => {
 
                     {!isLoading && data.length > 0
                       && <Table
+                        className="sup-bordered-table"
                         dataSource={data}
                         columns={[
                           { title: "Leaf Date", dataIndex: "date", key: "date" },

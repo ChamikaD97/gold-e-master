@@ -246,14 +246,68 @@ input::placeholder {
 
 .red-bordered-table .ant-table-thead>tr>th,
 .red-bordered-table .ant-table-tbody>tr>td {
-  border: 0.2px solid rgb(172, 172, 172) !important;
+  border: 0.1px solid rgb(172, 172, 172) !important;
+}
+
+.normal-bordered-table .ant-table-thead>tr>th {
+  border: 0.1px solid rgb(255, 255, 255) !important;
+  /* Changed to white */
+}
+
+/* Glassy table container */
+.normal-bordered-table .ant-table {
+  background: rgba(0, 0, 0, 0.466);
+  overflow: hidden;
+}
+
+.normal-bordered-table .ant-table-thead>tr>th {
+  background: #000000;
+  color: #f0f0f0;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: center;
+}
+
+.normal-bordered-table .ant-table-tbody>tr>td {
+  background: rgb(0, 0, 0);
+  color: #f5f5f5;
+  font-size: 13px;
+  border-color: white !important;
+  /* Changed from #444 */
+  text-align: center;
+  padding: 8px 12px;
+}
+
+.normal-bordered-table .ant-pagination {
+  background-color: rgb(0, 0, 0);
+  padding: 8px;
+  border-radius: 0 0 12px 12px;
+  color: #fff;
+}
+
+.normal-bordered-table .ant-pagination-item,
+.normal-bordered-table .ant-pagination-prev,
+.normal-bordered-table .ant-pagination-next {
+  border: none;
+  color: #fff;
+}
+
+.normal-bordered-table .ant-pagination-item-active {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.normal-bordered-table .ant-table-tbody>tr:hover>td {
+  background-color: #0000008f  !important;
+  cursor: pointer;
+  color: #ffffff;
 }
 
 .sup-bordered-table .ant-table-thead>tr>th,
 
 .sup-bordered-table .ant-table-tbody>tr>td {
   border: 0.2px solid rgb(0, 0, 0) !important;
-   background: transparent !important; 
+  background: transparent !important;
 }
 
 /* For a glassy, modern dark table look */
@@ -300,11 +354,10 @@ input::placeholder {
   color: #ffffff;
 }
 
-.sup-bordered-table .ant-table-tbody > tr:hover {
-  background-color: #0000004d; /* Light blue */
+.sup-bordered-table .ant-table-tbody>tr:hover {
+  background-color: #0000004d;
+  /* Light blue */
   cursor: pointer;
   color: #ffffff;
   font-weight: 600;
 }
-
-

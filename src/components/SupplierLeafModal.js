@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Modal, Calendar, Alert, Card, Button, Row, Col, message } from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { Modal, Calendar, Alert, Card, Button, Row, Col, message, Select } from "antd";
 import dayjs from "dayjs";
 import CircularLoader from "../components/CircularLoader";
 import { API_KEY, getMonthDateRangeFromParts } from "../api/api";
@@ -9,16 +9,41 @@ import { useSelector, useDispatch } from "react-redux";
 import { setSelectedSupplier } from "../redux/commonDataSlice";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import './DarkCalendar.css';
+import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
+const { Option } = Select;
 
-const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId }) => {
+const SupplierLeafModal = ({ open, onClose, filters, supplierId }) => {
     const [leafData, setLeafData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
     const [supplier, setSupplier] = useState(null);
+
+
+
+
+    const [superKg, setSuper] = useState(null);
+    const [normalKg, setNormal] = useState(null);
+
+
 
     const [data, setData] = useState([]);
 
+
+    const filteredData = useRef({ year: dayjs().year(), month: dayjs().month() + 1 });
+
     const dispatch = useDispatch();
+    const monthMap = useSelector((state) => state.commonData?.monthMap);
+    const [changed, setIsChanged] = useState(true)
+    const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const filteredMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+        .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
+    const [calendarDate, setCalendarDate] = useState(dayjs());
+
+    const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
+
     const fetchSupplierDataFromId = async (supId) => {
         dispatch(showLoader());
 
@@ -54,16 +79,59 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
     };
 
 
+    const handlePrevMonth = () => {
+        const { year, month } = filteredData.current;
+        console.log(year - 1, month - 1);
+        if (month === 1) {
+            filteredData.current = { year: year - 1, month: 12 };
+        } else {
+            filteredData.current = { year, month: month - 1 };
+        }
 
+        console.log("Prev:", filteredData.current); setIsChanged(!changed)
+        setCalendarDate(dayjs(`${filteredData.current.year}-${filteredData.current.month}-01`));
+
+    };
+
+    const handleNextMonth = () => {
+        const { year, month } = filteredData.current;
+        console.log(year + 1, month + 1);
+
+        if (month === 12) {
+            filteredData.current = { year: year + 1, month: 1 };
+        } else {
+            filteredData.current = { year, month: month + 1 };
+        }
+        setIsChanged(!changed)
+        setCalendarDate(dayjs(`${filteredData.current.year}-${filteredData.current.month}-01`));
+
+    };
 
 
     useEffect(() => {
+        filteredData.current = filters
+    }, [open])
 
+    useEffect(() => {
+        console.log('*****************cccccccc*********************');
         if (open && supplierId) {
             setLoading(true);
-            getLeafRecordsBySupplierId({ filters, supplierId })
+            const fill = filteredData.current
+
+
+            getLeafRecordsBySupplierId({ filters: filteredData.current, supplierId })
+
                 .then((data) => {
                     setLeafData(data || []);
+                    const superKg = data
+                        .filter((item) => item["Leaf Type"] === 2)
+                        .reduce((sum, item) => sum + parseFloat(item["Net"] || 0), 0);
+
+                    const normalKg = data
+                        .filter((item) => item["Leaf Type"] !== 2)
+                        .reduce((sum, item) => sum + parseFloat(item["Net"] || 0), 0);
+                    setNormal(normalKg)
+                    setSuper(superKg)
                     setError(null);
                 })
                 .catch(() => {
@@ -73,9 +141,11 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
                 .finally(() => setLoading(false));
             fetchSupplierDataFromId(supplierId);
         }
-    }, [supplierId, open]);
+    }, [supplierId, changed, open]);
 
     const getLeafRecordsBySupplierId = async ({ filters, supplierId }) => {
+        console.log('**************************************');
+
         const baseUrl = "/quiX/ControllerV1/glfdata";
         const range = getMonthDateRangeFromParts(filters.year, filters.month);
         const params = new URLSearchParams({ k: API_KEY, s: supplierId, d: range });
@@ -119,17 +189,6 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
         );
     };
 
-    const monthMap = useSelector((state) => state.commonData?.monthMap);
-
-    const superKg = leafData
-        .filter((item) => item["Leaf Type"] === 2)
-        .reduce((sum, item) => sum + parseFloat(item["Net"] || 0), 0);
-
-    const normalKg = leafData
-        .filter((item) => item["Leaf Type"] !== 2)
-        .reduce((sum, item) => sum + parseFloat(item["Net"] || 0), 0);
-
-    const totalKg = (superKg + normalKg).toFixed(2);
 
     const downloadLeafDataAsPDF = (print = false) => {
         const today = new Date().toLocaleDateString();
@@ -172,9 +231,10 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
 
         doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
-        doc.text("Monthly Leaf Supply Summary", 14, 51);
+        doc.line(14, 51, 196, 51);
+
         doc.setFontSize(11);
-        doc.text(`Leaf Supply of ${supplierId} in ${dayjs(selectedDate).format("MMMM YYYY")}`, 14, 56);
+        doc.text(`Monthly Leaf Supply Summary of ${supplierId} in ${dayjs(calendarDate).format("MMMM YYYY")}`, 14, 56);
         doc.setFont(undefined, 'normal');
         doc.line(14, 66, 196, 66);
 
@@ -295,7 +355,98 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
                     border: "1px solid #444",
                 }}
             >
-                {`Leaf Supply of ${supplier?.["Supplier Name"] || "Unknown"}  - ${supplierId}  in ${dayjs(selectedDate).format("MMMM YYYY")}`}
+                {`Leaf Supply of ${supplier?.["Supplier Name"] || "Unknown"}  - ${supplierId}  in ${dayjs(calendarDate).format("MMMM YYYY")}`}
+
+            </div>
+
+            <div
+                style={{
+                    marginBottom: 20,
+                    padding: 12,
+                    background: "#2b2b2b",
+                    borderRadius: 8,
+                    textAlign: "center",
+                    color: "#fff",
+                    fontWeight: "500",
+                    fontSize: 16,
+                    border: "1px solid #444",
+                }}
+            >
+                <Row gutter={[16, 16]}>
+                    <Col xs={12} sm={8} md={2}>
+
+                        <Button icon={<ArrowLeft />} type="primary" block onClick={handlePrevMonth} />
+
+
+                    </Col>
+                    <Col xs={12} sm={8} md={10}>
+                        <Select
+                            showSearch
+                            value={filteredData.current.year}
+                            onChange={(val) => {
+                                filteredData.current = {
+                                    ...filteredData.current,
+                                    year: val,
+                                };
+                            }}
+
+                            style={{
+                                width: "100%",
+                                backgroundColor: "rgb(0, 0, 0)",
+                                color: "#000",
+                                border: "1px solid #333",
+                                borderRadius: 6
+                            }}
+                            bordered={false}
+                            placeholder="Select Year"
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                option.children.toLowerCase().includes(input.toLowerCase())
+                            }
+                        >
+                            {years.map((year) => (
+                                <Option key={year} value={year}>
+                                    {year}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Col>
+                    <Col xs={12} sm={8} md={10}>
+                        <Select
+                            showSearch
+                            value={filteredData.current.month}
+                            onChange={(val) => {
+                                filteredData.current = {
+                                    ...filteredData.current,
+                                    month: val,
+                                };
+                            }}
+                            style={{
+                                width: "100%",
+                                backgroundColor: "rgb(0, 0, 0)",
+                                color: "#000",
+                                border: "1px solid #333",
+                                borderRadius: 6
+                            }}
+                            bordered={false}
+                            placeholder="Select Month"
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                option.children.toLowerCase().includes(input.toLowerCase())
+                            }
+                        >
+                            {filteredMonths.map((m) => (
+                                <Option key={m} value={parseInt(m)}>
+                                    {monthMap[m]}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Col>
+                    <Col xs={12} sm={8} md={2}>
+                        <Button icon={<ArrowRight />} danger type="primary" block onClick={handleNextMonth} />
+
+                    </Col>
+                </Row>
 
             </div>
 
@@ -308,15 +459,16 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
                     <>
 
 
-                     
 
-<div className="dark-calendar-wrapper">
-  <Calendar
-    fullscreen={false}
-    dateCellRender={dateCellRender}
-    value={dayjs(selectedDate)}
-  />
-</div>
+
+                        <div className="dark-calendar-wrapper">
+                            <Calendar
+                                fullscreen={false}
+                                value={calendarDate}
+                                dateCellRender={dateCellRender}
+                            />
+
+                        </div>
 
                         <div
                             style={{
@@ -371,7 +523,7 @@ const SupplierLeafModal = ({ open, onClose, filters, selectedDate, supplierId })
                                             backgroundColor: "#28a745",
                                             padding: "14px 24px",
                                             borderRadius: 10,
-                                            color: "#fff",
+                                            color: "#000",
                                             fontWeight: 600,
                                             textAlign: "center",
                                             boxShadow: "0 2px 10px rgba(0,0,0,0.3)",

@@ -4,16 +4,56 @@
   color: #ffffff;
 }
 
-.dark-calendar-wrapper .ant-picker-cell {
-  color: #ffffff;
+.dark-calendar-wrapper .ant-picker-calendar-full .ant-picker-calendar-date-value,
+.dark-calendar-wrapper .ant-picker-calendar-header .ant-picker-calendar-mode-switch {
+  display: none !important;
 }
-
-.dark-calendar-wrapper .ant-picker-cell-in-view.ant-picker-cell-selected {
-  background-color: #1890ff;
-  color: #ffffff;
+.dark-calendar-wrapper .ant-picker-calendar-header {
+  display: none !important;
 }
 
 .dark-calendar-wrapper .ant-picker-header {
   background-color: #2c2c2c;
   color: #ffffff;
+  border-bottom: 1px solid #444;
+}
+
+.dark-calendar-wrapper .ant-picker-cell {
+  color: #ffffff;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+}
+
+.dark-calendar-wrapper .ant-picker-cell-in-view.ant-picker-cell-selected {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+
+.dark-calendar-wrapper .ant-picker-cell-disabled {
+  display: none !important;
+}
+
+.dark-calendar-wrapper .ant-picker-content th {
+  color: #cccccc;
+}
+/* Full cell outline */
+.dark-calendar-wrapper .ant-picker-cell {
+  border: 0.5px solid rgba(255, 255, 255, 0.15);
+}
+/* Remove border or highlight around today's date */
+.dark-calendar-wrapper .ant-picker-cell-today::before {
+  display: none !important;
+}
+
+/* Optional: also normalize its text color and background */
+.dark-calendar-wrapper .ant-picker-cell-today .ant-picker-cell-inner {
+  border: none !important;
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.dark-calendar-wrapper .ant-picker-cell:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
 }

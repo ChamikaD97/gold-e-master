@@ -291,17 +291,6 @@ const Dashboard = () => {
 
 
 
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-
-        <Col span={5}>
-          <Card bordered={false} style={cardStyle}>
-            <LeafPieChart data={pieData} />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Search by Route | Set Today’s Route Supply */}
-
 
 
 

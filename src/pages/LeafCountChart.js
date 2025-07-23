@@ -244,7 +244,7 @@ const LeafSupply = () => {
       setRemainingSuppliers(remainingSuppliers);
 
       // ✅ Optional debug logs
- 
+
 
     } catch (err) {
       toast.error("❌ Failed to load leaf collection or supplier data");
@@ -659,152 +659,8 @@ const LeafSupply = () => {
     background: "rgba(0, 0, 0, 0.6)", color: "#fff", borderRadius: 12, marginBottom: 6
   };
 
-  const downloadXSupplierListAsPDF = (p) => {
-
-    const doc = new jsPDF();
-    const today = new Date().toLocaleDateString();
-    const selectedLine = filters.lineCode || "All";
-
-    // Header
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.line(14, 20, 196, 20);
-    doc.setFont(undefined, 'bold');
-    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
-
-    doc.setFontSize(9);
-    doc.line(14, 32, 196, 32);
-    doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 40);
-    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
-
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Daily Leaf Supply Summary", 14, 52);
-
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text(`${selectedLine} Line Suppliers that need to Supply Leaf`, 14, 58);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Date: ${today}    |    Line: ${selectedLine}`, 14, 63);
-
-    doc.setDrawColor(0);
-    doc.line(14, 66, 196, 66);
-
-    // 📋 X Supplier Details Table
-    if (xSupplierDetails.length > 0) {
-      const totalXKg = xSupplierDetails.reduce((sum, s) => sum + parseFloat(s["X KG"] || 0), 0);
-
-      const tableData2 = xSupplierDetails.map((s) => [
-        s["Supplier Id"],
-        s["Supplier Name"],
-        s["Contact"] || "-",
-        s["X KG"] || "0",
-        "",  // Informed (placeholder)
-        ""   // Availability (placeholder)
-      ]);
-
-      const tableData = tableData2.map((row, index) => [index + 1, ...row]);
 
 
-      const finalRow = [
-        { content: "Total", colSpan: 4, styles: { halign: "right", fontStyle: "bold" } },
-        { content: totalXKg.toFixed(2), styles: { fontStyle: "bold" } },
-        { content: "", styles: {} }, // empty last cell ("Availability")
-      ];
-
-      // Append the final row to the body
-      tableData.push(finalRow);
-
-      doc.autoTable({
-        startY: 72,
-        head: [["#", "Supplier ID", "Name", "Mobile", "Last Supply", "Informed", "Availability"]],
-        body: tableData,
-        styles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontSize: 9,
-          halign: 'center',
-          lineColor: [0, 0, 0],
-          lineWidth: 0.1
-        },
-        headStyles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontStyle: 'bold',
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2
-        },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        tableLineColor: [0, 0, 0],
-        tableLineWidth: 0.1,
-      });
-    }
-
-    // 📋 Remaining Inactive Suppliers Table
-    if (remainingSuppliers.length > 0) {
-      doc.addPage();
-
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text("Remaining Inactive Suppliers", 14, 30);
-
-      const inactiveTableData1 = remainingSuppliers.map(s => [
-        s["Supplier Id"],
-        s["Supplier Name"] || "-",
-        s["Contact"] || "-",
-        " "
-      ]);
-
-      // Add summary row
-      const inactiveTableData = inactiveTableData1.map((row, index) => [index + 1, ...row]);
-
-      doc.autoTable({
-        startY: 36,
-        head: [["#", "Supplier ID", "Name", "Mobile"]],
-        body: inactiveTableData,
-        styles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontSize: 9,
-          halign: 'center',
-          lineColor: [0, 0, 0],
-          lineWidth: 0.1
-        },
-        headStyles: {
-          fillColor: [255, 255, 255],
-          textColor: [0, 0, 0],
-          fontStyle: 'bold',
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2
-        },
-        alternateRowStyles: { fillColor: [240, 240, 240] },
-        tableLineColor: [0, 0, 0],
-        tableLineWidth: 0.1,
-      });
-    }
-
-    // 🖋️ Footer (only on the last page)
-    const lastPage = doc.internal.getNumberOfPages();
-    doc.setPage(lastPage);
-    doc.line(14, 275, 196, 275);
-    doc.setFontSize(8);
-    doc.setTextColor(5);
-    doc.setFont(undefined, 'normal');
-    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
-    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
-
-    // 📤 Export
-    if (p) {
-      doc.autoPrint(); // Print preview
-      const blob = doc.output("blob");
-      const blobUrl = URL.createObjectURL(blob);
-      window.open(blobUrl); // New tab for print
-    } else {
-      const formattedDate = new Date().toISOString().split('T')[0];
-      doc.save(`${selectedLine} line suppliers - ${formattedDate}.pdf`);
-    }
-  };
 
 
   return (
@@ -815,28 +671,8 @@ const LeafSupply = () => {
         open={xModalVisible}
         onCancel={() => setXModalVisible(false)}
         footer={[
-          <Button
-            key="download"
-            type="primary"
-            onClick={() => downloadXSupplierListAsPDF(false)}
-            style={{
-              backgroundColor: '#007bff',
-              borderRadius: 6,
-              fontWeight: 400,
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.4)'
-            }}
-          >
-            Download PDF
-          </Button>,
-          <Button
-            key="download"
 
-            onClick={() => downloadXSupplierListAsPDF(true)}
-            style={{ backgroundColor: "#28a745", color: "#fff", borderRadius: 6 }}
 
-          >
-            Print PDF
-          </Button>,
 
           <Button
             key="close"
@@ -1172,7 +1008,7 @@ const LeafSupply = () => {
               <Card bordered={false} style={cardStyle}>
                 {(
                   <Table
-                    className="sup-bordered-table"
+                    className="normal-bordered-table"
                     columns={columns}
                     dataSource={filteredTableData}
                     pagination={false}

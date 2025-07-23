@@ -20,6 +20,7 @@ import {
 import { ReloadOutlined } from "@ant-design/icons";
 import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
 import { toast } from "react-toastify";
+import TargetSummaryCards from "./TargetSummaryCards";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -59,7 +60,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
             setMonthlyTarget(data.default.filter((d) => lineCode == d.lineCode)[0].target);
 
         } catch (err) {
-                  toast.error("❌ Failed to load target files");
+            toast.error("❌ Failed to load target files");
             setTargets([]); // or fallback to default
         }
     };
@@ -67,10 +68,14 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
         year: currentYear,
         month: dayjs().month() + 1
     });
-
+    const [showMore, setShowMore] = useState(false);
+    const [chartType, setChartType] = useState("monthly");
     useEffect(() => {
-        loadTargetsForMonth(filters);
-    }, [filters.month, visible]);
+        if (showMore) {
+            loadTargetsForMonth(filters);
+        }
+
+    }, [filters.month, showMore, chartType, visible]);
 
     const monthMap = useSelector((state) => state.commonData?.monthMap);
 
@@ -79,8 +84,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
         .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
 
     const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
-    const [chartType, setChartType] = useState("monthly");
-    const [showMore, setShowMore] = useState(false);
+
 
 
     const getWeeklyDateRanges = (year, month) => {
@@ -150,7 +154,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
             setData(transformed);
 
         } catch (err) {
-                  toast.error("Error While Loading Data,Please Try Again");
+            toast.error("Error While Loading Data,Please Try Again");
             setData([]);
             setTotals({ super: 0, normal: 0 });
         } finally {
@@ -210,7 +214,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
 
             } catch (err) {
-                  toast.error("Error While Loading Data,Please Try Again");
+                toast.error("Error While Loading Data,Please Try Again");
                 weeklyResults.push({
                     week: range.week,
                     start: range.startDate,
@@ -313,7 +317,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                     normal: parseFloat(overallNormal.toFixed(2))
                 });
             } catch (err) {
-                  toast.error("Error While Loading Data,Please Try Again");
+                toast.error("Error While Loading Data,Please Try Again");
                 setData([]);
                 setTotals({ super: 0, normal: 0 });
             } finally {
@@ -635,160 +639,13 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                                 }}
                             >
 
-                                <Row gutter={[16, 16]} justify="center">
-
-
-
-
-
-                                    <Col xs={24} md={10}>
-                                        <div
-                                            style={{
-                                                backgroundColor: "#ffa347",
-                                                borderRadius: 10,
-                                                padding: "14px 24px",
-                                                textAlign: "center",
-                                                fontWeight: 600,
-                                                color: "#000",
-                                                boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                            }}
-                                        >
-                                            Target<br />
-                                            {targets}
-                                        </div>
-
-
-
-
-                                    </Col>
-                                    <Col xs={24} md={10}>
-
-                                        <div
-                                            style={{
-                                                backgroundColor: "#47a3ff",
-                                                borderRadius: 10,
-                                                padding: "14px 24px",
-                                                textAlign: "center",
-                                                fontWeight: 600,
-                                                color: "#000",
-                                                boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                            }}
-                                        >
-                                            Achievement<br />
-
-                                            {totals.normal + totals.super}
-
-                                            <br />
-
-
-                                        </div>
-                                    </Col>
-
-
-                                    <Col xs={24} md={4}>
-                                        <div
-                                            style={{
-                                                backgroundColor: "#ffa347",
-                                                borderRadius: 10,
-                                                padding: "14px 24px",
-                                                textAlign: "center",
-                                                fontWeight: 600,
-                                                color: "#000",
-                                                boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                            }}
-                                        >
-
-                                            {(((totals.normal + totals.super) / targets) * 100).toFixed(0)}%
-
-                                        </div>
-
-
-                                    </Col>
-
-                                </Row>
-                                <br />
-                                {weeklySummery.length && (
-
-                                    <Row gutter={[16, 16]}>
-                                        <Col xs={24} sm={6}>
-                                            <div
-                                                style={{
-                                                    backgroundColor: "#47a3ff",
-                                                    borderRadius: 10,
-                                                    padding: "14px 24px",
-                                                    textAlign: "center",
-                                                    fontWeight: 600,
-                                                    color: "#000",
-                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                                }}
-                                            >
-                                                {weeklySummery[0].total}  / {week1Target * monthlyTarget / 100} -
-                                                {((weeklySummery[0].total / (week1Target * monthlyTarget / 100)) * 100).toFixed(0)}%
-
-                                            </div>
-                                        </Col>
-
-                                        <Col xs={24} sm={6}>
-                                            <div
-                                                style={{
-                                                    backgroundColor: "#ffc547ff",
-                                                    borderRadius: 10,
-                                                    padding: "14px 24px",
-                                                    textAlign: "center",
-                                                    fontWeight: 600,
-                                                    color: "#000",
-                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                                }}
-                                            >
-                                                {weeklySummery[1].total}  / {
-                                                    week2Target * monthlyTarget / 100} -
-
-                                                {((weeklySummery[1].total / (week2Target * monthlyTarget / 100)) * 100).toFixed(0)}%
-
-
-                                            </div>
-                                        </Col>
-
-                                        <Col xs={24} sm={6}>
-                                            <div
-                                                style={{
-                                                    backgroundColor: "#ff6b8bff",
-                                                    borderRadius: 10,
-                                                    padding: "14px 24px",
-                                                    textAlign: "center",
-                                                    fontWeight: 600,
-                                                    color: "#000",
-                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                                }}
-                                            >
-                                                {weeklySummery[2].total}  / {week3Target * monthlyTarget / 100} -
-                                                {((weeklySummery[2].total / (week3Target * monthlyTarget / 100)) * 100).toFixed(0)}%
-
-                                            </div>
-                                        </Col>
-
-                                        <Col xs={24} sm={6}>
-                                            <div
-                                                style={{
-                                                    backgroundColor: "#47a3ff",
-                                                    borderRadius: 10,
-                                                    padding: "14px 24px",
-                                                    textAlign: "center",
-                                                    fontWeight: 600,
-                                                    color: "#000",
-                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                                }}
-                                            >
-                                                {weeklySummery[3].total}  / {week4Target * monthlyTarget / 100}-
-                                                {((weeklySummery[3].total / (week4Target * monthlyTarget / 100)) * 100).toFixed(0)}%
-
-
-                                            </div>
-                                        </Col>
-                                    </Row>
-
-                                )}
-
+                                <TargetSummaryCards
+                                    targets={targets}
+                                    totals={totals}
+                                    weeklySummery={weeklySummery}
+                                    weekTargets={[week1Target, week2Target, week3Target, week4Target]}
+                                    monthlyTarget={monthlyTarget}
+                                />
 
 
                             </div>

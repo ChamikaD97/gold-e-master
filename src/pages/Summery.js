@@ -110,7 +110,10 @@ const Summary = () => {
 
         return [
           lineCode,
-          //     row.super.toLocaleString(),
+          row.super.toLocaleString(),
+          row.super > 0 ?
+            ((row.super / row.total) * 100).toFixed(0) + "%" :
+            '-',
           row.target.toLocaleString(),
           row.total.toLocaleString(),
           row.difference.toLocaleString(),
@@ -122,7 +125,8 @@ const Summary = () => {
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Target", "Received", "Difference", "%"]],
+        head: [["Line", "Super", "%", "Target", "Received", "Difference", "%"]],
+
         body: tableData,
         styles: {
           fontSize: 10,
@@ -154,17 +158,17 @@ const Summary = () => {
           const rowIndex = data.row.index;
           const lastIndex = tableData.length - 1;
 
-          // ✅ Green background only for the first column, excluding header and "Total" row
+          // ✅ First column: Light yellow background
           if (
             data.section === 'body' &&
             columnIndex === 0 &&
             cellValue !== "Total" &&
             rowIndex !== lastIndex
           ) {
-            data.cell.styles.fillColor = [255, 255, 153]; // Light yellow
+            data.cell.styles.fillColor = [255, 255, 153];
           }
 
-          // 🎯 Highlight "Total" row in pink
+          // 🎯 Highlight "Total" row
           if (
             data.section === 'body' &&
             rowIndex === lastIndex &&
@@ -172,10 +176,10 @@ const Summary = () => {
           ) {
             data.cell.styles.textColor = [0, 0, 0];
             data.cell.styles.fontStyle = "bold";
-            data.cell.styles.fillColor = [255, 192, 203]; // Light pink
+            data.cell.styles.fillColor = [255, 192, 203];
           }
 
-          // 🎯 % column styling
+          // 🎯 Main % column (last column)
           if (
             data.section === 'body' &&
             columnIndex === data.table.columns.length - 1 &&
@@ -184,24 +188,41 @@ const Summary = () => {
           ) {
             const percent = parseFloat(cellValue.replace('%', ''));
 
-            // Adjust raw value to include emoji if ≥ 100%
             if (percent >= 100) {
-              data.cell.raw = `${cellValue} ✅ Done`; // Add emoji & label
-              data.cell.styles.fillColor = [0, 255, 127]; // Bright green
+              data.cell.raw = `${cellValue} ✅ Done`;
+              data.cell.styles.fillColor = [0, 255, 127];
             } else if (percent >= 70) {
-              data.cell.styles.fillColor = [153, 255, 153]; // Light green
+              data.cell.styles.fillColor = [153, 255, 153];
             } else if (percent >= 50) {
-              data.cell.styles.fillColor = [255, 204, 102]; // Orange
+              data.cell.styles.fillColor = [255, 204, 102];
             } else if (percent >= 20) {
-              data.cell.styles.fillColor = [255, 255, 153]; // Yellow
+              data.cell.styles.fillColor = [255, 255, 153];
             } else {
-              data.cell.styles.fillColor = [255, 102, 102]; // Red
+              data.cell.styles.fillColor = [255, 102, 102];
             }
 
             data.cell.styles.textColor = [0, 0, 0];
             data.cell.styles.fontStyle = "bold";
           }
+
+          // ✅ Super % column styling (assuming columnIndex === 2)
+          if (
+            data.section === 'body' &&
+            columnIndex === 2 &&
+            typeof cellValue === 'string' &&
+            cellValue.endsWith('%')
+          ) {
+            const percent = parseFloat(cellValue.replace('%', ''));
+            if (percent > 50) {
+              data.cell.styles.fillColor = [153, 255, 153]; // green
+            } else {
+              data.cell.styles.fillColor = [255, 102, 102]; // red
+            }
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
         }
+
 
       });
 
@@ -232,21 +253,25 @@ const Summary = () => {
           lineCode = row.line;
         }
 
-        return [
+       return [
           lineCode,
           row.super.toLocaleString(),
+          row.super > 0 ?
+            ((row.super / row.total) * 100).toFixed(0) + "%" :
+            '-',
           row.target.toLocaleString(),
           row.total.toLocaleString(),
           row.difference.toLocaleString(),
           row.target > 0 ?
             ((row.total / row.target) * 100).toFixed(0) + "%" :
-            ''
+            '-'
         ];
       });
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Super", "Target", "Received", "Difference", "%"]],
+        head: [["Line", "Super", "%", "Target", "Received", "Difference", "%"]],
+
         body: tableData,
         styles: {
           fontSize: 10,
@@ -271,61 +296,77 @@ const Summary = () => {
         verticalLineColor: [0, 0, 0],
         verticalLineWidth: 0.2,
         margin: { left: 14, right: 14 },
+didParseCell: function (data) {
+  const columnIndex = data.column.index;
+  const cellValue = data.cell.raw;
+  const rowIndex = data.row.index;
+  const lastIndex = tableData.length - 1;
 
-        didParseCell: function (data) {
-          const columnIndex = data.column.index;
-          const cellValue = data.cell.raw;
-          const rowIndex = data.row.index;
-          const lastIndex = tableData.length - 1;
+  // ✅ First column: Light yellow background
+  if (
+    data.section === 'body' &&
+    columnIndex === 0 &&
+    cellValue !== "Total" &&
+    rowIndex !== lastIndex
+  ) {
+    data.cell.styles.fillColor = [255, 255, 153];
+  }
 
-          // ✅ Green background only for the first column, excluding header and "Total" row
-          if (
-            data.section === 'body' &&
-            columnIndex === 0 &&
-            cellValue !== "Total" &&
-            rowIndex !== lastIndex
-          ) {
-            data.cell.styles.fillColor = [255, 255, 153]; // Light yellow
-          }
+  // 🎯 Highlight "Total" row
+  if (
+    data.section === 'body' &&
+    rowIndex === lastIndex &&
+    tableData[lastIndex][0] === "Total"
+  ) {
+    data.cell.styles.textColor = [0, 0, 0];
+    data.cell.styles.fontStyle = "bold";
+    data.cell.styles.fillColor = [255, 192, 203];
+  }
 
-          // 🎯 Highlight "Total" row in pink
-          if (
-            data.section === 'body' &&
-            rowIndex === lastIndex &&
-            tableData[lastIndex][0] === "Total"
-          ) {
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-            data.cell.styles.fillColor = [255, 192, 203]; // Light pink
-          }
+  // 🎯 Main % column (last column)
+  if (
+    data.section === 'body' &&
+    columnIndex === data.table.columns.length - 1 &&
+    typeof cellValue === 'string' &&
+    cellValue.endsWith('%')
+  ) {
+    const percent = parseFloat(cellValue.replace('%', ''));
 
-          // 🎯 % column styling
-          if (
-            data.section === 'body' &&
-            columnIndex === data.table.columns.length - 1 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
+    if (percent >= 100) {
+      data.cell.raw = `${cellValue} ✅ Done`;
+      data.cell.styles.fillColor = [0, 255, 127];
+    } else if (percent >= 70) {
+      data.cell.styles.fillColor = [153, 255, 153];
+    } else if (percent >= 50) {
+      data.cell.styles.fillColor = [255, 204, 102];
+    } else if (percent >= 20) {
+      data.cell.styles.fillColor = [255, 255, 153];
+    } else {
+      data.cell.styles.fillColor = [255, 102, 102];
+    }
 
-            // Adjust raw value to include emoji if ≥ 100%
-            if (percent >= 100) {
-              data.cell.raw = `${cellValue} ✅ Done`; // Add emoji & label
-              data.cell.styles.fillColor = [0, 255, 127]; // Bright green
-            } else if (percent >= 70) {
-              data.cell.styles.fillColor = [153, 255, 153]; // Light green
-            } else if (percent >= 50) {
-              data.cell.styles.fillColor = [255, 204, 102]; // Orange
-            } else if (percent >= 20) {
-              data.cell.styles.fillColor = [255, 255, 153]; // Yellow
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102]; // Red
-            }
+    data.cell.styles.textColor = [0, 0, 0];
+    data.cell.styles.fontStyle = "bold";
+  }
 
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-        }
+  // ✅ Super % column styling (assuming columnIndex === 2)
+  if (
+    data.section === 'body' &&
+    columnIndex === 2 &&
+    typeof cellValue === 'string' &&
+    cellValue.endsWith('%')
+  ) {
+    const percent = parseFloat(cellValue.replace('%', ''));
+    if (percent > 50) {
+      data.cell.styles.fillColor = [153, 255, 153]; // green
+    } else {
+      data.cell.styles.fillColor = [255, 102, 102]; // red
+    }
+    data.cell.styles.textColor = [0, 0, 0];
+    data.cell.styles.fontStyle = "bold";
+  }
+}
+
 
       });
 
@@ -353,20 +394,25 @@ const Summary = () => {
           lineCode = row.line;
         }
 
-        return [
+       return [
           lineCode,
           row.super.toLocaleString(),
+          row.super > 0 ?
+            ((row.super / row.total) * 100).toFixed(0) + "%" :
+            '-',
           row.target.toLocaleString(),
           row.total.toLocaleString(),
           row.difference.toLocaleString(),
           row.target > 0 ?
             ((row.total / row.target) * 100).toFixed(0) + "%" :
-            ''];
+            '-'
+        ];
       });
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Super", "Target", "Received", "Difference", "%"]],
+        head: [["Line", "Super", "%", "Target", "Received", "Difference", "%"]],
+
         body: tableData,
         styles: {
           fontSize: 10,
@@ -392,60 +438,77 @@ const Summary = () => {
         verticalLineWidth: 0.2,
         margin: { left: 14, right: 14 },
 
-        didParseCell: function (data) {
-          const columnIndex = data.column.index;
-          const cellValue = data.cell.raw;
-          const rowIndex = data.row.index;
-          const lastIndex = tableData.length - 1;
+ didParseCell: function (data) {
+  const columnIndex = data.column.index;
+  const cellValue = data.cell.raw;
+  const rowIndex = data.row.index;
+  const lastIndex = tableData.length - 1;
 
-          // ✅ Green background only for the first column, excluding header and "Total" row
-          if (
-            data.section === 'body' &&
-            columnIndex === 0 &&
-            cellValue !== "Total" &&
-            rowIndex !== lastIndex
-          ) {
-            data.cell.styles.fillColor = [255, 255, 153]; // Light yellow
-          }
+  // ✅ First column: Light yellow background
+  if (
+    data.section === 'body' &&
+    columnIndex === 0 &&
+    cellValue !== "Total" &&
+    rowIndex !== lastIndex
+  ) {
+    data.cell.styles.fillColor = [255, 255, 153];
+  }
 
-          // 🎯 Highlight "Total" row in pink
-          if (
-            data.section === 'body' &&
-            rowIndex === lastIndex &&
-            tableData[lastIndex][0] === "Total"
-          ) {
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-            data.cell.styles.fillColor = [255, 192, 203]; // Light pink
-          }
+  // 🎯 Highlight "Total" row
+  if (
+    data.section === 'body' &&
+    rowIndex === lastIndex &&
+    tableData[lastIndex][0] === "Total"
+  ) {
+    data.cell.styles.textColor = [0, 0, 0];
+    data.cell.styles.fontStyle = "bold";
+    data.cell.styles.fillColor = [255, 192, 203];
+  }
 
-          // 🎯 % column styling
-          if (
-            data.section === 'body' &&
-            columnIndex === data.table.columns.length - 1 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
+  // 🎯 Main % column (last column)
+  if (
+    data.section === 'body' &&
+    columnIndex === data.table.columns.length - 1 &&
+    typeof cellValue === 'string' &&
+    cellValue.endsWith('%')
+  ) {
+    const percent = parseFloat(cellValue.replace('%', ''));
 
-            // Adjust raw value to include emoji if ≥ 100%
-            if (percent >= 100) {
-              data.cell.raw = `${cellValue} ✅ Done`; // Add emoji & label
-              data.cell.styles.fillColor = [0, 255, 127]; // Bright green
-            } else if (percent >= 70) {
-              data.cell.styles.fillColor = [153, 255, 153]; // Light green
-            } else if (percent >= 50) {
-              data.cell.styles.fillColor = [255, 204, 102]; // Orange
-            } else if (percent >= 20) {
-              data.cell.styles.fillColor = [255, 255, 153]; // Yellow
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102]; // Red
-            }
+    if (percent >= 100) {
+      data.cell.raw = `${cellValue} ✅ Done`;
+      data.cell.styles.fillColor = [0, 255, 127];
+    } else if (percent >= 70) {
+      data.cell.styles.fillColor = [153, 255, 153];
+    } else if (percent >= 50) {
+      data.cell.styles.fillColor = [255, 204, 102];
+    } else if (percent >= 20) {
+      data.cell.styles.fillColor = [255, 255, 153];
+    } else {
+      data.cell.styles.fillColor = [255, 102, 102];
+    }
 
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-        }
+    data.cell.styles.textColor = [0, 0, 0];
+    data.cell.styles.fontStyle = "bold";
+  }
+
+  // ✅ Super % column styling (assuming columnIndex === 2)
+  if (
+    data.section === 'body' &&
+    columnIndex === 2 &&
+    typeof cellValue === 'string' &&
+    cellValue.endsWith('%')
+  ) {
+    const percent = parseFloat(cellValue.replace('%', ''));
+    if (percent > 50) {
+      data.cell.styles.fillColor = [153, 255, 153]; // green
+    } else {
+      data.cell.styles.fillColor = [255, 102, 102]; // red
+    }
+    data.cell.styles.textColor = [0, 0, 0];
+    data.cell.styles.fontStyle = "bold";
+  }
+}
+
 
 
 
