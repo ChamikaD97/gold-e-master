@@ -253,7 +253,7 @@ const Summary = () => {
           lineCode = row.line;
         }
 
-       return [
+        return [
           lineCode,
           row.super.toLocaleString(),
           row.super > 0 ?
@@ -296,76 +296,76 @@ const Summary = () => {
         verticalLineColor: [0, 0, 0],
         verticalLineWidth: 0.2,
         margin: { left: 14, right: 14 },
-didParseCell: function (data) {
-  const columnIndex = data.column.index;
-  const cellValue = data.cell.raw;
-  const rowIndex = data.row.index;
-  const lastIndex = tableData.length - 1;
+        didParseCell: function (data) {
+          const columnIndex = data.column.index;
+          const cellValue = data.cell.raw;
+          const rowIndex = data.row.index;
+          const lastIndex = tableData.length - 1;
 
-  // ✅ First column: Light yellow background
-  if (
-    data.section === 'body' &&
-    columnIndex === 0 &&
-    cellValue !== "Total" &&
-    rowIndex !== lastIndex
-  ) {
-    data.cell.styles.fillColor = [255, 255, 153];
-  }
+          // ✅ First column: Light yellow background
+          if (
+            data.section === 'body' &&
+            columnIndex === 0 &&
+            cellValue !== "Total" &&
+            rowIndex !== lastIndex
+          ) {
+            data.cell.styles.fillColor = [255, 255, 153];
+          }
 
-  // 🎯 Highlight "Total" row
-  if (
-    data.section === 'body' &&
-    rowIndex === lastIndex &&
-    tableData[lastIndex][0] === "Total"
-  ) {
-    data.cell.styles.textColor = [0, 0, 0];
-    data.cell.styles.fontStyle = "bold";
-    data.cell.styles.fillColor = [255, 192, 203];
-  }
+          // 🎯 Highlight "Total" row
+          if (
+            data.section === 'body' &&
+            rowIndex === lastIndex &&
+            tableData[lastIndex][0] === "Total"
+          ) {
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.fillColor = [255, 192, 203];
+          }
 
-  // 🎯 Main % column (last column)
-  if (
-    data.section === 'body' &&
-    columnIndex === data.table.columns.length - 1 &&
-    typeof cellValue === 'string' &&
-    cellValue.endsWith('%')
-  ) {
-    const percent = parseFloat(cellValue.replace('%', ''));
+          // 🎯 Main % column (last column)
+          if (
+            data.section === 'body' &&
+            columnIndex === data.table.columns.length - 1 &&
+            typeof cellValue === 'string' &&
+            cellValue.endsWith('%')
+          ) {
+            const percent = parseFloat(cellValue.replace('%', ''));
 
-    if (percent >= 100) {
-      data.cell.raw = `${cellValue} ✅ Done`;
-      data.cell.styles.fillColor = [0, 255, 127];
-    } else if (percent >= 70) {
-      data.cell.styles.fillColor = [153, 255, 153];
-    } else if (percent >= 50) {
-      data.cell.styles.fillColor = [255, 204, 102];
-    } else if (percent >= 20) {
-      data.cell.styles.fillColor = [255, 255, 153];
-    } else {
-      data.cell.styles.fillColor = [255, 102, 102];
-    }
+            if (percent >= 100) {
+              data.cell.raw = `${cellValue} ✅ Done`;
+              data.cell.styles.fillColor = [0, 255, 127];
+            } else if (percent >= 70) {
+              data.cell.styles.fillColor = [153, 255, 153];
+            } else if (percent >= 50) {
+              data.cell.styles.fillColor = [255, 204, 102];
+            } else if (percent >= 20) {
+              data.cell.styles.fillColor = [255, 255, 153];
+            } else {
+              data.cell.styles.fillColor = [255, 102, 102];
+            }
 
-    data.cell.styles.textColor = [0, 0, 0];
-    data.cell.styles.fontStyle = "bold";
-  }
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
 
-  // ✅ Super % column styling (assuming columnIndex === 2)
-  if (
-    data.section === 'body' &&
-    columnIndex === 2 &&
-    typeof cellValue === 'string' &&
-    cellValue.endsWith('%')
-  ) {
-    const percent = parseFloat(cellValue.replace('%', ''));
-    if (percent > 50) {
-      data.cell.styles.fillColor = [153, 255, 153]; // green
-    } else {
-      data.cell.styles.fillColor = [255, 102, 102]; // red
-    }
-    data.cell.styles.textColor = [0, 0, 0];
-    data.cell.styles.fontStyle = "bold";
-  }
-}
+          // ✅ Super % column styling (assuming columnIndex === 2)
+          if (
+            data.section === 'body' &&
+            columnIndex === 2 &&
+            typeof cellValue === 'string' &&
+            cellValue.endsWith('%')
+          ) {
+            const percent = parseFloat(cellValue.replace('%', ''));
+            if (percent > 50) {
+              data.cell.styles.fillColor = [153, 255, 153]; // green
+            } else {
+              data.cell.styles.fillColor = [255, 102, 102]; // red
+            }
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
+        }
 
 
       });
@@ -394,7 +394,7 @@ didParseCell: function (data) {
           lineCode = row.line;
         }
 
-       return [
+        return [
           lineCode,
           row.super.toLocaleString(),
           row.super > 0 ?
@@ -438,76 +438,76 @@ didParseCell: function (data) {
         verticalLineWidth: 0.2,
         margin: { left: 14, right: 14 },
 
- didParseCell: function (data) {
-  const columnIndex = data.column.index;
-  const cellValue = data.cell.raw;
-  const rowIndex = data.row.index;
-  const lastIndex = tableData.length - 1;
+        didParseCell: function (data) {
+          const columnIndex = data.column.index;
+          const cellValue = data.cell.raw;
+          const rowIndex = data.row.index;
+          const lastIndex = tableData.length - 1;
 
-  // ✅ First column: Light yellow background
-  if (
-    data.section === 'body' &&
-    columnIndex === 0 &&
-    cellValue !== "Total" &&
-    rowIndex !== lastIndex
-  ) {
-    data.cell.styles.fillColor = [255, 255, 153];
-  }
+          // ✅ First column: Light yellow background
+          if (
+            data.section === 'body' &&
+            columnIndex === 0 &&
+            cellValue !== "Total" &&
+            rowIndex !== lastIndex
+          ) {
+            data.cell.styles.fillColor = [255, 255, 153];
+          }
 
-  // 🎯 Highlight "Total" row
-  if (
-    data.section === 'body' &&
-    rowIndex === lastIndex &&
-    tableData[lastIndex][0] === "Total"
-  ) {
-    data.cell.styles.textColor = [0, 0, 0];
-    data.cell.styles.fontStyle = "bold";
-    data.cell.styles.fillColor = [255, 192, 203];
-  }
+          // 🎯 Highlight "Total" row
+          if (
+            data.section === 'body' &&
+            rowIndex === lastIndex &&
+            tableData[lastIndex][0] === "Total"
+          ) {
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.fillColor = [255, 192, 203];
+          }
 
-  // 🎯 Main % column (last column)
-  if (
-    data.section === 'body' &&
-    columnIndex === data.table.columns.length - 1 &&
-    typeof cellValue === 'string' &&
-    cellValue.endsWith('%')
-  ) {
-    const percent = parseFloat(cellValue.replace('%', ''));
+          // 🎯 Main % column (last column)
+          if (
+            data.section === 'body' &&
+            columnIndex === data.table.columns.length - 1 &&
+            typeof cellValue === 'string' &&
+            cellValue.endsWith('%')
+          ) {
+            const percent = parseFloat(cellValue.replace('%', ''));
 
-    if (percent >= 100) {
-      data.cell.raw = `${cellValue} ✅ Done`;
-      data.cell.styles.fillColor = [0, 255, 127];
-    } else if (percent >= 70) {
-      data.cell.styles.fillColor = [153, 255, 153];
-    } else if (percent >= 50) {
-      data.cell.styles.fillColor = [255, 204, 102];
-    } else if (percent >= 20) {
-      data.cell.styles.fillColor = [255, 255, 153];
-    } else {
-      data.cell.styles.fillColor = [255, 102, 102];
-    }
+            if (percent >= 100) {
+              data.cell.raw = `${cellValue} ✅ Done`;
+              data.cell.styles.fillColor = [0, 255, 127];
+            } else if (percent >= 70) {
+              data.cell.styles.fillColor = [153, 255, 153];
+            } else if (percent >= 50) {
+              data.cell.styles.fillColor = [255, 204, 102];
+            } else if (percent >= 20) {
+              data.cell.styles.fillColor = [255, 255, 153];
+            } else {
+              data.cell.styles.fillColor = [255, 102, 102];
+            }
 
-    data.cell.styles.textColor = [0, 0, 0];
-    data.cell.styles.fontStyle = "bold";
-  }
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
 
-  // ✅ Super % column styling (assuming columnIndex === 2)
-  if (
-    data.section === 'body' &&
-    columnIndex === 2 &&
-    typeof cellValue === 'string' &&
-    cellValue.endsWith('%')
-  ) {
-    const percent = parseFloat(cellValue.replace('%', ''));
-    if (percent > 50) {
-      data.cell.styles.fillColor = [153, 255, 153]; // green
-    } else {
-      data.cell.styles.fillColor = [255, 102, 102]; // red
-    }
-    data.cell.styles.textColor = [0, 0, 0];
-    data.cell.styles.fontStyle = "bold";
-  }
-}
+          // ✅ Super % column styling (assuming columnIndex === 2)
+          if (
+            data.section === 'body' &&
+            columnIndex === 2 &&
+            typeof cellValue === 'string' &&
+            cellValue.endsWith('%')
+          ) {
+            const percent = parseFloat(cellValue.replace('%', ''));
+            if (percent > 50) {
+              data.cell.styles.fillColor = [153, 255, 153]; // green
+            } else {
+              data.cell.styles.fillColor = [255, 102, 102]; // red
+            }
+            data.cell.styles.textColor = [0, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+          }
+        }
 
 
 
@@ -1110,6 +1110,30 @@ didParseCell: function (data) {
           <Row justify="space-between" gutter={[16, 16]}>
             <Col span={24}>
               <Row gutter={[16, 16]}>
+                <Col xs={12} sm={8} md={1}>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    type="primary"
+                    block
+                    danger
+                    onClick={
+
+
+                      () => {
+
+                        setRouteSummary([])
+                        setWeek1Summary([])
+                        setWeek2Summary([])
+                        setWeek3Summary([])
+                        setWeek4Summary([])
+                        setFilters({ year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: '', officer: '' })
+                      }
+
+                    }
+                  >
+
+                  </Button>
+                </Col>
                 <Col md={3}>
                   <Select showSearch
                     style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
@@ -1177,12 +1201,13 @@ didParseCell: function (data) {
                   <Button
                     type="primary"
                     style={{ marginLeft: 8 }}
+                    disabled={!week3Summary.length}
                     onClick={() => exportToPDF(week3Summary, '3rd Week Summery')}
                   >
                     Week 3
                   </Button>
                 </Col>
-                <Col md={3}>
+                <Col md={2}>
                   <Button
                     type="primary"
                     style={{ marginLeft: 8 }}
@@ -1200,26 +1225,31 @@ didParseCell: function (data) {
         {loading && <CircularLoader />}
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
 
-        <Card bordered={false} style={cardStyle}>
-          {officerOrder.map((officer) => {
-            const officerData = routeSummary.filter(row => row.officer === officer);
-            if (!officerData.length) return null;
-            return (
-              <Card key={officer} bordered={false} style={{ ...cardStyle, marginBottom: 20 }}>
-                <h3 style={{ color: "#FFD700", marginBottom: 12 }}>{officer} Summary</h3>
-                <Table
-                  columns={columns}
-                  className="sup-bordered-table"
-                  dataSource={officerData}
-                  pagination={false}
-                  bordered
-                  size="middle"
-                  rowClassName={(record) => record.officer === "Grand Total" ? "grand-total-row" : record.isTotal ? "officer-total-row" : ""}
-                />
-              </Card>
-            );
-          })}
-        </Card>
+        {
+          routeSummary.length > 0 && (
+
+            <Card bordered={false} style={cardStyle}>
+              {officerOrder.map((officer) => {
+                const officerData = routeSummary.filter(row => row.officer === officer);
+                if (!officerData.length) return null;
+                return (
+                  <Card key={officer} bordered={false} style={{ ...cardStyle, marginBottom: 20 }}>
+                    <h3 style={{ color: "#FFD700", marginBottom: 12 }}>{officer} Summary</h3>
+                    <Table
+                      columns={columns}
+                      className="sup-bordered-table"
+                      dataSource={officerData}
+                      pagination={false}
+                      bordered
+                      size="middle"
+                      rowClassName={(record) => record.officer === "Grand Total" ? "grand-total-row" : record.isTotal ? "officer-total-row" : ""}
+                    />
+                  </Card>
+                );
+              })}
+            </Card>
+          )
+        }
       </div>
     </div>
   );

@@ -10,8 +10,6 @@ import LoginForm from "./pages/LoginForm";
 import Dashboard from "./pages/Dashboard";
 import HeaderComponent from "./components/Header";
 import MainLayout from "./components/MainLayout";
-import EmployeeManagementPage from "./pages/Employees";
-import MealManagement from "./pages/MealManagement";
 import Suppliers from "./pages/Suppliers";
 import SupplierInfo from "./pages/SupplierInfo";
 import LeafSupply from "./pages/LeafCountChart";
@@ -21,10 +19,8 @@ import LeafSupplyByDateRange from "./pages/LeafSupplyByDateRange";
 import Prediction from "./pages/Prediction";
 import { ToastContainer } from "react-toastify";
 import OfficerTargets from "./pages/OfficerTargets";
-import TodaySuppliers from "./pages/TodaySuppliers";
 import TodaySuppliersFull from "./pages/TodaySuppliersFull";
 import Summary from "./pages/Summery";
-import TodaySuppliersOfficer from "./pages/TodaySuppliersOfficer";
 
 const LayoutWithHeader = () => (
   <>
@@ -92,14 +88,7 @@ const App = () => {
               path="/dashboard"
               element={<PrivateRoute element={<Dashboard />} />}
             />
-            <Route
-              path="/employees"
-              element={<PrivateRoute element={<EmployeeManagementPage />} />}
-            />
-            <Route
-              path="/src/pages/Employees.js"
-              element={<PrivateRoute element={<EmployeeManagementPage />} />}
-            />
+
             <Route
               path="/leaf/supply"
               element={<PrivateRoute element={<LeafSupply />} />}
@@ -112,22 +101,13 @@ const App = () => {
               path="/leaf/lastSupply"
               element={<PrivateRoute element={<LastSupply />} />}
             />
-            <Route
-              path="/leaf/todaySupply/route"
-              element={<PrivateRoute element={<TodaySuppliers />} />}
-            />
+
             <Route
               path="/leaf/todaySupply/full"
               element={<PrivateRoute element={<TodaySuppliersFull />} />}
             />
-            <Route
-              path="/leaf/todaySupply/officer"
-              element={<PrivateRoute element={<TodaySuppliersOfficer />} />}
-            />
-            <Route
-              path="/meal"
-              element={<PrivateRoute element={<MealManagement />} />}
-            />
+
+
             <Route
               path="/suppliers/routes"
               element={<PrivateRoute element={<Suppliers />} />}

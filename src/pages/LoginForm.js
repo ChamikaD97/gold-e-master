@@ -134,11 +134,21 @@ const LoginPage = () => {
             </Form.Item>
           )}
 
-          <Form.Item wrapperCol={{ offset: 14, span: 10 }}>
-            <Button type="primary" block onClick={handleLogin}>
-              Login
-            </Button>
+          <Form.Item wrapperCol={{ offset: 6, span: 18 }}>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+              <Button type="primary" onClick={handleLogin}>
+                Login
+              </Button>
+              <Button type="primary" danger onClick={() => {
+                setUserName("");
+                setPassword("");
+                setError("");
+              }}>
+                Clear
+              </Button>
+            </div>
           </Form.Item>
+
         </Form>
       </Card>
     </FullPageLayout>
