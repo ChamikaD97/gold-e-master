@@ -14,6 +14,7 @@ import LeafLineChart from "../components/dashboardCards/LeafLineChart";
 import TotalCard from "../components/dashboardCards/TotalCard";
 import OfficerSummaryList from "../components/dashboardCards/OfficerSummaryList";
 import { toast } from "react-toastify";
+import Clock from "../components/dashboardCards/Clock";
 
 const { Text, Title } = Typography;
 
@@ -54,6 +55,11 @@ const Dashboard = () => {
     const end = start.endOf("month");
     const dd = `${start.format("YYYY-MM-DD")}~${end.format("YYYY-MM-DD")}`;
 
+    if (!Array.isArray(officerLines) || officerLines.length === 0) {
+      toast.error("No officer lines defined.");
+      return;
+    }
+
     dispatch(showLoader());
 
     try {
@@ -61,12 +67,15 @@ const Dashboard = () => {
         officerLines.map(async (officer) => {
           const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${officer.routes}&d=${dd}`;
           const res = await fetch(url);
+          if (!res.ok) throw new Error(`Fetch failed for ${officer.name}`);
           const json = await res.json();
 
-          const transformed = json.map(item => ({
-            leaf_type: item["Leaf Type"] === 2 ? "Super" : "Normal",
-            net_kg: parseFloat(item["Net"]),
-          }));
+          const transformed = Array.isArray(json)
+            ? json.map((item) => ({
+              leaf_type: item["Leaf Type"] === 2 ? "Super" : "Normal",
+              net_kg: parseFloat(item["Net"]) || 0,
+            }))
+            : [];
 
           const total = transformed.reduce(
             (acc, item) => {
@@ -86,8 +95,8 @@ const Dashboard = () => {
 
       setOfficerSummaries(results);
     } catch (err) {
-                        toast.error("Error While Loading Data,Please Try Again");
-
+      console.error(err);
+      toast.error("Error while loading data. Please try again.");
       setOfficerSummaries([]);
     } finally {
       dispatch(hideLoader());
@@ -109,7 +118,7 @@ const Dashboard = () => {
     const end = start.endOf("month");
     const dd = `${start.format("YYYY-MM-DD")}~${end.format("YYYY-MM-DD")}`;
 
-        const id = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162';
+    const id = '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162';
 
 
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${id}&d=${dd}`;
@@ -143,7 +152,7 @@ const Dashboard = () => {
       setTotals(calculatedTotals);
       setData(transformed);
     } catch (err) {
-                  toast.error("Error While Loading Data,Please Try Again");
+      toast.error("Error While Loading Data,Please Try Again");
       setData([]);
       setTotals({ super: 0, normal: 0 });
     } finally {
@@ -180,11 +189,11 @@ const Dashboard = () => {
     return acc;
   }, []);
 
-  const handleSearchRoute = () => navigate("/suppliers/routes");
 
-  const handleTodaySupply = () => navigate("/leaf/supply");
+  const handleTodaySupply = () => navigate("/leaf/todaySupply/officer");
 
-  const handleYesterdayLeaf = () => navigate("/leaf/count");
+  const handelTargets = () => navigate("/factory-targets/officer");
+  const handleSummery = () => navigate("/summery");
 
   return (
     <div style={{ padding: 10 }}>
@@ -194,58 +203,39 @@ const Dashboard = () => {
           <img
             src={icon}
             alt="SLMS"
-            style={{ width: 120, height: 120, borderRadius: "50%", border: "1px solid white" }}
+            style={{
+              width: 120, height: 120, borderRadius: "50%", border: "1px solid white", border: "2px solid white",
+              boxShadow: "0 0 8px rgba(255,255,255,0.4)",
+            }}
           />
+
           <div>
             <div style={{ fontWeight: "bold", color: "#fff", fontSize: 30 }}>
               SUPER LEAF MONITORING SYSTEM
             </div>
             <div style={{ fontSize: 16, color: "#ccc" }}>GREENHOUSE PLANTATION (PVT) LTD</div>
           </div>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Clock />
+          </div>
         </div>
+
       </Card>
 
       {/* Chart 1 | Chart 2 | Search Supplier by ID */}
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-
+        {/* 
         <Col span={8}>
           <TotalCard label="This Month Collection" value={totals.super + totals.normal} type="total" />
 
-        </Col>
-        <Col span={5}>
-          <Card bordered={false} style={cardStyle}>
-            <LeafPieChart data={pieData} />
-          </Card>
-        </Col>
-      </Row>
-
-
-
-
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={8}>
-          <Card bordered={false} style={cardStyle}>
-
-            <Title level={4} style={{ color: "#fff" }}>Leaf Count Chart</Title>
-            in here i need to show a chart
-
-            <div style={{ height: 200, backgroundColor: "#333", borderRadius: 8 }}></div>
-          </Card>
-        </Col>
-        {/* <Col span={8}>
-          <Card bordered={false} style={cardStyle}>
-
-          <OfficerSummaryList data={officerSummaries} title="This Month Officer Summary" />
-
-          </Card>
         </Col> */}
-        <Col span={8}>
+        <Col span={10}>
           <Card bordered={false} style={cardStyle}>
             <Row gutter={[8, 8]} align="middle">
-              <Col flex="60px">
-                <Text style={{ color: "#fff" }}>Search</Text>
+              <Col span={10}>
+                <Text style={{ color: "#fff" }}>Enter Supplier Id To Search</Text>
               </Col>
-              <Col flex="auto">
+              <Col span={12}>
                 <Input
                   value={filters.searchById}
                   onChange={(e) =>
@@ -263,7 +253,7 @@ const Dashboard = () => {
                   allowClear
                 />
               </Col>
-              <Col flex="60px">
+              <Col span={2}>
                 <Button
                   icon={<SearchRounded />}
                   type="primary"
@@ -273,25 +263,45 @@ const Dashboard = () => {
             </Row>
           </Card>
         </Col>
+
+
+        <Col span={4}>
+          <Card bordered={false} style={cardStyle}>
+            <Button type="primary" onClick={handleTodaySupply} block>
+              Today Suppliers
+            </Button>
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card bordered={false} style={cardStyle}>
+            <Button type="primary" onClick={handelTargets} block>
+              Targets And Achievements
+            </Button>
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card bordered={false} style={cardStyle}>
+            <Button type="primary" onClick={handleSummery} block>
+              Summery Reports
+            </Button>
+          </Card>
+        </Col>
+      </Row>
+
+
+
+
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+
+        <Col span={5}>
+          <Card bordered={false} style={cardStyle}>
+            <LeafPieChart data={pieData} />
+          </Card>
+        </Col>
       </Row>
 
       {/* Search by Route | Set Today’s Route Supply */}
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={12}>
-          <Card bordered={false} style={cardStyle}>
-            <Button type="primary" onClick={handleSearchRoute} block>
-              View Route Suppliers
-            </Button>
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card bordered={false} style={cardStyle}>
-            <Button type="primary" onClick={handleTodaySupply} block>
-              Go to Leaf Supply
-            </Button>
-          </Card>
-        </Col>
-      </Row>
+
 
 
 

@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SearchRounded } from "@mui/icons-material";
+import { toast } from "react-toastify";
 const { Option } = Select;
 const Summary = () => {
 
@@ -614,34 +615,40 @@ const Summary = () => {
   };
 
   const getLeafRecordsByDates = async () => {
-
     const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
+    const formatted = `${filters.year}_${filters.month}`;
 
     const ids = Array.from({ length: 170 }, (_, i) => i + 1).join(",");
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${dateRange}`;
+
     dispatch(showLoader());
     setLoading(true);
     setError(null);
-    const formatted =
-      (filters.year + '_' + filters.month)
+
     try {
-      const dataf = await import(`../data/targets/targets_${formatted}.json`);
-      setTargets(dataf.default);
+      const targetModule = await import(`../data/targets/targets_${formatted}.json`);
+      const targets = targetModule.default;
+      setTargets(targets);
 
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch leaf records");
+
       const result = await response.json();
+      if (!Array.isArray(result)) throw new Error("Invalid API data format");
 
       const idToMergedCode = getMergedMap();
       const mergeDisplayMap = getMergeDisplayMap();
 
-
       const transformed = result.map(item => {
         const lineId = String(item["Route"]).trim();
         const lineCode = idToMergedCode[lineId] || "Unknown";
-        const net_kg = parseFloat(item["Net"]);
+        const net_kg = parseFloat(item["Net"]) || 0;
         const isSuper = item["Leaf Type"] === 2;
-        const target = getTargetByLineCode(lineCode, dataf.default) || 0;
+        const target = getTargetByLineCode(lineCode, targets) || 0;
+
+        if (lineCode === "Unknown") {
+          console.warn(`Unknown line ID: ${lineId}`);
+        }
 
         return {
           supplier_id: item["Supplier Id"],
@@ -661,13 +668,11 @@ const Summary = () => {
       let totalSuper = 0;
       let totalReceived = 0;
       let totalTarget = 0;
-
       const uniqueLineCodes = new Set();
 
       transformed.forEach(record => {
         totalReceived += record.net_kg;
         if (record.isSuper) totalSuper += record.net_kg;
-
         if (!uniqueLineCodes.has(record.lineCode)) {
           totalTarget += record.target;
           uniqueLineCodes.add(record.lineCode);
@@ -676,16 +681,15 @@ const Summary = () => {
 
       const totalDifference = totalTarget - totalReceived;
 
-      // ✅ Final summary object
-      const summaryData = {
+      setSummery({
         records: transformed,
         totalSuper,
         totalTarget,
         totalReceived,
         totalDifference,
-      };
-      // Set state
-      setSummery(summaryData);
+      });
+
+      // 👉 Group data by officer and line
       const groupedTotals = {};
       transformed.forEach(item => {
         const key = `${item.officer}__${item.lineCode}`;
@@ -696,15 +700,17 @@ const Summary = () => {
             lineCode: item.lineCode,
             super: 0,
             total: 0,
-            target: getTargetByLineCode(item.lineCode, dataf.default),
+            target: getTargetByLineCode(item.lineCode, targets),
             difference: 0,
           };
         }
         if (item.leaf_type === "Super") groupedTotals[key].super += item.net_kg;
         groupedTotals[key].total += item.net_kg;
-        groupedTotals[key].difference = groupedTotals[key].target - groupedTotals[key].total;
+        groupedTotals[key].difference =
+          groupedTotals[key].target - groupedTotals[key].total;
       });
 
+      // 👉 Group rows per officer
       const groupedByOfficer = {};
       Object.values(groupedTotals).forEach(row => {
         if (!groupedByOfficer[row.officer]) groupedByOfficer[row.officer] = [];
@@ -717,16 +723,16 @@ const Summary = () => {
       officerOrder.forEach(officer => {
         let group = groupedByOfficer[officer] || [];
 
-        // Sort group by custom line code order
         group = group.sort((a, b) => {
           const indexA = customLineCodeOrder.indexOf(a.lineCode);
           const indexB = customLineCodeOrder.indexOf(b.lineCode);
-
-          if (indexA === -1 && indexB === -1) return a.lineCode.localeCompare(b.lineCode);
+          if (indexA === -1 && indexB === -1)
+            return a.lineCode.localeCompare(b.lineCode);
           if (indexA === -1) return 1;
           if (indexB === -1) return -1;
           return indexA - indexB;
         });
+
         group.forEach((entry, index) => {
           finalTableData.push({
             key: keyCounter++,
@@ -761,10 +767,10 @@ const Summary = () => {
         });
       });
 
-      // Add grand total row at the end
+      // 👉 Add grand total row
       const grandTotal = finalTableData.reduce(
         (acc, row) => {
-          if (!row.isTotal) return acc; // Only sum officer total rows
+          if (!row.isTotal) return acc;
           acc.super += row.super;
           acc.total += row.total;
           acc.target += row.target;
@@ -786,20 +792,22 @@ const Summary = () => {
         officerRowSpan: 0,
         isTotal: true,
       });
-      getLeafRecordsByWeeks(dataf.default)
+
+      // 👉 Weekly breakdown
+      if (typeof getLeafRecordsByWeeks === "function") {
+        getLeafRecordsByWeeks(targets);
+      }
 
       setRouteSummary(finalTableData);
-
-      const data = await import(`../data/targets/targets_${formatted}.json`);
-      setTargets(data.default);
-
     } catch (err) {
-      setError(err.message);
+      console.error("Error in getLeafRecordsByDates:", err);
+      toast.error("Error while loading data. Please try again.");
     } finally {
       dispatch(hideLoader());
       setLoading(false);
     }
   };
+
 
   const getLeafRecordsByWeeks = async (targets) => {
     const ids = Array.from({ length: 170 }, (_, i) => i + 1).join(",");
@@ -983,7 +991,7 @@ const Summary = () => {
         setSummary(finalTableData);
       }
     } catch (err) {
-      setError(err.message);
+      setError("errr" + err.message);
     } finally {
       dispatch(hideLoader());
       setLoading(false);

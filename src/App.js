@@ -1,21 +1,24 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
 import LoginForm from "./pages/LoginForm";
 import Dashboard from "./pages/Dashboard";
 import HeaderComponent from "./components/Header";
 import MainLayout from "./components/MainLayout";
 import EmployeeManagementPage from "./pages/Employees";
-import LeafCountChart from "./pages/LeafCountChart";
-import RegisterPage from "./pages/RegistrationForm";
 import MealManagement from "./pages/MealManagement";
-import Suppliers from "./pages/Suppliers"; // Assuming this is the correct import for the Suppliers page
+import Suppliers from "./pages/Suppliers";
 import SupplierInfo from "./pages/SupplierInfo";
 import LeafSupply from "./pages/LeafCountChart";
-import { App as AntdApp } from 'antd';
+import { App as AntdApp } from "antd";
 import LastSupply from "./pages/LastSupply";
 import LeafSupplyByDateRange from "./pages/LeafSupplyByDateRange";
 import Prediction from "./pages/Prediction";
-import OfficersPage from "./pages/Officers";
 import { ToastContainer } from "react-toastify";
 import OfficerTargets from "./pages/OfficerTargets";
 import TodaySuppliers from "./pages/TodaySuppliers";
@@ -30,10 +33,32 @@ const LayoutWithHeader = () => (
   </>
 );
 
-const App = () => {
-  return (
-    <AntdApp> {/* ✅ Wrap with Ant Design context provider */}
+// ✅ Route guard component
 
+const PrivateRoute = ({ element }) => {
+  const valid = isSessionValid();
+
+  if (!valid) {
+    localStorage.removeItem("loggedInUser");
+    return <Navigate to="/login" replace />;
+  }
+  console.log('*************PrivateRoute*******************');
+
+  return element;
+};
+const isSessionValid = () => {
+  console.log('**************isSessionValid******************');
+
+  const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+  if (!user?.expiry) return false;
+  return Date.now() < user.expiry;
+};
+
+const App = () => {
+  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+
+  return (
+    <AntdApp>
       <ToastContainer
         position="top-center"
         autoClose={3000}
@@ -43,53 +68,94 @@ const App = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="dark" // or "light" | "dark"
-        limit={3} // limit to 3 toasts at a time
+        theme="dark"
+        limit={3}
       />
 
       <Router>
         <Routes>
+          {/* ✅ Public Routes */}
+          <Route
+            path="/login"
+            element={
+              isSessionValid() ? <Navigate to="/dashboard" replace /> : <LoginForm />
+            }
+          />
 
-          {/* ✅ Public Routes without header */}
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/register" element={<RegisterPage />} />
 
-          {/* ✅ Protected Routes with header */}
+
+
+          {/* ✅ Protected Routes */}
           <Route element={<LayoutWithHeader />}>
-            <Route index element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route index element={<PrivateRoute element={<Dashboard />} />} />
+            <Route
+              path="/dashboard"
+              element={<PrivateRoute element={<Dashboard />} />}
+            />
+            <Route
+              path="/employees"
+              element={<PrivateRoute element={<EmployeeManagementPage />} />}
+            />
+            <Route
+              path="/src/pages/Employees.js"
+              element={<PrivateRoute element={<EmployeeManagementPage />} />}
+            />
+            <Route
+              path="/leaf/supply"
+              element={<PrivateRoute element={<LeafSupply />} />}
+            />
+            <Route
+              path="/leaf/dailyLeafSupply"
+              element={<PrivateRoute element={<LeafSupplyByDateRange />} />}
+            />
+            <Route
+              path="/leaf/lastSupply"
+              element={<PrivateRoute element={<LastSupply />} />}
+            />
+            <Route
+              path="/leaf/todaySupply/route"
+              element={<PrivateRoute element={<TodaySuppliers />} />}
+            />
+            <Route
+              path="/leaf/todaySupply/full"
+              element={<PrivateRoute element={<TodaySuppliersFull />} />}
+            />
+            <Route
+              path="/leaf/todaySupply/officer"
+              element={<PrivateRoute element={<TodaySuppliersOfficer />} />}
+            />
+            <Route
+              path="/meal"
+              element={<PrivateRoute element={<MealManagement />} />}
+            />
+            <Route
+              path="/suppliers/routes"
+              element={<PrivateRoute element={<Suppliers />} />}
+            />
+            <Route
+              path="/factory-targets/prediction"
+              element={<PrivateRoute element={<Prediction />} />}
+            />
+            <Route
+              path="/factory-targets/officer"
+              element={<PrivateRoute element={<OfficerTargets />} />}
+            />
+            <Route
+              path="/summery"
+              element={<PrivateRoute element={<Summary />} />}
+            />
+            <Route
+              path="/supplier/info"
+              element={<PrivateRoute element={<SupplierInfo />} />}
+            />
 
-
-            <Route path="/employees" element={<EmployeeManagementPage />} />
-
-            <Route path="/src/pages/Employees.js" element={<EmployeeManagementPage />} />
-
-            <Route path="/leaf/supply" element={<LeafSupply />} />
-
-            <Route path="/leaf/dailyLeafSupply" element={<LeafSupplyByDateRange
-            />} />
-            <Route path="/leaf/lastSupply" element={<LastSupply />} />
-            <Route path="/leaf/todaySupply/route" element={<TodaySuppliers />} />
-            <Route path="/leaf/todaySupply/full" element={<TodaySuppliersFull />} />
-            <Route path="/leaf/todaySupply/officer" element={<TodaySuppliersOfficer />} />
-            <Route path="/meal" element={<MealManagement />} />
-
-            <Route path="/suppliers/routes" element={<Suppliers />} />
-            <Route path="/factory-targets/prediction" element={<Prediction />} />
-            <Route path="/factory-targets/officer" element={<OfficerTargets />} />
-
-            <Route path="/summery" element={<Summary />} />
-            <Route path="/supplier/info" element={<SupplierInfo />} />
             {/* 404 Route */}
-
             <Route path="/404" element={<div>404 - Page Not Found</div>} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Route>
-
         </Routes>
       </Router>
     </AntdApp>
-
   );
 };
 

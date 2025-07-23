@@ -4,15 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   AppstoreOutlined,
   SolutionOutlined,
-  TeamOutlined,
   FundOutlined,
-  ShopOutlined,
-  CoffeeOutlined,
-  CarOutlined,
   SettingOutlined,
   LogoutOutlined,
   FileOutlined,
-  BellOutlined,
   UserOutlined,
   InfoCircleFilled,
 } from "@ant-design/icons";
@@ -28,7 +23,6 @@ const { SubMenu } = Menu;
 const HeaderComponent = () => {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
-  const users = JSON.parse(localStorage.getItem("users") || "[]");
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
 
 

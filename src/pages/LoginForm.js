@@ -24,28 +24,33 @@ const LoginPage = () => {
   }, []);
 
   const handleLogin = () => {
-
     import("../data/users/users.json")
       .then((module) => {
         const users = module.default || [];
+
         localStorage.setItem("users", JSON.stringify(users));
+
+        const user = users.find(
+          (u) => u.userName === userName && u.password === password
+        );
+
+        if (user) {
+          const sessionData = {
+            ...user,
+            expiry: Date.now() + 1000 * 60 * 60,  // 1 hour in milliseconds
+          };
+          localStorage.setItem("loggedInUser", JSON.stringify(sessionData));
+          navigate("/dashboard");
+        } else {
+          setError("Invalid User Name or password");
+        }
       })
       .catch((err) => {
         console.error("Failed to load users.json", err);
         setError("Could not load initial user data.");
       });
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-    const user = users.find((u) => u.userName === userName && u.password === password);
-    console.log(user);
-
-    if (user) {
-      localStorage.setItem("loggedInUser", JSON.stringify(user));
-      navigate("/dashboard");
-    } else {
-      setError("Invalid User Name or password");
-    }
   };
+
 
   return (
     <FullPageLayout>
@@ -118,6 +123,7 @@ const LoginPage = () => {
           >
             <Input.Password
               value={password}
+              onPressEnter={handleLogin}
               onChange={(e) => setPassword(e.target.value)}
             />
           </Form.Item>
@@ -132,12 +138,6 @@ const LoginPage = () => {
             <Button type="primary" block onClick={handleLogin}>
               Login
             </Button>
-          </Form.Item>
-
-          <Form.Item wrapperCol={{ span: 24 }} style={{ textAlign: "center", marginBottom: 0 }}>
-            <Text style={{ color: "#ccc" }}>
-              Don’t have an account? <Link to="/register">Register</Link>
-            </Text>
           </Form.Item>
         </Form>
       </Card>
