@@ -53,6 +53,9 @@ const Summary = () => {
     "SLF", "DG", "ML", "MV"
   ];
 
+  const today = new Date();
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const daysRemaining = endOfMonth.getDate() - today.getDate() + 1;
 
 
   const exportToPDF = (pdfData, title) => {
@@ -110,22 +113,28 @@ const Summary = () => {
 
         return [
           lineCode,
-          row.super.toLocaleString(),
-          row.super > 0 ?
-            ((row.super / row.total) * 100).toFixed(0) + "%" :
-            '-',
+
           row.target.toLocaleString(),
           row.total.toLocaleString(),
           row.difference.toLocaleString(),
           row.target > 0 ?
             ((row.total / row.target) * 100).toFixed(0) + "%" :
-            '-'
+            '-',
+
+          row.super.toLocaleString(),
+          row.super > 0 ?
+            ((row.super / row.total) * 100).toFixed(0) + "%" :
+            '-',
+
+
+          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
+
         ];
       });
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Super", "%", "Target", "Received", "Difference", "%"]],
+        head: [["Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
 
         body: tableData,
         styles: {
@@ -182,7 +191,7 @@ const Summary = () => {
           // 🎯 Main % column (last column)
           if (
             data.section === 'body' &&
-            columnIndex === data.table.columns.length - 1 &&
+            columnIndex === data.table.columns.length - 4 &&
             typeof cellValue === 'string' &&
             cellValue.endsWith('%')
           ) {
@@ -208,7 +217,7 @@ const Summary = () => {
           // ✅ Super % column styling (assuming columnIndex === 2)
           if (
             data.section === 'body' &&
-            columnIndex === 2 &&
+            columnIndex === 6 &&
             typeof cellValue === 'string' &&
             cellValue.endsWith('%')
           ) {
@@ -255,22 +264,28 @@ const Summary = () => {
 
         return [
           lineCode,
-          row.super.toLocaleString(),
-          row.super > 0 ?
-            ((row.super / row.total) * 100).toFixed(0) + "%" :
-            '-',
+
           row.target.toLocaleString(),
           row.total.toLocaleString(),
           row.difference.toLocaleString(),
           row.target > 0 ?
             ((row.total / row.target) * 100).toFixed(0) + "%" :
-            '-'
+            '-',
+
+          row.super.toLocaleString(),
+          row.super > 0 ?
+            ((row.super / row.total) * 100).toFixed(0) + "%" :
+            '-',
+
+
+          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
+
         ];
       });
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Super", "%", "Target", "Received", "Difference", "%"]],
+        head: [["Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
 
         body: tableData,
         styles: {
@@ -326,7 +341,7 @@ const Summary = () => {
           // 🎯 Main % column (last column)
           if (
             data.section === 'body' &&
-            columnIndex === data.table.columns.length - 1 &&
+            columnIndex === data.table.columns.length - 4 &&
             typeof cellValue === 'string' &&
             cellValue.endsWith('%')
           ) {
@@ -352,7 +367,7 @@ const Summary = () => {
           // ✅ Super % column styling (assuming columnIndex === 2)
           if (
             data.section === 'body' &&
-            columnIndex === 2 &&
+            columnIndex === 6 &&
             typeof cellValue === 'string' &&
             cellValue.endsWith('%')
           ) {
@@ -396,22 +411,28 @@ const Summary = () => {
 
         return [
           lineCode,
-          row.super.toLocaleString(),
-          row.super > 0 ?
-            ((row.super / row.total) * 100).toFixed(0) + "%" :
-            '-',
+
           row.target.toLocaleString(),
           row.total.toLocaleString(),
           row.difference.toLocaleString(),
           row.target > 0 ?
             ((row.total / row.target) * 100).toFixed(0) + "%" :
-            '-'
+            '-',
+
+          row.super.toLocaleString(),
+          row.super > 0 ?
+            ((row.super / row.total) * 100).toFixed(0) + "%" :
+            '-',
+
+
+          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
+
         ];
       });
 
       autoTable(doc, {
         startY: startY + 9,
-        head: [["Line", "Super", "%", "Target", "Received", "Difference", "%"]],
+        head: [["Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
 
         body: tableData,
         styles: {
@@ -468,7 +489,7 @@ const Summary = () => {
           // 🎯 Main % column (last column)
           if (
             data.section === 'body' &&
-            columnIndex === data.table.columns.length - 1 &&
+            columnIndex === data.table.columns.length - 4 &&
             typeof cellValue === 'string' &&
             cellValue.endsWith('%')
           ) {
@@ -494,7 +515,7 @@ const Summary = () => {
           // ✅ Super % column styling (assuming columnIndex === 2)
           if (
             data.section === 'body' &&
-            columnIndex === 2 &&
+            columnIndex === 6 &&
             typeof cellValue === 'string' &&
             cellValue.endsWith('%')
           ) {
@@ -534,6 +555,7 @@ const Summary = () => {
 
         summery.totalSuper,
         summery.totalTarget, summery.totalReceived,
+
 
       ]];
 
@@ -898,7 +920,7 @@ const Summary = () => {
         const idToMergedCode = getMergedMap();
         const mergeDisplayMap = getMergeDisplayMap();
 
-        const transformed = result.map(item => {
+        const transformed = result && result.map(item => {
           const lineId = String(item["Route"]).trim();
           const lineCode = idToMergedCode[lineId] || "Unknown";
           const net_kg = parseFloat(item["Net"]);
@@ -1054,7 +1076,7 @@ const Summary = () => {
         setSummary(finalTableData);
       }
     } catch (err) {
-      setError("errr" + err.message);
+
     } finally {
       dispatch(hideLoader());
       setLoading(false);
@@ -1201,7 +1223,6 @@ const Summary = () => {
                   <Button
                     type="primary"
                     style={{ marginLeft: 8 }}
-                    disabled={!week3Summary.length}
                     onClick={() => exportToPDF(week3Summary, '3rd Week Summery')}
                   >
                     Week 3

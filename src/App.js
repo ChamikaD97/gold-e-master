@@ -21,6 +21,7 @@ import { ToastContainer } from "react-toastify";
 import OfficerTargets from "./pages/OfficerTargets";
 import TodaySuppliersFull from "./pages/TodaySuppliersOfficer.js";
 import Summary from "./pages/Summery";
+import MissRejo from "./pages/Miss&Rejo.js";
 
 const LayoutWithHeader = () => (
   <>
@@ -125,6 +126,9 @@ const App = () => {
               element={<PrivateRoute element={<Summary />} />}
             />
             <Route
+              path="/missing"
+              element={<PrivateRoute element={<MissRejo />} />}
+            />            <Route
               path="/supplier/info"
               element={<PrivateRoute element={<SupplierInfo />} />}
             />

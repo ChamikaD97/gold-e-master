@@ -153,7 +153,13 @@ const LastSupply = () => {
       key: "last_supply_date",
       sorter: (a, b) =>
         new Date(a.last_supply_date) - new Date(b.last_supply_date),
+    }, {
+      title: "Total Supplied (kg)",
+      dataIndex: "total_kg",
+      key: "total_kg",
+      sorter: (a, b) => parseFloat(a.total_kg) - parseFloat(b.total_kg),
     },
+
     {
       title: "Inactive For",
       key: "inactive_for",

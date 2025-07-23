@@ -15,7 +15,7 @@ import SettingsModal from "../components/SettingsModal";
 
 import icon from "../images/logo.ico";
 import { Table } from "@mui/material";
-import { SummarizeRounded, TableBar } from "@mui/icons-material";
+import { CardTravelSharp, SummarizeRounded, TableBar } from "@mui/icons-material";
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
@@ -115,7 +115,9 @@ const HeaderComponent = () => {
           <Menu.Item key="summery" icon={<SummarizeRounded />}>
             <Link to="/summery">Summery</Link>
           </Menu.Item>
-
+          <Menu.Item key="missing" icon={<CardTravelSharp />}>
+            <Link to="/missing">Missing & Rejoing Cards</Link>
+          </Menu.Item>
           {/* <Menu.Item key="meal" icon={<CoffeeOutlined />}>
             <Link to="/meal">Meal Management</Link>
           </Menu.Item> */}
