@@ -151,7 +151,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
             setTotals(calculatedTotals);
             setData(transformed);
         } catch (err) {
-                  toast.error("Error While Loading Data,Please Try Again");
+            toast.error("Error While Loading Data,Please Try Again");
             setData([]);
             setTotals({ super: 0, normal: 0 });
         } finally {
@@ -251,7 +251,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                     normal: parseFloat(overallNormal.toFixed(2))
                 });
             } catch (err) {
-                  toast.error("Error While Loading Data,Please Try Again");
+                toast.error("Error While Loading Data,Please Try Again");
                 setData([]);
                 setTotals({ super: 0, normal: 0 });
             } finally {

@@ -685,12 +685,15 @@ const Prediction = () => {
                 value={filters.year}
                 bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
 
-                <Option value="2021">2021</Option>
-                <Option value="2022">2022</Option>
-                <Option value="2023">2023</Option>
+                {[...Array(5)].map((_, i) => {
+                  const year = new Date().getFullYear() - i;
+                  return (
+                    <Option key={year} value={year}>
+                      {year}
+                    </Option>
+                  );
+                })}
 
-                <Option value="2024">2024</Option>
-                <Option value="2025">2025</Option>
               </Select>
             </Col>
             <Col md={3}>

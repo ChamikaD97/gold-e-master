@@ -1,84 +1,110 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Modal,
   Form,
-  Input,
-  Switch,
-  Button,
   InputNumber,
-  Descriptions,
-  Card,
+  Button,
   Row,
   Col,
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { setAutomaticalyInactive, setLeafRound, setNotificationsVisible, clearMarkers, setdateRangeMonths } from "../redux/commonDataSlice";
+import {
+  setAutomaticalyInactive,
+  setLeafRound,
+  setNotificationsVisible,
+  clearMarkers,
+  setdateRangeMonths,
+} from "../redux/commonDataSlice";
 
-/**
- * SettingsModal
- * @param {boolean} open - Whether the modal is visible
- * @param {Function} onClose - Function to close the modal
- */
 const SettingsModal = ({ open, onClose }) => {
   const [form] = Form.useForm();
   const state = useSelector((state) => state.commonData);
 
-  // Redux values
-  const leafRound = useSelector((state) => state.commonData?.leafRound);
-  const automaticalyInactive = useSelector((state) => state.commonData?.automaticalyInactive);
-  const dateRangeMonths = useSelector((state) => state.commonData?.dateRangeMonths);
-  const week1Target = useSelector((state) => state.commonData?.week1Target);
-  const week2Target = useSelector((state) => state.commonData?.week2Target);
-  const week3Target = useSelector((state) => state.commonData?.week3Target);
-  const week4Target = useSelector((state) => state.commonData?.week4Target);
-  const dispatch = useDispatch();
-  const handleFinish = (values) => {
+  const {
+    leafRound,
+    automaticalyInactive,
+    dateRangeMonths,
+    week1Target,
+    week2Target,
+    week3Target,
+    week4Target,
+    notificationsVisible,
+  } = state;
 
+  const dispatch = useDispatch();
+
+  const handleFinish = (values) => {
     dispatch(setLeafRound(values.leafRound));
     dispatch(setAutomaticalyInactive(values.automaticalyInactive));
     dispatch(setNotificationsVisible(values.notifications));
-    dispatch(setdateRangeMonths(values.dateRangeMonths)); // Reset to default value
+    dispatch(setdateRangeMonths(values.dateRangeMonths));
     onClose();
   };
 
-  const cardStyle = {
-    background: "rgba(0, 0, 0, 0.82)",
-    color: "#fff",
-    borderRadius: 12,
-    marginBottom: 6,
-  };
   const inputStyle = {
-
-    borderColor: "#444",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    color: "#fff",
+    borderColor: "#555",
     width: "100%",
   };
 
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .dark-modal-form .ant-form-item-label > label {
+        color: #fff !important;
+      }
+
+      .dark-modal-form .ant-input-number input {
+        color: #fff !important;
+        background-color: rgba(255,255,255,0.05) !important;
+        border-color: #555 !important;
+      }
+
+      .dark-modal-form h4 {
+        color: #fff !important;
+      }
+
+      .dark-modal-form .ant-btn {
+        color: #fff !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
     <Modal
-
       open={open}
       onCancel={onClose}
       footer={null}
       destroyOnClose
       bodyStyle={{
-
+        backgroundColor: "#222",
         borderRadius: 10,
       }}
     >
-
-
-
-      <Card bordered={false}>
+      <div
+        className="dark-modal-form"
+        style={{
+          margin: "16px 0",
+          borderRadius: 10,
+          backgroundColor: "#222",
+          padding: 10,
+          color: "#fff",
+          fontWeight: "normal",
+        }}
+      >
         <Form
           form={form}
           layout="horizontal"
           labelCol={{ span: 16 }}
           wrapperCol={{ span: 8 }}
           onFinish={handleFinish}
-          labelAlign="left"         // 👈 This aligns labels to the left
-
+          labelAlign="left"
           initialValues={{
-
             notifications: true,
             leafRound,
             automaticalyInactive,
@@ -89,34 +115,29 @@ const SettingsModal = ({ open, onClose }) => {
             week4Target,
           }}
         >
-
           <Form.Item wrapperCol={{ span: 24 }}>
-            <div
-              style={{
-                borderTop: "1px solid",
-              }}
-            ></div>
-            <h4 style={{ color: "#333" }}>Settings</h4>          </Form.Item>
+            <div style={{ borderTop: "1px solid #444", marginBottom: 8 }} />
+            <h4 style={{ color: "#fff", fontSize: "18px", fontWeight: "normal", marginBottom: 12 }}>
+              Settings
+            </h4>
+
+          </Form.Item>
 
           <Form.Item label="Leaf Round" name="leafRound">
-            <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
+            <InputNumber min={1} style={inputStyle} />
           </Form.Item>
 
           <Form.Item label="Missing Range (Months)" name="dateRangeMonths">
-            <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
-          </Form.Item>
-          <Form.Item label="Automatically Inactive (days)" name="automaticalyInactive">
-            <InputNumber min={1} style={{ ...inputStyle, width: "100%" }} />
+            <InputNumber min={1} style={inputStyle} />
           </Form.Item>
 
-          {/* 🔻 Separator */}
+          <Form.Item label="Automatically Inactive (days)" name="automaticalyInactive">
+            <InputNumber min={1} style={inputStyle} />
+          </Form.Item>
+
           <Form.Item wrapperCol={{ span: 24 }}>
-            <div
-              style={{
-                borderTop: "1px solid",
-              }}
-            ></div>
-            <h4 style={{ color: "#333" }}>Weekly Targets</h4>
+            <div style={{ borderTop: "1px solid #444", marginBottom: 8 }} />
+            <h4>Weekly Targets</h4>
           </Form.Item>
 
           <Row gutter={16}>
@@ -142,25 +163,15 @@ const SettingsModal = ({ open, onClose }) => {
             </Col>
           </Row>
 
-
-          <div
-            style={{
-              borderTop: "1px solid",
-              marginBottom: 16,
-            }}
-          ></div>
           <Form.Item wrapperCol={{ span: 24 }}>
-
-
-
-
+            <div style={{ borderTop: "1px solid #444", marginBottom: 16 }} />
             <div style={{ display: "flex", gap: 10 }}>
               <Button
                 type="primary"
                 htmlType="submit"
                 block
                 style={{
-                  backgroundColor: "#00b96b", // custom green
+                  backgroundColor: "#00b96b",
                   borderColor: "#00b96b",
                 }}
               >
@@ -172,18 +183,16 @@ const SettingsModal = ({ open, onClose }) => {
                 block
                 onClick={() => {
                   dispatch(clearMarkers());
-
-                  // slight delay to reflect Redux state updates
                   setTimeout(() => {
                     form.setFieldsValue({
-                      notifications: state.notificationsVisible,
-                      leafRound: state.leafRound,
-                      automaticalyInactive: state.automaticalyInactive,
+                      notifications: notificationsVisible,
+                      leafRound,
+                      automaticalyInactive,
                     });
                   }, 50);
                 }}
                 style={{
-                  backgroundColor: "#1677ff", // custom blue
+                  backgroundColor: "#1677ff",
                   borderColor: "#1677ff",
                 }}
               >
@@ -201,21 +210,13 @@ const SettingsModal = ({ open, onClose }) => {
                     automaticalyInactive: null,
                   })
                 }
-
               >
                 Clear
               </Button>
             </div>
-
           </Form.Item>
-
         </Form>
-
-
-      </Card>
-
-      {/* ✅ Settings Form */}
-
+      </div>
     </Modal>
   );
 };

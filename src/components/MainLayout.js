@@ -2,7 +2,7 @@
 import React from "react";
 import { Layout, Typography } from "antd";
 import { useLocation, Outlet } from "react-router-dom";
-import background from "../images/background.jpg";
+import background from "../images/background.png";
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
