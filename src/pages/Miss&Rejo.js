@@ -41,7 +41,20 @@ const MissRejo = () => {
     "J", "T", "SELF 02", "TK", "HA", "D",
     "SLF", "DG", "ML", "MV"
   ];
+  const ajithLines = ['60,154,129', '65', '146', '74', '33', '8', '98', '145', '81,97'];
+  const udaraLines = ['23', '72', '96', '149', '21', '9', '162'];
+  const udayangaLines = ['6', '7', '25', '61', '150', '36', '102,161,129', '48,64,62', '155'];
+  const gaminiLines = ['70', '31,157', '34', '12,109,127'];
+  const chamodLines = ['91', '67,68,69', '138,124'];
 
+  const officerList = [
+    { name: "Ajith", line: ajithLines },
+    { name: "Udara", line: udaraLines },
+    { name: "Udayanga", line: udayangaLines },
+    { name: "Gamini", line: gaminiLines },
+    { name: "Chamod", line: chamodLines }
+
+  ];
   const today = new Date();
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const daysRemaining = endOfMonth.getDate() - today.getDate() + 1;
@@ -49,6 +62,8 @@ const MissRejo = () => {
   const [currentSupplierTable, setCurrentSupplierTable] = useState([]);
   const [previousSupplierTable, setPreviousSupplierTable] = useState([]);
   const [missingSuppliers, setMissingSuppliers] = useState([]);
+  const [selectedOfficer, setSelectedOfficer] = useState({ name: "Select Officer", line: "All" });
+  const [selectedLine, setSelectedLine] = useState(null);
 
   const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMap.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
   const filteredLines = filters.officer === "All" ? [] : ["All", ...(officerLineMap[filters.officer] || [])];
@@ -56,6 +71,130 @@ const MissRejo = () => {
   const [rejoinedSuppliers, setRejoinedSuppliers] = useState([]);
   const [missedTotal, setMissedTotal] = useState("0.00");
   const [rejoinedTotal, setRejoinedTotal] = useState("0.00");
+
+  const groupByLine = (suppliers) => {
+    const grouped = {};
+    suppliers.forEach(s => {
+      if (!grouped[s.line]) grouped[s.line] = [];
+      grouped[s.line].push(s);
+    });
+    return grouped;
+  };
+
+
+  const getOfficerByLineId = (lineId) => {
+    const match = lineIdCodeMap.find((line) => line.lineId === lineId);
+    return match ? match.officer : null;
+  };
+
+  const exportGroupedPDF = (suppliers, title = "Missing") => {
+    const doc = new jsPDF("p", "mm", "a4");
+    const grouped = groupByLine(suppliers);
+    let startY = 46;
+    let tablesOnPage = 0;
+
+    // === HEADER ===
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.line(14, 12, 196, 12);
+    doc.setFont(undefined, 'bold');
+    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 18, { align: "center" });
+
+    doc.setFontSize(9);
+    doc.line(14, 22, 196, 22);
+    doc.setFont(undefined, 'normal');
+    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 30);
+    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
+    doc.line(14, 39, 196, 39);
+
+    // === DATE HEADER ===
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    doc.text(`${title} Cards on: ${filters.year} - ${monthMap[filters.month]}`, 14, startY);
+    doc.line(14, startY + 4, 196, startY + 4);
+    startY += 12;
+
+    // === TABLES PER GROUP ===
+    Object.keys(grouped).sort().forEach((line, index, array) => {
+      const lineSuppliers = grouped[line];
+      const totalKg = lineSuppliers.reduce((sum, s) => sum + parseFloat(s.total_kg), 0).toFixed(0);
+      const supplierCount = lineSuppliers.length;
+
+      // Add new page if more than 3 tables already rendered
+      if (tablesOnPage === 3) {
+        doc.addPage();
+        startY = 20;
+        tablesOnPage = 0;
+      }
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(0);
+      doc.text(`Line: ${line} - Officer: ${lineSuppliers[0]?.officer || "Unknown"}`, 14, startY);
+
+      const body = lineSuppliers.map((s, index) => [
+        index + 1,
+        s.supplier_id,
+        s.name || "-",
+        s.contact || "-",
+        s.total_kg
+      ]);
+
+      autoTable(doc, {
+        startY: startY + 4,
+        head: [["No", "Supplier ID", "Name", "Contact", "Total Net (kg)"]],
+        body: body,
+        theme: "grid",
+        margin: { left: 14, right: 14 },
+        styles: {
+          fontSize: 10,
+          cellPadding: 1.5,
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2,
+        },
+        headStyles: {
+          fillColor: title === 'Rejoined' ? [22, 160, 133] : [255, 102, 102],
+          textColor: 255,
+          halign: "center",
+          valign: "middle",
+        },
+        bodyStyles: {
+          halign: "center",
+          valign: "middle",
+        },
+        didDrawPage: (data) => {
+          doc.setFontSize(10);
+          doc.setFont(undefined, "bold");
+          doc.setTextColor(0);
+          doc.text(`Total Net (kg): ${totalKg}   |   Supplier Count: ${supplierCount}`, 14, data.cursor.y + 8);
+
+          // Draw line after table
+
+          doc.setLineWidth(0.3); // Make the line thicker (bold)
+          doc.line(14, data.cursor.y + 14, 196, data.cursor.y + 14);
+
+          startY = data.cursor.y + 22;
+        }
+      });
+
+      tablesOnPage++;
+    });
+
+    // === Footer ONLY on last page ===
+    const totalPages = doc.internal.getNumberOfPages();
+    doc.setPage(totalPages);
+    doc.line(14, 275, 196, 275);
+    doc.setFontSize(8);
+    doc.setTextColor(5);
+    doc.setFont(undefined, 'normal');
+    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
+
+    doc.save(`${title.replace(" ", "_")}_${filters.year}_${filters.month}.pdf`);
+  };
+
+
+
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -76,62 +215,87 @@ const MissRejo = () => {
 
     let startY = 46;
     doc.setFontSize(11);
-    doc.text(`Missing & Rejoined Cards on: ${filters.month}`, 14, startY);
+    doc.text(`Missing & Rejoined Cards on: ${filters.year} - ${monthMap[filters.month]}`, 14, startY);
     doc.line(14, startY + 4, 196, startY + 4);
 
-    // Missed
+    const officer = getOfficerByLineId(filters.line);
+
+    // === Missed Section ===
     startY += 12;
     doc.setFont(undefined, 'bold');
-    doc.text(`Missing Suppliers: ${missedSuppliers.length} | Total Net: ${missedTotal} kg`, 14, startY);
+    doc.text(`Line: ${filters.lineCode} - Officer: ${officer || "Unknown"}`, 14, startY);
     doc.setFont(undefined, 'normal');
 
     autoTable(doc, {
       startY: startY + 4,
-      head: [["Supplier ID", "Total Net (kg)"]],
-      body: missedSuppliers.map(s => [s.supplier_id, s.total_kg]),
+      head: [["No", "Supplier ID", "Name", "Contact", "Total Net (kg)"]],
+      body: missedSuppliers.map((s, index) => [
+        index + 1,
+        s.supplier_id,
+        s.name || "Unknown",
+        s.contact || "-",
+        s.total_kg
+      ]),
       styles: {
-        fontSize: 9,
+        fontSize: 10,
         cellPadding: 1.5,
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
       },
       headStyles: {
-        fillColor: [200, 0, 0],
+        fillColor: [255, 102, 102],
         textColor: 255,
         halign: "center",
+        valign: "middle",
       },
       bodyStyles: {
         halign: "center",
+        valign: "middle",
       },
       margin: { left: 14, right: 14 },
     });
 
-    // Rejoined
+    // === Rejoined Section ===
+    startY = doc.lastAutoTable.finalY + 10;
+    doc.setFont(undefined, 'bold');
+    doc.text(`Missed Suppliers: ${missedSuppliers.length} | Total Net: ${missedTotal} kg`, 14, startY);
+    doc.setFont(undefined, 'normal');
+
+    autoTable(doc, {
+      startY: startY + 4,
+      head: [["No", "Supplier ID", "Name", "Contact", "Total Net (kg)"]],
+      body: rejoinedSuppliers.map((s, index) => [
+        index + 1,
+        s.supplier_id,
+        s.name || "Unknown",
+        s.contact || "-",
+        s.total_kg
+      ]),
+      styles: {
+        fontSize: 10,
+        cellPadding: 1.5,
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+      },
+      headStyles: {
+        fillColor: [22, 160, 133],
+        textColor: 255,
+        halign: "center",
+        valign: "middle",
+      },
+      bodyStyles: {
+        halign: "center",
+        valign: "middle",
+      },
+      margin: { left: 14, right: 14 },
+    });
     startY = doc.lastAutoTable.finalY + 10;
     doc.setFont(undefined, 'bold');
     doc.text(`Rejoined Suppliers: ${rejoinedSuppliers.length} | Total Net: ${rejoinedTotal} kg`, 14, startY);
     doc.setFont(undefined, 'normal');
-
-    autoTable(doc, {
-      startY: startY + 4,
-      head: [["Supplier ID", "Total Net (kg)"]],
-      body: rejoinedSuppliers.map(s => [s.supplier_id, s.total_kg]),
-      styles: {
-        fontSize: 9,
-        cellPadding: 1.5,
-      },
-      headStyles: {
-        fillColor: [0, 128, 0],
-        textColor: 255,
-        halign: "center",
-      },
-      bodyStyles: {
-        halign: "center",
-      },
-      margin: { left: 14, right: 14 },
-    });
-
-    // Footer
-    const pageCount = doc.internal.getNumberOfPages();
-    doc.setPage(pageCount);
+    // === Footer ONLY on Last Page ===
+    const totalPages = doc.internal.getNumberOfPages();
+    doc.setPage(totalPages);
     doc.line(14, 275, 196, 275);
     doc.setFontSize(8);
     doc.setTextColor(5);
@@ -142,6 +306,7 @@ const MissRejo = () => {
     doc.save(`Missing_Rejoined_${filters.year}_${filters.month}.pdf`);
   };
 
+
   const supplierTableColumns = [
     {
       title: "Supplier ID",
@@ -149,22 +314,36 @@ const MissRejo = () => {
       key: "supplier_id",
     },
     {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Contact",
+      dataIndex: "contact",
+      key: "contact",
+    },
+    {
+      title: "Line",
+      dataIndex: "line",
+      key: "line",
+    },
+    {
+      title: "Officer",
+      dataIndex: "officer",
+      key: "officer",
+    },
+    {
       title: "Total Net (kg)",
       dataIndex: "total_kg",
       key: "total_kg",
+      align: "right"
     },
   ];
 
 
   const [routeSummary, setRouteSummary] = useState({ current: [], previous: [] });
   const [supplierCounts, setSupplierCounts] = useState({ current: 0, previous: 0 });
-
-
-  const getOfficerByLineCode = (lineCode) => {
-    const entry = lineIdCodeMap.find(item => item.lineCode === lineCode);
-    return entry?.officer || "Unknown";
-  };
-
   const getMergedMap = () => {
     const map = {};
     lineIdCodeMap.forEach(item => {
@@ -176,19 +355,49 @@ const MissRejo = () => {
     });
     return map;
   };
+  const mergedMap = getMergedMap();
 
-  const getMergeDisplayMap = () => {
-    const displayMap = {};
-    lineIdCodeMap.forEach(item => {
-      const ids = item.lineId.split(",");
-      if (ids.length > 1) {
-        ids.forEach(id => {
-          displayMap[item.lineCode] = item.lineCode + " (" + item.lineId + ")";
-        });
-      }
-    });
-    return displayMap;
+  const supplierMap = {};
+
+
+  const getOfficerByLineCode = (lineCode) => {
+    const entry = lineIdCodeMap.find(item => item.lineCode === lineCode);
+    return entry?.officer || "Unknown";
   };
+
+
+
+  const groupBySupplier = (dataArr) => {
+    const map = {};
+    dataArr.forEach(d => {
+      const sid = d["Supplier Id"];
+      const net = parseFloat(d["Net"]) || 0;
+      const sup = supplierMap[sid] || {};
+
+      if (!map[sid]) {
+        map[sid] = {
+          supplier_id: sid,
+          total_kg: 0,
+          name: sup.name || "Unknown",
+          contact: sup.contact || "-",
+          line: sup.lineCode || "Unknown",
+          officer: sup.officer || "Unknown"
+        };
+      }
+      map[sid].total_kg += net;
+    });
+
+    return Object.values(map).map(item => ({
+      ...item,
+      total_kg: item.total_kg.toFixed(0)
+    }));
+  };
+
+
+
+
+  // Group by supplier_id
+
 
 
   const getLeafRecordsByDates = async () => {
@@ -207,51 +416,89 @@ const MissRejo = () => {
     const prevMonth = String(prev.month() + 1).padStart(2, "0");
     const prevStart = getMonthDateRangeFromParts(prevYear, prevMonth);
 
-    const ids = filters.line;
+    let ids = filters.line;
+    if (selectedOfficer.line !== 'All') {
+      ids = selectedOfficer.line;
+    } else if (selectedOfficer.line === 'All' && filters.line !== 'Select Line') {
+      ids = filters.line;
+    }
+
     const currentUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${currentStart}`;
     const prevUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${prevStart}`;
+    const supplierUrl = `/quiX/ControllerV1/supdata?k=${API_KEY}&r=${ids}`;
 
     dispatch(showLoader());
     setLoading(true);
     setError(null);
 
     try {
-      const [currentRes, prevRes, targetImport] = await Promise.all([
+      const [currentRes, prevRes, supRes] = await Promise.all([
         fetch(currentUrl),
         fetch(prevUrl),
-        import(`../data/targets/targets_${formattedCurrent}.json`)
+        fetch(supplierUrl)
       ]);
 
-      if (!currentRes.ok || !prevRes.ok) throw new Error("Failed to fetch data");
+      if (!currentRes.ok || !prevRes.ok || !supRes.ok) {
+        throw new Error("Failed to fetch data");
+      }
 
-      const currentData = await currentRes.json();
-      const previousData = await prevRes.json();
+      const [currentData, previousData, supplierData] = await Promise.all([
+        currentRes.json(),
+        prevRes.json(),
+        supRes.json()
+      ]);
 
-      // === Group by supplier and sum ===
+      // ✅ Step 1: Prepare merged map and supplier info
+      const mergedMap = getMergedMap(); // Needed!
+      const supplierMap = {};
+
+      supplierData.forEach(s => {
+        const rawLineId = s["Route"] || s["Line"] || "Unknown";
+        const mergedCode = mergedMap[rawLineId] || rawLineId;
+        const officer = getOfficerByLineCode(mergedCode);
+
+        supplierMap[s["Supplier Id"]] = {
+          name: s["Supplier Name"],
+          contact: s["Contact"],
+          line: mergedCode,
+          officer: officer
+        };
+      });
+
+      // ✅ Step 2: Group by supplier and sum
       const groupBySupplier = (dataArr) => {
         const map = {};
         dataArr.forEach(d => {
           const sid = d["Supplier Id"];
           const net = parseFloat(d["Net"]) || 0;
+          const sup = supplierMap[sid] || {};
+
           if (!map[sid]) {
-            map[sid] = { supplier_id: sid, total_kg: 0 };
+            map[sid] = {
+              supplier_id: sid,
+              total_kg: 0,
+              name: sup.name || "Unknown",
+              contact: sup.contact || "-",
+              line: sup.line || "Unknown",
+              officer: sup.officer || "Unknown"
+            };
           }
           map[sid].total_kg += net;
         });
+
         return Object.values(map).map(item => ({
           ...item,
-          total_kg: item.total_kg.toFixed(2)
+          total_kg: item.total_kg.toFixed(0)
         }));
       };
 
       const currentSuppliers = groupBySupplier(currentData);
       const previousSuppliers = groupBySupplier(previousData);
 
-      // === Store them for display ===
       setCurrentSupplierTable(currentSuppliers);
       setPreviousSupplierTable(previousSuppliers);
 
-      // === Identify missed and rejoined ===
+      // ✅ Step 3: Identify missed and rejoined
       const currentIds = new Set(currentSuppliers.map(s => s.supplier_id));
       const previousIds = new Set(previousSuppliers.map(s => s.supplier_id));
 
@@ -260,11 +507,12 @@ const MissRejo = () => {
 
       setMissedSuppliers(missed);
       setRejoinedSuppliers(rejoined);
+
       const missedTotal = missed.reduce((sum, s) => sum + parseFloat(s.total_kg), 0);
       const rejoinedTotal = rejoined.reduce((sum, s) => sum + parseFloat(s.total_kg), 0);
 
-      setMissedTotal(missedTotal.toFixed(2));
-      setRejoinedTotal(rejoinedTotal.toFixed(2));
+      setMissedTotal(missedTotal.toFixed(0));
+      setRejoinedTotal(rejoinedTotal.toFixed(0));
 
       setSupplierCounts({
         current: currentSuppliers.length,
@@ -285,7 +533,6 @@ const MissRejo = () => {
 
 
 
-
   const cardStyle = {
     background: "rgba(0, 0, 0, 0.6)",
     color: "#fff",
@@ -300,26 +547,57 @@ const MissRejo = () => {
           <Row justify="space-between" gutter={[16, 16]}>
             <Col span={24}>
               <Row gutter={[16, 16]}>
-                <Col xs={12} sm={8} md={1}>
+                <Col md={1}>
+
+
+
                   <Button
                     icon={<ReloadOutlined />}
                     type="primary"
-                    block
                     danger
-                    onClick={
-
-
-                      () => {
-
-                        setMissedSuppliers([]);
-                        setRejoinedSuppliers([]);
-                        setFilters({ year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: '', officer: '' })
-                      }
-
-                    }
+                    block
+                    onClick={() => {
+                      setSelectedOfficer({ name: "Select Officer", line: "All" })
+                      setMissedSuppliers([]);
+                      setRejoinedSuppliers([]);
+                      setFilters({
+                        year: "Select Year",
+                        month: "Select Month",
+                        officer: "All",
+                        line: "Select Line",
+                        lineCode: '',
+                        officer: ''
+                      });
+                    }}
                   >
 
                   </Button>
+
+                </Col>
+                <Col md={3} style={{ display: "flex", alignItems: "center", height: "100%" }}>
+                  <Select
+                    placeholder="Select Officer"
+                    style={{
+                      width: "100%",
+                      backgroundColor: "rgb(0, 0, 0)",
+                      color: "#000",
+                      border: "1px solid #333",
+                      borderRadius: 6
+                    }}
+                    bordered={false}
+                    value={selectedOfficer?.name}
+                    onChange={(value) => {
+                      const officer = officerList.find(o => o.name === value);
+                      setSelectedOfficer(officer);
+                      setSelectedLine(null);
+                    }}
+                  >
+                    {officerList.map((officer) => (
+                      <Option key={officer.name} value={officer.name}>
+                        Mr. {officer.name}
+                      </Option>
+                    ))}
+                  </Select>
                 </Col>
                 <Col md={3}>
                   <Select
@@ -371,7 +649,7 @@ const MissRejo = () => {
                     ))}
                   </Select>
                 </Col>
-                <Col md={3}>
+                <Col md={1}>
 
                   <Button
                     icon={<SearchRounded />}
@@ -383,12 +661,29 @@ const MissRejo = () => {
                   <Button
                     type="primary"
                     style={{ marginLeft: 8 }}
-                    onClick={() => exportToPDF(routeSummary, 'Full Summery')}
+                    onClick={() => exportToPDF()}
                   >
                     All
                   </Button>
                 </Col>
-
+                <Col md={3}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => exportGroupedPDF(missedSuppliers, "Missed")}
+                  >
+                    Missed
+                  </Button>
+                </Col>
+                <Col md={4}>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => exportGroupedPDF(rejoinedSuppliers, "Rejoined")}
+                  >
+                    Rejoined
+                  </Button>
+                </Col>
 
 
               </Row>
