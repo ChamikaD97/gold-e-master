@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Button, Table, Select, DatePicker, Progress } from "antd";
+import React, { useState } from "react";
+import { Card, Col, Row, Button, Select, Progress } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import lineIdCodeMap from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
@@ -636,7 +636,7 @@ const Summary = () => {
     doc.setFont(undefined, 'normal');
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    doc.text(`Leaf Summary on Date: ${yesterday.toLocaleDateString()} by Mr. ${title}`, 14, 46);
+    doc.text(`Leaf Summary by Mr. ${title} on Date: ${yesterday.toLocaleDateString()} `, 14, 46);
 
 
     doc.line(14, 50, 196, 50);
@@ -644,11 +644,8 @@ const Summary = () => {
     officerOrder.slice(key, key + 1).forEach(officer => {
       const data = pdfData.filter(row => row.officer === officer);
       if (!data.length) return;
-
-      const title = `Mr. ${officer} Summary`;
       doc.setFont(undefined, 'bold');
       doc.setFontSize(10);
-      doc.text(title, 14, startY);
       doc.setFont(undefined, 'normal');
 
       const tableData = data.map(row => {
@@ -684,7 +681,7 @@ const Summary = () => {
       });
 
       autoTable(doc, {
-        startY: startY + 9,
+        startY: startY + 4,
         head: [["Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
 
         body: tableData,
@@ -793,64 +790,8 @@ const Summary = () => {
 
 
 
-    officerOrder.slice(5, 7).forEach(officer => {
-      const data = pdfData.filter(row => row.officer === officer);
-      if (!data.length) return;
-
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
-
-      doc.setFont(undefined, 'normal');
-
-      // ✅ Calculate overall totals from officer total rows
 
 
-      // ✅ Build table data
-      const summaryTableData = [[
-
-        summery.totalSuper,
-        summery.totalTarget, summery.totalReceived,
-
-
-      ]];
-
-      // ✅ Add spacing
-      startY = doc.lastAutoTable.finalY + 10;
-
-      // ✅ Add Summary Table
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text("Grand Total Summary", 14, startY);
-      doc.setFont(undefined, 'normal');
-
-      autoTable(doc, {
-        startY: startY + 4,
-        head: [["Super", "Target", "Received"]],
-        body: summaryTableData,
-        styles: {
-          fontSize: 10,
-          cellPadding: 1.5,
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2,
-        },
-        headStyles: {
-          fillColor: [0, 123, 255], // blue header
-          textColor: 255,
-          halign: "center",
-          valign: "middle",
-        },
-        bodyStyles: {
-          halign: "center",
-          valign: "middle",
-          fontStyle: "bold",
-          fillColor: [255, 255, 200], // light yellow background
-        },
-        margin: { left: 14, right: 14 },
-      });
-
-      startY = doc.lastAutoTable.finalY + 10;
-    });
     // Go to last page
     const pageCount = doc.internal.getNumberOfPages();
     doc.setPage(pageCount);
@@ -863,7 +804,10 @@ const Summary = () => {
     doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
     doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-    doc.save("GreenHouse_Summary.pdf");
+    doc.save(`Leaf Summary by Mr. ${title} on Date: ${yesterday.toLocaleDateString()}.pdf`);
+
+
+
   };
 
 

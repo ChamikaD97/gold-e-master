@@ -26,11 +26,13 @@ const HeaderComponent = () => {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
 
 
-  const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("users");
-    navigate("/login");
-  };
+const handleLogout = () => {
+  localStorage.removeItem("loggedInUser");
+  localStorage.removeItem("users");
+  navigate("/login");
+  window.location.reload(); // ✅ Force page reload after redirect
+};
+
   return (
     <>
       <Header
