@@ -10,12 +10,13 @@ import {
   FileOutlined,
   UserOutlined,
   InfoCircleFilled,
+  AimOutlined,
 } from "@ant-design/icons";
 import SettingsModal from "../components/SettingsModal";
 
 import icon from "../images/logo.ico";
 import { Table } from "@mui/material";
-import { CardTravelSharp, SummarizeRounded, TableBar } from "@mui/icons-material";
+import { CardTravelSharp, SummarizeRounded, TableBar, TurnSharpRightTwoTone } from "@mui/icons-material";
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
@@ -94,6 +95,12 @@ const HeaderComponent = () => {
             </Menu.Item>
 
           </SubMenu>
+
+
+
+ <Menu.Item key="targets" icon={<AimOutlined />}>
+            <Link to="/targets">Targets</Link>
+          </Menu.Item>
 
           <SubMenu key="leaf" icon={<FundOutlined />} title="Leaf">
             <Menu.Item key="leaf-supply">

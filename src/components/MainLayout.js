@@ -26,7 +26,7 @@ const MainLayout = () => {
     const interval = setInterval(() => {
       const index = Math.floor(Math.random() * backgrounds.length);
       setCurrentBg(backgrounds[index]);
-    }, 25000); // 15000ms = 15 seconds
+    }, 50000); // 15000ms = 15 seconds
 
     return () => clearInterval(interval);
   }, []);
