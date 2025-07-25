@@ -13,6 +13,32 @@ export const base_sql = "http://localhost:3000/";
 const API_BASE = "http://localhost:8000"; // Update for production
 
 
+// 📥 Create or update a single leaf count (avg if exists)
+export const createOrUpdateLeafCount = (payload) => {
+  return axios.post(`${API_BASE}/leaf-count`, payload);
+};
+
+// 📤 Get all records
+export const getAllLeafCounts = () => {
+  return axios.get(`${API_BASE}/leaf-count`);
+};
+
+// 📆 Get all records for specific year/month
+export const getLeafCountsByMonthYear = (year, month) => {
+  return axios.get(`${API_BASE}/leaf-count/${year}/${month}`);
+};
+
+// 🔍 Get one record by lineCode, year, month
+export const getLeafCountByLineMonthYear = (lineCode, year, month) => {
+  return axios.get(`${API_BASE}/leaf-count/${lineCode}/${year}/${month}`);
+};
+
+// 🗑️ Delete a record by lineCode, year, month
+export const deleteLeafCount = (lineCode, year, month) => {
+  return axios.delete(`${API_BASE}/leaf-count/${lineCode}/${year}/${month}`);
+};
+
+
 export const login = async (username, password) => {
   try {
     const response = await axios.post(`${API_BASE}/auth/login`, {

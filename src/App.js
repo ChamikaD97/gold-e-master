@@ -24,6 +24,7 @@ import Summary from "./pages/Summery";
 import MissRejo from "./pages/Miss&Rejo.js";
 import RegisterPage from "./pages/RegisterPage.js";
 import Targets from "./pages/Targets.js";
+import LeafCount from "./pages/LeafCounts.js";
 
 // ✅ Session check
 export const isSessionValid = () => {
@@ -117,7 +118,10 @@ const App = () => {
             <Route path="/summery" element={<PrivateRoute element={<Summary />} />} />
             <Route path="/missing" element={<PrivateRoute element={<MissRejo />} />} />
             <Route path="/supplier/info" element={<PrivateRoute element={<SupplierInfo />} />} />
- <Route path="/targets" element={<PrivateRoute element={<Targets />} />} />
+            <Route path="/targets" element={<PrivateRoute element={<Targets />} />} />
+
+            <Route path="/leaf/count" element={<PrivateRoute element={<LeafCount />} />} />
+
             {/* 404 */}
             <Route path="/404" element={<div>404 - Page Not Found</div>} />
             <Route path="*" element={<Navigate to="/404" replace />} />
