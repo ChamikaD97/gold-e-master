@@ -115,7 +115,7 @@ const Suppliers = () => {
     const baseUrl = "/quiX/ControllerV1/supdata";
     const ids = Array.from({ length: 170 }, (_, i) => i + 1).join(",");
 
-    const params = new URLSearchParams({ k: API_KEY, r: ids });
+    const params = new URLSearchParams({ k: API_KEY, r: lineCode });
     const url = `${baseUrl}?${params.toString()}`;
 
     setLoading(true);

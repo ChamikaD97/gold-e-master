@@ -60,48 +60,48 @@ const Prediction = () => {
   };
 
   const handleTargetSearch = async () => {
-    try {
-      console.log(filters);
+  try {
+    console.log(filters);
 
-      const data2 = await fetchMonthlyTargets(filters.year, filters.month);
-        console.log('****************************');
-      const target2 = data2.default.filter(item => item.lineCode === filters.lineCode)
-      console.log('****************************');
-      console.log(target2);
+    // ✅ Wait until this API call completes
+    const data2 = await fetchMonthlyTargets(filters.year, filters.month);
+    console.log("🚀 Monthly targets fetched:", data2);
 
-      if (data2) {
-        targetsN.current = target2[0].target
-      } else {
-        toast.warn("⚠️ No target found for selected line.");
-      }
+    const target2 = data2.filter(item => item.lineCode === filters.lineCode);
+    console.log("🎯 Filtered target:", target2);
 
-
-
-
-      const enteredTarget = targetsN.current
-      if (!enteredTarget) {
-        message.warning("Please enter a target value to search.");
-        return;
-      }
-      getLeafRecordsByRoutes(); // Ensure data is fetched before searching
-      // Example: filter totals or find specific section in your table
-      const matched = lineWiseTotals && Object.entries(lineWiseTotals).find(
-        ([line, value]) => value.target?.toString() === enteredTarget
-      );
-
-      if (matched) {
-        message.success(`✅ Found line ${matched[0]} with target ${enteredTarget}`);
-        // Optionally scroll to a div or update table highlight
-      } else {
-        message.error("❌ No line found with the entered target");
-      }
-
-    } catch (err) {
-
+    if (!target2.length) {
+      toast.warn("⚠️ No target found for selected line.");
+      return;
     }
 
+    targetsN.current = target2[0].target;
+    const enteredTarget = targetsN.current;
 
-  };
+    if (!enteredTarget) {
+      message.warning("Please enter a target value to search.");
+      return;
+    }
+
+    // ✅ Wait for leaf records to load before comparing
+    await getLeafRecordsByRoutes();
+
+    const matched = lineWiseTotals && Object.entries(lineWiseTotals).find(
+      ([line, value]) => value.target?.toString() === enteredTarget.toString()
+    );
+
+    if (matched) {
+      message.success(`✅ Found line ${matched[0]} with target ${enteredTarget}`);
+    } else {
+      message.error("❌ No line found with the entered target");
+    }
+
+  } catch (err) {
+    console.error("🔴 Error in handleTargetSearch:", err);
+    toast.error("Something went wrong while searching target.");
+  }
+};
+
 
   const [xSupplierDetails, setXSupplierDetails] = useState([]); // array of detailed supplier objects
   const leafRound = useSelector((state) => state.commonData?.leafRound);
