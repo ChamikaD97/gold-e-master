@@ -296,6 +296,10 @@ input::placeholder {
   background-color: #000000;
   color: #ffffff;
 }
+/* This targets the selected item shown in the select box */
+.ant-select-selector {
+  color: black !important;
+}
 
 .normal-bordered-table .ant-table-tbody>tr:hover>td {
   background-color: #0000008f  !important;

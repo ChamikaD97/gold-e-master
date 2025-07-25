@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Card, Col, Row, Select, Typography, Button, Table, Input, Modal,
   message
@@ -6,13 +6,12 @@ import {
 import { ReloadOutlined } from "@ant-design/icons";
 import '../App.css';
 import lineIdCodeMap from "../data/SummeryData.json";
-
 import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
 import CircularLoader from "../components/CircularLoader";
 import SupplierLeafModal from "../components/SupplierLeafModal";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { API_KEY, getMonthDateRangeFromParts, getPreviousMonthDateRange } from "../api/api";
+import { API_KEY, fetchMonthlyTargets, getMonthDateRangeFromParts, getPreviousMonthDateRange } from "../api/api";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import CountUp from "react-countup";
@@ -36,53 +35,72 @@ const Prediction = () => {
     const match = lineIdCodeMap.find((line) => line.lineId === lineId);
     return match ? match.officer : null;
   };
-  const [targets, setTargets] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(dayjs()); // default to current month
+  const targetsN = useRef();
 
   const loadTargetsForMonth = async (filters) => {
 
-    const formatted = dayjs(filters.year).format("YYYY") + '_' + dayjs(filters.month).format("MM");
 
     try {
-      const data = await import(`../data/targets/targets_${formatted}.json`);
-      const lineCode = filters.lineCode
-      const target = data.default.filter(item => item.lineCode === lineCode)
-      setTargets(target[0].target);
+      const data2 = await fetchMonthlyTargets(filters.year, filters.month);
+      const target2 = data2.default.filter(item => item.lineCode === filters.lineCode)
 
+
+      if (data2) {
+        targetsN.current = target2[0].target
+      } else {
+        toast.warn("⚠️ No target found for selected line.");
+      }
 
     } catch (err) {
-      toast.error("❌ Target file not found");
 
-      setTargets([]); // or fallback to default
+      toast.error("❌ Target file not found", err);
+      targetsN.current = []
     }
   };
 
-  useEffect(() => {
-    if (filters.month !== "Select Month") {
-      loadTargetsForMonth(filters);
+  const handleTargetSearch = async () => {
+    try {
+      console.log(filters);
+
+      const data2 = await fetchMonthlyTargets(filters.year, filters.month);
+        console.log('****************************');
+      const target2 = data2.default.filter(item => item.lineCode === filters.lineCode)
+      console.log('****************************');
+      console.log(target2);
+
+      if (data2) {
+        targetsN.current = target2[0].target
+      } else {
+        toast.warn("⚠️ No target found for selected line.");
+      }
+
+
+
+
+      const enteredTarget = targetsN.current
+      if (!enteredTarget) {
+        message.warning("Please enter a target value to search.");
+        return;
+      }
+      getLeafRecordsByRoutes(); // Ensure data is fetched before searching
+      // Example: filter totals or find specific section in your table
+      const matched = lineWiseTotals && Object.entries(lineWiseTotals).find(
+        ([line, value]) => value.target?.toString() === enteredTarget
+      );
+
+      if (matched) {
+        message.success(`✅ Found line ${matched[0]} with target ${enteredTarget}`);
+        // Optionally scroll to a div or update table highlight
+      } else {
+        message.error("❌ No line found with the entered target");
+      }
+
+    } catch (err) {
 
     }
 
-  }, [filters.month]);
 
-  const handleTargetSearch = () => {
-    const enteredTarget = targets
-    if (!enteredTarget) {
-      message.warning("Please enter a target value to search.");
-      return;
-    }
-    getLeafRecordsByRoutes(); // Ensure data is fetched before searching
-    // Example: filter totals or find specific section in your table
-    const matched = lineWiseTotals && Object.entries(lineWiseTotals).find(
-      ([line, value]) => value.target?.toString() === enteredTarget
-    );
-
-    if (matched) {
-      message.success(`✅ Found line ${matched[0]} with target ${enteredTarget}`);
-      // Optionally scroll to a div or update table highlight
-    } else {
-      message.error("❌ No line found with the entered target");
-    }
   };
 
   const [xSupplierDetails, setXSupplierDetails] = useState([]); // array of detailed supplier objects
@@ -503,7 +521,7 @@ const Prediction = () => {
 
       setData(transformed);
       //downloadXSupplierListAsPDF(transformed, false);
-      setColData(transformed, targets);
+      setColData(transformed, targetsN.current);
 
     } catch (err) {
       setError("❌ Failed to load supplier data");
@@ -520,7 +538,7 @@ const Prediction = () => {
     const doc = new jsPDF();
     const today = new Date().toLocaleDateString();
     const selectedLine = filters.lineCode || "All";
-    const target = targets;
+    const target = targetsN.current;
     const firstLineKey = Object.keys(lineWiseTotals)[0];
     const lastMonthAchievement = lineWiseTotals?.[firstLineKey]?.overall?.toFixed(0) || "N/A";
 
@@ -712,7 +730,7 @@ const Prediction = () => {
             </Col>
             <Col md={3}>
 
-              {targets}
+              {targetsN.current ? targetsN.current : ''}
             </Col>
             <Col md={3}>
               <Button

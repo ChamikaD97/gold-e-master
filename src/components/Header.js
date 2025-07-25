@@ -26,12 +26,12 @@ const HeaderComponent = () => {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
 
 
-const handleLogout = () => {
-  localStorage.removeItem("loggedInUser");
-  localStorage.removeItem("users");
-  navigate("/login");
-  window.location.reload(); // ✅ Force page reload after redirect
-};
+  const handleLogout = () => {
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("token");
+    navigate("/login");
+    window.location.reload(); // ✅ Force page reload after redirect
+  };
 
   return (
     <>
@@ -127,8 +127,8 @@ const handleLogout = () => {
         <Avatar style={{ backgroundColor: '#206b00ff' }} icon={<UserOutlined />} />
         {loggedInUser && (
           <Tooltip title="Logged in user">
-            <div style={{ color: "white", fontWeight: "bold", marginLeft: 16 }}>
-              {loggedInUser.name}
+            <div style={{ color: "white", fontWeight: "normal", marginLeft: 16 }}>
+           Hi,   {loggedInUser.username}
             </div>
           </Tooltip>
         )}

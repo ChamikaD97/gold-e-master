@@ -1,9 +1,60 @@
 import { useDispatch } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
+import axios from "axios";
 
 
 // api.js
 export const BASE_URL = "http://newserver:46597/quiX/ControllerV1";
+
+
+export const base_sql = "http://localhost:3000/";
+// src/api.js
+
+const API_BASE = "http://localhost:8000"; // Update for production
+
+
+export const login = async (username, password) => {
+  try {
+    const response = await axios.post(`${API_BASE}/auth/login`, {
+      username,
+      password,
+    });
+
+    return response.data; // contains: { access_token, user }
+  } catch (error) {
+    // rethrow for caller to handle
+    throw error;
+  }
+};
+
+
+
+export const register = async (username, password, role = 'user') => {
+  return axios.post(
+    `${API_BASE}/auth/register`,
+    { username, password, role },
+    {
+      withCredentials: true, // ✅ allow sending cookies if needed
+    }
+  );
+};
+
+
+export const fetchMonthlyTargets = async (year, month) => {
+
+  
+  try {
+     console.log('****************************');
+    const response = await axios.get(`${API_BASE}/targets/${year}/${month}`);
+     console.log('****************************',response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Failed to fetch targets:", error);
+    throw error;
+  }
+};
+
+
 export const API_KEY = "quix717244";
 const buildQueryParams = (params) =>
   Object.entries(params)
@@ -148,7 +199,7 @@ export const getMonthDateRangeFromParts = (year, month) => {
     const dd = String(date.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
   };
-console.log(`${formatDate(firstDate)}~${formatDate(lastDate)}`);
+  console.log(`${formatDate(firstDate)}~${formatDate(lastDate)}`);
 
   return `${formatDate(firstDate)}~${formatDate(lastDate)}`;
 };

@@ -10,7 +10,7 @@ import {
 } from "antd";
 import { showLoader, hideLoader } from "../redux/loaderSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { API_KEY } from "../api/api";
+import { API_KEY, fetchMonthlyTargets } from "../api/api";
 import dayjs from "dayjs";
 import CircularLoader from "./CircularLoader";
 import CountUp from "react-countup";
@@ -47,17 +47,21 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
     const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
 
-    const loadTargetsForMonth = async (data) => {
+    const loadTargetsForMonth = async (range) => {
         setTargets([]); // or fallback to default
-        const formatted = data.month > 10 ?
-            (data.year + '_' + data.month) : (data.year + '_0' + data.month);
+
         try {
 
+            const data = await fetchMonthlyTargets(range.year, range.month);
+                const match = data.find((d) => d.lineCode === lineCode);
 
-            const data = await import(`../data/targets/targets_${formatted}.json`);
+            if (match) {
+                setTargets(match.target);
+                setMonthlyTarget(match.target);
+            } else {
+                toast.warn("⚠️ No target found for selected line.");
+            }
 
-            setTargets(data.default.filter((d) => lineCode == d.lineCode)[0].target);
-            setMonthlyTarget(data.default.filter((d) => lineCode == d.lineCode)[0].target);
 
         } catch (err) {
             toast.error("❌ Failed to load target files");

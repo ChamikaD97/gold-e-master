@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Card, Col, Row, Button, Select, Progress } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import lineIdCodeMap from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { API_KEY, getMonthDateRangeFromParts } from "../api/api";
+import { API_KEY, fetchMonthlyTargets, getMonthDateRangeFromParts } from "../api/api";
 import dayjs from "dayjs";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -34,7 +34,7 @@ const Summary = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [targets, setTargets] = useState([]);
+  const targetsN = useRef();
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
@@ -901,7 +901,7 @@ const Summary = () => {
 
   const getLeafRecordsByDates = async () => {
     const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
-    const formatted = `${filters.year}_${filters.month}`;
+
 
     const ids = Array.from({ length: 170 }, (_, i) => i + 1).join(",");
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${dateRange}`;
@@ -910,16 +910,29 @@ const Summary = () => {
     setLoading(true);
     setError(null);
 
-    try {
-      const targetModule = await import(`../data/targets/targets_${formatted}.json`);
-      const targets = targetModule.default;
-      setTargets(targets);
 
+    try {
+      // 👉 Wait until target data is fully loaded
+      const data = await fetchMonthlyTargets(filters.year, filters.month);
+      console.log('✅ Targets fetched:', data.length);
+
+      if (data && Array.isArray(data)) {
+        targetsN.current= data
+
+      } else {
+        toast.warn("⚠️ No target found for selected line.");
+        return; // stop further execution if no target
+      }
+
+      // 👉 Proceed with leaf record fetch *after* target fetch completes
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch leaf records");
 
       const result = await response.json();
       if (!Array.isArray(result)) throw new Error("Invalid API data format");
+
+      // ... continue processing result as you're already doing
+
 
       const idToMergedCode = getMergedMap();
       const mergeDisplayMap = getMergeDisplayMap();
@@ -929,7 +942,7 @@ const Summary = () => {
         const lineCode = idToMergedCode[lineId] || "Unknown";
         const net_kg = parseFloat(item["Net"]) || 0;
         const isSuper = item["Leaf Type"] === 2;
-        const target = getTargetByLineCode(lineCode, targets) || 0;
+        const target = getTargetByLineCode(lineCode, targetsN.current) || 0;
 
         if (lineCode === "Unknown") {
           console.warn(`Unknown line ID: ${lineId}`);
@@ -985,7 +998,7 @@ const Summary = () => {
             lineCode: item.lineCode,
             super: 0,
             total: 0,
-            target: getTargetByLineCode(item.lineCode, targets),
+            target: getTargetByLineCode(item.lineCode, targetsN.current),
             difference: 0,
           };
         }
@@ -1080,7 +1093,7 @@ const Summary = () => {
 
       // 👉 Weekly breakdown
       if (typeof getLeafRecordsByWeeks === "function") {
-        getLeafRecordsByWeeks(targets);
+        getLeafRecordsByWeeks(targetsN.current);
       }
 
       setRouteSummary(finalTableData);

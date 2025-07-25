@@ -22,7 +22,42 @@ import OfficerTargets from "./pages/OfficerTargets";
 import TodaySuppliersFull from "./pages/TodaySuppliersOfficer.js";
 import Summary from "./pages/Summery";
 import MissRejo from "./pages/Miss&Rejo.js";
+import RegisterPage from "./pages/RegisterPage.js";
 
+// ✅ Session check
+export const isSessionValid = () => {
+
+  const token = localStorage.getItem("token");
+
+
+  console.log(token);
+
+
+  try {
+
+
+    if (!token) {
+      localStorage.removeItem("loggedInUser");
+      localStorage.removeItem("token");
+      return false
+    } else {
+      return true;
+
+    }
+
+
+
+
+
+  } catch (e) {
+    console.error("Invalid session format", e);
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("token");
+    return false;
+  }
+};
+
+// ✅ Layout wrapper
 const LayoutWithHeader = () => (
   <>
     <HeaderComponent />
@@ -30,30 +65,12 @@ const LayoutWithHeader = () => (
   </>
 );
 
-// ✅ Route guard component
-
+// ✅ Route guard
 const PrivateRoute = ({ element }) => {
-  const valid = isSessionValid();
-
-  if (!valid) {
-    localStorage.removeItem("loggedInUser");
-    return <Navigate to="/login" replace />;
-  }
-  console.log('*************PrivateRoute*******************');
-
-  return element;
-};
-const isSessionValid = () => {
-  console.log('**************isSessionValid******************');
-
-  const user = JSON.parse(localStorage.getItem("loggedInUser") || "null");
-  if (!user?.expiry) return false;
-  return Date.now() < user.expiry;
+  return isSessionValid() ? element : <Navigate to="/login" replace />;
 };
 
 const App = () => {
-  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
-
   return (
     <AntdApp>
       <ToastContainer
@@ -75,65 +92,32 @@ const App = () => {
           <Route
             path="/login"
             element={
-              isSessionValid() ? <Navigate to="/login" replace /> : <LoginForm />
+              isSessionValid() ? <Navigate to="/dashboard" replace /> : <LoginForm />
             }
           />
-
-
-
+          <Route
+            path="/register"
+            element={
+              isSessionValid() ? <Navigate to="/dashboard" replace /> : <RegisterPage />
+            }
+          />
 
           {/* ✅ Protected Routes */}
           <Route element={<LayoutWithHeader />}>
             <Route index element={<PrivateRoute element={<Dashboard />} />} />
-            <Route
-              path="/dashboard"
-              element={<PrivateRoute element={<Dashboard />} />}
-            />
+            <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
+            <Route path="/leaf/supply" element={<PrivateRoute element={<LeafSupply />} />} />
+            <Route path="/leaf/dailyLeafSupply" element={<PrivateRoute element={<LeafSupplyByDateRange />} />} />
+            <Route path="/leaf/lastSupply" element={<PrivateRoute element={<LastSupply />} />} />
+            <Route path="/leaf/todaySupply/officer" element={<PrivateRoute element={<TodaySuppliersFull />} />} />
+            <Route path="/suppliers/routes" element={<PrivateRoute element={<Suppliers />} />} />
+            <Route path="/factory-targets/prediction" element={<PrivateRoute element={<Prediction />} />} />
+            <Route path="/factory-targets/officer" element={<PrivateRoute element={<OfficerTargets />} />} />
+            <Route path="/summery" element={<PrivateRoute element={<Summary />} />} />
+            <Route path="/missing" element={<PrivateRoute element={<MissRejo />} />} />
+            <Route path="/supplier/info" element={<PrivateRoute element={<SupplierInfo />} />} />
 
-            <Route
-              path="/leaf/supply"
-              element={<PrivateRoute element={<LeafSupply />} />}
-            />
-            <Route
-              path="/leaf/dailyLeafSupply"
-              element={<PrivateRoute element={<LeafSupplyByDateRange />} />}
-            />
-            <Route
-              path="/leaf/lastSupply"
-              element={<PrivateRoute element={<LastSupply />} />}
-            />
-
-            <Route
-              path="/leaf/todaySupply/officer"
-              element={<PrivateRoute element={<TodaySuppliersFull />} />}
-            />
-
-
-            <Route
-              path="/suppliers/routes"
-              element={<PrivateRoute element={<Suppliers />} />}
-            />
-            <Route
-              path="/factory-targets/prediction"
-              element={<PrivateRoute element={<Prediction />} />}
-            />
-            <Route
-              path="/factory-targets/officer"
-              element={<PrivateRoute element={<OfficerTargets />} />}
-            />
-            <Route
-              path="/summery"
-              element={<PrivateRoute element={<Summary />} />}
-            />
-            <Route
-              path="/missing"
-              element={<PrivateRoute element={<MissRejo />} />}
-            />            <Route
-              path="/supplier/info"
-              element={<PrivateRoute element={<SupplierInfo />} />}
-            />
-
-            {/* 404 Route */}
+            {/* 404 */}
             <Route path="/404" element={<div>404 - Page Not Found</div>} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Route>

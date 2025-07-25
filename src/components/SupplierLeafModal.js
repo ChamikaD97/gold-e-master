@@ -113,7 +113,6 @@ const SupplierLeafModal = ({ open, onClose, filters, supplierId }) => {
     }, [open])
 
     useEffect(() => {
-        console.log('*****************cccccccc*********************');
         if (open && supplierId) {
             setLoading(true);
             const fill = filteredData.current

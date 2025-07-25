@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import {
-  Card,
-  Button,
-  Input,
-  Typography,
-  Form
-} from "antd";
+import { Link, useNavigate } from "react-router-dom";
+import { Card, Button, Input, Typography, Form } from "antd";
 import FullPageLayout from "../components/FullPageLayout";
 import icon from "../images/logo.ico";
+import { login } from "../api/api";
 
 const { Title, Text } = Typography;
 
@@ -23,32 +18,23 @@ const LoginPage = () => {
     setTimeout(() => setVisible(true), 100);
   }, []);
 
-  const handleLogin = () => {
-    import("../data/users/users.json")
-      .then((module) => {
-        const users = module.default || [];
+  const handleLogin = async () => {
+    if (!userName || !password) {
+      setError("Username and password are required");
+      return;
+    }
 
-        localStorage.setItem("users", JSON.stringify(users));
-
-        const user = users.find(
-          (u) => u.userName === userName && u.password === password
-        );
-
-        if (user) {
-          const sessionData = {
-            ...user,
-            expiry: Date.now() + 1000 * 60 * 60,  // 1 hour in milliseconds
-          };
-          localStorage.setItem("loggedInUser", JSON.stringify(sessionData));
-          navigate("/dashboard");
-        } else {
-          setError("Invalid User Name or password");
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load users.json", err);
-        setError("Could not load initial user data.");
-      });
+    try {
+      const data = await login(userName, password);
+      localStorage.setItem("loggedInUser", JSON.stringify(data.user));
+      localStorage.setItem("token", data.access_token);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login error:", error);
+      const errMsg =
+        error?.response?.data?.message || "Login failed. Please try again.";
+      setError(errMsg);
+    }
   };
 
 
@@ -68,64 +54,26 @@ const LoginPage = () => {
         }}
       >
         {/* Branding */}
-        <div
-          style={{
-            marginBottom: 12,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center"
-          }}
-        >
+        <div style={{ marginBottom: 12, textAlign: "center" }}>
           <img
             src={icon}
             alt="SLMS"
-            style={{
-              width: 100,
-              height: 100,
-              marginBottom: 8,
-              borderRadius: 50,
-              border: "1px solid white"
-            }}
+            style={{ width: 100, height: 100, marginBottom: 8, borderRadius: 50, border: "1px solid white" }}
           />
           <div>
-            <div style={{ fontWeight: "bold", color: "#fff", fontSize: 22 }}>
-              SLMS
-            </div>
-            <div style={{ fontWeight: "bold", color: "#fff", fontSize: 18 }}>
-              SUPER LEAF MONITORING SYSTEM
-            </div>
-            <div style={{ fontSize: 14, color: "#ccc" }}>
-              GREENHOUSE PLANTATION (PVT) LTD
-            </div>
+            <div style={{ fontWeight: "bold", color: "#fff", fontSize: 22 }}>SLMS</div>
+            <div style={{ fontWeight: "bold", color: "#fff", fontSize: 18 }}>SUPER LEAF MONITORING SYSTEM</div>
+            <div style={{ fontSize: 14, color: "#ccc" }}>GREENHOUSE PLANTATION (PVT) LTD</div>
           </div>
         </div>
 
-        <Form
-          layout="horizontal"
-          labelCol={{ span: 6 }}
-          wrapperCol={{ span: 18 }}
-          colon={false}
-        >
-          <Form.Item
-            label={<span style={{ color: "white" }}>User Name</span>}
-            required
-          >
-            <Input
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-            />
+        <Form layout="horizontal" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }} colon={false}>
+          <Form.Item label={<span style={{ color: "white" }}>User Name</span>} required>
+            <Input value={userName} onChange={(e) => setUserName(e.target.value)} />
           </Form.Item>
 
-          <Form.Item
-            label={<span style={{ color: "white" }}>Password</span>}
-            required
-          >
-            <Input.Password
-              value={password}
-              onPressEnter={handleLogin}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+          <Form.Item label={<span style={{ color: "white" }}>Password</span>} required>
+            <Input.Password value={password} onPressEnter={handleLogin} onChange={(e) => setPassword(e.target.value)} />
           </Form.Item>
 
           {error && (
@@ -136,19 +84,19 @@ const LoginPage = () => {
 
           <Form.Item wrapperCol={{ offset: 6, span: 18 }}>
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-              <Button type="primary" onClick={handleLogin}>
-                Login
-              </Button>
+              <Button type="primary" onClick={handleLogin}>Login</Button>
               <Button type="primary" danger onClick={() => {
                 setUserName("");
                 setPassword("");
                 setError("");
-              }}>
-                Clear
-              </Button>
+              }}>Clear</Button>
             </div>
           </Form.Item>
-
+          <Form.Item wrapperCol={{ span: 24 }} style={{ textAlign: "center", marginBottom: 0 }}>
+            <Text style={{ color: "#ccc" }}>
+              Don’t have an account? <Link to="/register">Register</Link>
+            </Text>
+          </Form.Item>
         </Form>
       </Card>
     </FullPageLayout>
