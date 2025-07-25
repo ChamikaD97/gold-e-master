@@ -39,14 +39,21 @@ export const register = async (username, password, role = 'user') => {
   );
 };
 
+// api.js or targetService.js (frontend)
+export const deleteTarget = (lineCode, year, month) => {
+  return axios.delete(`${API_BASE}/targets/${lineCode}/${year}/${month}`);
+};
+
+export const updateTarget = (lineCode, year, month, target) =>
+  axios.put(`${API_BASE}/targets/${lineCode}/${year}/${month}`, {
+    target
+  });
 
 export const fetchMonthlyTargets = async (year, month) => {
 
-  
+
   try {
-     console.log('****************************');
     const response = await axios.get(`${API_BASE}/targets/${year}/${month}`);
-     console.log('****************************',response.data);
     return response.data;
   } catch (error) {
     console.error("❌ Failed to fetch targets:", error);

@@ -910,14 +910,13 @@ const Summary = () => {
     setLoading(true);
     setError(null);
 
-
+    console.log('/////////7777777777777777/////');
     try {
       // 👉 Wait until target data is fully loaded
       const data = await fetchMonthlyTargets(filters.year, filters.month);
-      console.log('✅ Targets fetched:', data.length);
 
       if (data && Array.isArray(data)) {
-        targetsN.current= data
+        targetsN.current = data
 
       } else {
         toast.warn("⚠️ No target found for selected line.");
@@ -986,7 +985,7 @@ const Summary = () => {
         totalReceived,
         totalDifference,
       });
-
+      console.log('/////////////////////*********////////////////');
       // 👉 Group data by officer and line
       const groupedTotals = {};
       transformed.forEach(item => {
@@ -1097,6 +1096,8 @@ const Summary = () => {
       }
 
       setRouteSummary(finalTableData);
+      console.log('////////////////////////////////////');
+
     } catch (err) {
       console.error("Error in getLeafRecordsByDates:", err);
       toast.error("Error while loading data. Please try again.");
@@ -1460,75 +1461,8 @@ const Summary = () => {
             </Col>
           </Row>
         </Card>
-        {/* 
-        <Row gutter={[16, 16]} justify="center" >
-
-          {!isLoading &&
 
 
-            <>
-
-              <Col xs={24} sm={12} md={8}>
-                <div
-                  style={{
-                    backgroundColor: "#ffa347",
-                    borderRadius: 10,
-                    padding: "14px 24px",
-                    textAlign: "center",
-                    fontWeight: 600,
-                    color: "#000",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                  }}
-                >
-                  Super Total<br />
-                  <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={0.5} separator="," /> kg
-                </div>
-              </Col>
-
-              <Col xs={24} sm={12} md={8}>
-                <div
-                  style={{
-                    backgroundColor: "#47a3ff",
-                    borderRadius: 10,
-                    padding: "14px 24px",
-                    textAlign: "center",
-                    fontWeight: 600,
-                    color: "#000",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                  }}
-                >
-                  Normal Total<br />
-
-                  <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={0.5} separator="," /> kg
-
-                </div>
-              </Col>
-
-              <Col xs={24} sm={24} md={8}>
-                <div
-                  style={{
-                    backgroundColor: "#28a745",
-                    borderRadius: 10,
-                    padding: "14px 24px",
-                    textAlign: "center",
-                    fontWeight: 600,
-                    color: "#000",
-                    textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
-                    boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)"
-                  }}
-                >
-                  Overall Total<br />
-                  <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super + totals.normal)} duration={0.5} separator="," /> kg
-
-
-                </div>
-              </Col>
-            </>
-          }
-        </Row> 
-        
-        
-        */}
 
         <Row gutter={[16, 16]} justify="center">
           {!loading &&

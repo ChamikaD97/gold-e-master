@@ -18,18 +18,18 @@ const MainLayout = () => {
   const backgrounds = [background1, background2, background3, background4, background5];
   const [currentBg, setCurrentBg] = useState(backgrounds[0]);
 
-  useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * backgrounds.length);
-    setCurrentBg(backgrounds[randomIndex]);
+  // useEffect(() => {
+  //   const randomIndex = Math.floor(Math.random() * backgrounds.length);
+  //   setCurrentBg(backgrounds[randomIndex]);
 
-    // Optional: change background every 15 seconds
-    const interval = setInterval(() => {
-      const index = Math.floor(Math.random() * backgrounds.length);
-      setCurrentBg(backgrounds[index]);
-    }, 50000); // 15000ms = 15 seconds
+  //   // Optional: change background every 15 seconds
+  //   const interval = setInterval(() => {
+  //     const index = Math.floor(Math.random() * backgrounds.length);
+  //     setCurrentBg(backgrounds[index]);
+  //   }, 50000); // 15000ms = 15 seconds
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   const NotFoundTextOnly = () => (
     <div
