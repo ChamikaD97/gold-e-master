@@ -72,7 +72,7 @@ const Summary = () => {
     doc.setFontSize(9);
     doc.line(14, 22, 196, 22);
     doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, Rotumba.nayakapura", 14, 30);
+    doc.text("Factory: Panakaduwa, Rotumba.", 14, 30);
     doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
     doc.line(14, 39, 196, 39);
 
@@ -627,7 +627,7 @@ const Summary = () => {
     doc.setFontSize(9);
     doc.line(14, 22, 196, 22);
     doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, Rotumba.nayakapura", 14, 30);
+    doc.text("Factory: Panakaduwa, Rotumba.", 14, 30);
     doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
     doc.line(14, 39, 196, 39);
 
@@ -909,6 +909,8 @@ const Summary = () => {
     dispatch(showLoader());
     setLoading(true);
     setError(null);
+
+    console.log('/////////7777777777777777/////');
     try {
       // 👉 Wait until target data is fully loaded
       const data = await fetchMonthlyTargets(filters.year, filters.month);
@@ -983,6 +985,7 @@ const Summary = () => {
         totalReceived,
         totalDifference,
       });
+      console.log('/////////////////////*********////////////////');
       // 👉 Group data by officer and line
       const groupedTotals = {};
       transformed.forEach(item => {
@@ -1093,6 +1096,7 @@ const Summary = () => {
       }
 
       setRouteSummary(finalTableData);
+      console.log('////////////////////////////////////');
 
     } catch (err) {
       console.error("Error in getLeafRecordsByDates:", err);
