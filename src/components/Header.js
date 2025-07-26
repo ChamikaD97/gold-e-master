@@ -90,6 +90,15 @@ const HeaderComponent = () => {
             <Menu.Item key="route-suppliers">
               <Link to="/suppliers/routes">Route Suppliers</Link>
             </Menu.Item>
+            {
+              role !== 'User' && (
+
+
+                <Menu.Item key="missing">
+                  <Link to="/missing">Missing/Rejoing Suppliers</Link>
+                </Menu.Item>
+              )}
+
           </SubMenu>
 
 
@@ -98,6 +107,14 @@ const HeaderComponent = () => {
 
 
           <SubMenu key="factory-targets" icon={<FileOutlined />} title="Targets & Achievements">
+            {
+              role === 'Super Admin' && (
+
+                <Menu.Item key="targets" >
+                  <Link to="/targets">Manage Targets</Link>
+                </Menu.Item>
+
+              )}
             {
               role !== 'User' && (
                 <Menu.Item key="target-prediction">
@@ -108,20 +125,13 @@ const HeaderComponent = () => {
               )}
 
             <Menu.Item key="officer-targets">
-              <Link to="/factory-targets/officer">Officer Targets</Link>
+              <Link to="/factory-targets/officer">Analysis</Link>
             </Menu.Item>
 
           </SubMenu>
 
 
-          {
-            role === 'Super Admin' && (
 
-              <Menu.Item key="targets" icon={<AimOutlined />}>
-                <Link to="/targets">Targets</Link>
-              </Menu.Item>
-
-            )}
 
 
           <SubMenu key="leaf" icon={<FundOutlined />} title="Leaf">
@@ -148,20 +158,12 @@ const HeaderComponent = () => {
           {
             role !== 'User' && (
               <Menu.Item key="summery" icon={<SummarizeRounded />}>
-                <Link to="/summery">Summery</Link>
+                <Link to="/summery">Reports</Link>
               </Menu.Item>
 
             )}
 
 
-          {
-            role !== 'User' && (
-
-
-              <Menu.Item key="missing" icon={<CardTravelSharp />}>
-                <Link to="/missing">Missing/Rejoing</Link>
-              </Menu.Item>
-            )}
 
 
 

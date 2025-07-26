@@ -247,7 +247,6 @@ export const getMonthDateRangeFromParts = (year, month) => {
     const dd = String(date.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
   };
-  console.log(`${formatDate(firstDate)}~${formatDate(lastDate)}`);
 
   return `${formatDate(firstDate)}~${formatDate(lastDate)}`;
 };

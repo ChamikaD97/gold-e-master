@@ -29,7 +29,7 @@ const Targets = () => {
   const currentYear = currentDate.getFullYear();
   const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [newTargets, setNewTargets] = useState([{ lineCode: "", target: null }]);
+  const [newTargets, setNewTargets] = useState([{ lineCode: "", target: 0 }]);
   const [newYear, setNewYear] = useState(currentYear);
   const [newMonth, setNewMonth] = useState(currentMonth);
 
@@ -339,7 +339,7 @@ const Targets = () => {
         >
           {editingRecord?.lineCode}
         </span>
-         <span
+        <span
           style={{
             background: "#000000ff",
             color: "#fff",
@@ -348,7 +348,7 @@ const Targets = () => {
             fontWeight: 400,
             fontSize: 15,
             display: "inline-block",
-            minWidth: "60px",            marginRight: "5px",
+            minWidth: "60px", marginRight: "5px",
 
             textAlign: "center",
             boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
@@ -360,7 +360,7 @@ const Targets = () => {
         >
           {filters.year}
         </span>
-         <span
+        <span
           style={{
             background: "#000000ff",
             color: "#fff",
@@ -369,7 +369,7 @@ const Targets = () => {
             fontWeight: 400,
             fontSize: 15,
             display: "inline-block",
-            minWidth: "60px",            marginRight: "10px",
+            minWidth: "60px", marginRight: "10px",
 
             textAlign: "center",
             boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
@@ -382,7 +382,7 @@ const Targets = () => {
           {monthMap[filters.month] || filters.month}
         </span>
 
-<span
+        <span
           style={{
             background: "#00792eff",
             color: "#fff",
@@ -391,7 +391,7 @@ const Targets = () => {
             fontWeight: 400,
             fontSize: 15,
             display: "inline-block",
-            minWidth: "60px",            marginRight: "10px",
+            minWidth: "60px", marginRight: "10px",
 
             textAlign: "center",
             boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
@@ -401,7 +401,7 @@ const Targets = () => {
           onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
           onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
         >
-         Current Target - {editingRecord?.target}
+          Current Target - {editingRecord?.target}
         </span>        <p>
           <strong>Target (Kg):</strong>
           <InputNumber
@@ -412,7 +412,6 @@ const Targets = () => {
           />
         </p>
       </Modal>
-
       <Modal
         title="Add New Monthly Targets"
         open={addModalOpen}
@@ -422,117 +421,121 @@ const Targets = () => {
         cancelText="Cancel"
         width={600}
       >
+        {/* Year & Month Selection */}
         <Row gutter={24} style={{ marginBottom: 16 }}>
           <Col span={10}>
             <Select
-
               value={newYear}
-              onChange={val => setNewYear(val)}
-
-
-              style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 1)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
-
+              onChange={(val) => setNewYear(val)}
+              style={{
+                width: "100%",
+                backgroundColor: "#000",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+              }}
               bordered={false}
             >
               {[...Array(5)].map((_, i) => {
                 const year = new Date().getFullYear() - i;
-                return <Option key={year} value={year}>{year}</Option>;
+                return (
+                  <Option key={year} value={year}>
+                    {year}
+                  </Option>
+                );
               })}
             </Select>
-
-
           </Col>
-
-
-
 
           <Col span={14}>
             <Select
               value={newMonth}
               bordered={false}
-
-              onChange={val => setNewMonth(val)}
-              style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 1)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+              onChange={(val) => setNewMonth(val)}
+              style={{
+                width: "100%",
+                backgroundColor: "#000",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+              }}
               placeholder="Select Month"
             >
-              {allMonths.map(m => (
-                <Option key={m} value={m}>{monthMap[m]}</Option>
+              {allMonths.map((m) => (
+                <Option key={m} value={m}>
+                  {monthMap[m]}
+                </Option>
               ))}
             </Select>
           </Col>
+        </Row>
+
+
+        <Row gutter={24} style={{ marginBottom: 16 }}>
+          {lineIdCodeMap.map((line, idx) => (
+            <>
+              <Col span={6} style={{ marginBottom: 16 }}>
+                <span
+                  style={{
+                    background: "#8b5400ff",
+                    color: "#fff",
+                    padding: "6px 12px",
+                    borderRadius: "24px",
+                    fontWeight: 400,
+                    fontSize: 15,
+                    display: "inline-block",
+                    minWidth: "60px",
+                    textAlign: "center",
+                    boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+                    transition: "transform 0.2s",
+                  }}
+
+
+                >
+                  {line.lineCode} {line.lineName ? `- ${line.lineName}` : ""}
+                </span>
+
+              </Col>
+              <Col span={6}>
+                <InputNumber
+                  min={0}
+                  placeholder="Target (Kg)"
+                  style={{
+                    width: "100%",
+                    backgroundColor: "#fff",
+                    color: "#000",
+                    border: "1px solid #333",
+                    borderRadius: 6,
+                  }}
+                  value={newTargets.find((t) => t.lineCode === line.lineCode)?.target || null}
+                  onChange={(val) => {
+                    const updated = [...newTargets];
+                    const existingIndex = updated.findIndex(
+                      (t) => t.lineCode === line.lineCode
+                    );
+                    if (existingIndex !== -1) {
+                      updated[existingIndex].target = val;
+                    } else {
+                      updated.push({ lineCode: line.lineCode, target: val });
+                    }
+                    setNewTargets(updated);
+                  }}
+                />
+              </Col>
+            </>
+          ))}
 
         </Row>
 
 
-        {newTargets.map((row, idx) => (
-          <Row gutter={24} style={{ marginBottom: 16 }}>
-            <Col span={10}>
-              <Select
-                showSearch
-                bordered={false}
-
-                style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 1)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
-                placeholder="Select Line"
-                value={row.lineCode}
-                onChange={(val) => {
-                  const updated = [...newTargets];
-                  updated[idx].lineCode = val;
-                  setNewTargets(updated);
-                }}
-              >
-                {lineIdCodeMap.map(line => (
-                  <Option key={line.lineCode} value={line.lineCode}>
-                    {line.lineCode}
-                  </Option>
-                ))}
-              </Select>
-
-            </Col>
-            <Col span={10}>
-              <InputNumber
-                min={0}
-                placeholder="Target (Kg)"
-                style={{ width: "100%", backgroundColor: "rgba(255, 255, 255, 1)", color: "#fff", border: "1px solid #333", borderRadius: 6 }}
-
-                value={row.target}
-                onChange={val => {
-                  const updated = [...newTargets];
-                  updated[idx].target = val;
-                  setNewTargets(updated);
-                }}
-              />
-            </Col>
-            <Col span={4}>
-              <Button
-                danger
-  type="primary"
-                onClick={() => {
-                  const updated = [...newTargets];
-                  updated.splice(idx, 1);
-                  setNewTargets(updated);
-                }}
-              >
-                X
-              </Button>
-            </Col>
-          </Row>
-        ))}''
 
 
-
-        <Button
-          type="primary"
-          
-          onClick={() => setNewTargets(prev => [...prev, { lineCode: "", target: null }])}
-        >
-          Add Another Line
-        </Button>
       </Modal>
 
       <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
 
-        
+
           <Card bordered={false} style={cardStyle}>
             <Row justify="space-evenly" gutter={[16, 16]}>
               <Col span={24}>
@@ -546,7 +549,7 @@ const Targets = () => {
                       onClick={() => {
                         targetsN.current = [];
                         setTotalTarget(0);
-
+                        setNewTargets([{ lineCode: "", target: 0 }])
                         setMalinduwa(0); setFilters({
                           year: "Select Year",
                           month: "Select Month",
@@ -603,7 +606,7 @@ const Targets = () => {
                       onClick={() => getTargets()}
                     />
                   </Col>
-                  
+
                   <Col md={4}>
                     <Input
                       className="custom-supplier-input"
@@ -622,7 +625,7 @@ const Targets = () => {
                       allowClear
                     />
                   </Col>
-<Col md={3}>
+                  <Col md={3}>
                     <Button
                       type="primary"
                       onClick={() => setAddModalOpen(true)}

@@ -81,21 +81,18 @@ const SupplierLeafModal = ({ open, onClose, filters, supplierId }) => {
 
     const handlePrevMonth = () => {
         const { year, month } = filteredData.current;
-        console.log(year - 1, month - 1);
         if (month === 1) {
             filteredData.current = { year: year - 1, month: 12 };
         } else {
             filteredData.current = { year, month: month - 1 };
         }
-
-        console.log("Prev:", filteredData.current); setIsChanged(!changed)
         setCalendarDate(dayjs(`${filteredData.current.year}-${filteredData.current.month}-01`));
 
     };
 
     const handleNextMonth = () => {
         const { year, month } = filteredData.current;
-        console.log(year + 1, month + 1);
+       
 
         if (month === 12) {
             filteredData.current = { year: year + 1, month: 1 };
@@ -143,8 +140,6 @@ const SupplierLeafModal = ({ open, onClose, filters, supplierId }) => {
     }, [supplierId, changed, open]);
 
     const getLeafRecordsBySupplierId = async ({ filters, supplierId }) => {
-        console.log('**************************************');
-
         const baseUrl = "/quiX/ControllerV1/glfdata";
         const range = getMonthDateRangeFromParts(filters.year, filters.month);
         const params = new URLSearchParams({ k: API_KEY, s: supplierId, d: range });

@@ -33,7 +33,6 @@ export const isSessionValid = () => {
   const token = localStorage.getItem("token");
 
 
-  console.log(token);
 
 
   try {

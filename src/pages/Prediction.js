@@ -61,14 +61,11 @@ const Prediction = () => {
 
   const handleTargetSearch = async () => {
   try {
-    console.log(filters);
 
     // ✅ Wait until this API call completes
     const data2 = await fetchMonthlyTargets(filters.year, filters.month);
-    console.log("🚀 Monthly targets fetched:", data2);
 
     const target2 = data2.filter(item => item.lineCode === filters.lineCode);
-    console.log("🎯 Filtered target:", target2);
 
     if (!target2.length) {
       toast.warn("⚠️ No target found for selected line.");

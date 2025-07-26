@@ -909,8 +909,6 @@ const Summary = () => {
     dispatch(showLoader());
     setLoading(true);
     setError(null);
-
-    console.log('/////////7777777777777777/////');
     try {
       // 👉 Wait until target data is fully loaded
       const data = await fetchMonthlyTargets(filters.year, filters.month);
@@ -985,7 +983,6 @@ const Summary = () => {
         totalReceived,
         totalDifference,
       });
-      console.log('/////////////////////*********////////////////');
       // 👉 Group data by officer and line
       const groupedTotals = {};
       transformed.forEach(item => {
@@ -1096,7 +1093,6 @@ const Summary = () => {
       }
 
       setRouteSummary(finalTableData);
-      console.log('////////////////////////////////////');
 
     } catch (err) {
       console.error("Error in getLeafRecordsByDates:", err);

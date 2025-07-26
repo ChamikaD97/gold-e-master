@@ -36,11 +36,11 @@ const RegisterPage = () => {
 
   const handleRegister = async () => {
     const { userName, password, role } = form.getFieldsValue();
-    console.log(userName, password, role);
+
 
     try {
       const response = await register(userName, password, role);
-      console.log('Register success:', response.data);
+
 
       message.success("Registration successful!");
       navigate("/login");

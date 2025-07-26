@@ -4,6 +4,7 @@ import { Card, Button, Input, Typography, Form } from "antd";
 import FullPageLayout from "../components/FullPageLayout";
 import icon from "../images/logo.ico";
 import { login } from "../api/api";
+import { toast } from "react-toastify";
 
 const { Title, Text } = Typography;
 
@@ -30,10 +31,11 @@ const LoginPage = () => {
       localStorage.setItem("token", data.access_token);
       navigate("/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
       const errMsg =
         error?.response?.data?.message || "Login failed. Please try again.";
-      setError(errMsg);
+      toast.error(errMsg);
+
+
     }
   };
 
