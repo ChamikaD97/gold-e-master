@@ -11,6 +11,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SearchRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
+import CountUp from "react-countup";
 const { Option } = Select;
 const MissRejo = () => {
 
@@ -628,14 +629,14 @@ const MissRejo = () => {
                     value={filters.year}
                     bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
 
-               {[...Array(5)].map((_, i) => {
-  const year = new Date().getFullYear() - i;
-  return (
-    <Option key={year} value={year}>
-      {year}
-    </Option>
-  );
-})}
+                    {[...Array(5)].map((_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      return (
+                        <Option key={year} value={year}>
+                          {year}
+                        </Option>
+                      );
+                    })}
 
 
                   </Select>
@@ -704,19 +705,53 @@ const MissRejo = () => {
             <Card bordered={false} style={cardStyle}>
 
               <Row gutter={[16, 16]} style={{ marginTop: 32 }}>
-                <Col span={12}>
-                  Missing Cards -   {missedSuppliers.length}   -
+                <Col xs={24} sm={12} md={12}>
+                  <div
+                    style={{
+                      backgroundColor: "rgba(255, 102, 102, 1)",
+                      borderRadius: 10,
+                      padding: "14px 24px",
+                      textAlign: "center",
+                      fontWeight: 600,
+                      color: "#000",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                    }}
+                  >
+                    Missing Cards<br />
 
-
-
-                  {missedTotal}</Col>
-                <Col span={12}>
-                  Rejoined Cards- {rejoinedSuppliers.length}  -
-                  -                  {rejoinedTotal}
+                    {/* Format: 5 / 2,646 kg */}
+                    <span style={{ fontSize: 30 }}>
+                      {missedSuppliers.length} / <CountUp end={missedTotal} duration={0} separator="," /> kg
+                    </span>
+                  </div>
                 </Col>
 
-              </Row>
 
+
+
+
+
+
+                <Col xs={24} sm={12} md={12}>
+                  <div
+                    style={{
+                      backgroundColor: "rgba(22, 160, 133, 1)",
+                      borderRadius: 10,
+                      padding: "14px 24px",
+                      textAlign: "center",
+                      fontWeight: 600,
+                      color: "#000",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                    }}
+                  >
+                    Rejoined Cards<br />
+                    <span style={{ fontSize: 30 }}>
+                      {rejoinedSuppliers.length} / <CountUp end={rejoinedTotal} duration={0} separator="," /> kg
+                    </span>
+                  </div>
+                </Col>
+              </Row>
+              {/* 
               <Row gutter={[16, 16]} style={{ marginTop: 32 }}>
                 <Col span={12}>
                   <Card bordered={false} style={cardStyle}>
@@ -742,7 +777,7 @@ const MissRejo = () => {
                 </Col>
 
 
-              </Row>
+              </Row> */}
 
 
             </Card>

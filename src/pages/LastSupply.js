@@ -128,7 +128,29 @@ const LastSupply = () => {
       title: "Supplier ID",
       dataIndex: "Supplier Id",
       key: "Supplier Id",
-      sorter: (a, b) => a["Supplier Id"].localeCompare(b["Supplier Id"]),
+      render: text => (
+        <span
+          style={{
+            background: "#8b5400ff",
+
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "24px",
+            fontWeight: 600,
+            fontSize: 13,
+            display: "inline-block",
+            minWidth: "60px",
+            textAlign: "center",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+            transition: "transform 0.2s",
+          }}
+
+          onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+        >
+          {text}
+        </span>
+      )
     },
     {
       title: "Name",
@@ -264,7 +286,6 @@ const LastSupply = () => {
       {!isLoading && allSuppliers.length > 0 && (
         <Card
           size="small"
-          bordered={false}
           style={{
             marginTop: 12,
             background: "rgba(0, 0, 0, 0.6)",

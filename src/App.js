@@ -25,6 +25,7 @@ import MissRejo from "./pages/Miss&Rejo.js";
 import RegisterPage from "./pages/RegisterPage.js";
 import Targets from "./pages/Targets.js";
 import LeafCount from "./pages/LeafCounts.js";
+import Users from "./pages/Users.js";
 
 // ✅ Session check
 export const isSessionValid = () => {
@@ -121,7 +122,7 @@ const App = () => {
             <Route path="/targets" element={<PrivateRoute element={<Targets />} />} />
 
             <Route path="/leaf/count" element={<PrivateRoute element={<LeafCount />} />} />
-
+ <Route path="/users" element={<PrivateRoute element={<Users />} />} />
             {/* 404 */}
             <Route path="/404" element={<div>404 - Page Not Found</div>} />
             <Route path="*" element={<Navigate to="/404" replace />} />

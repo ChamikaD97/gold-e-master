@@ -53,7 +53,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
         try {
 
             const data = await fetchMonthlyTargets(range.year, range.month);
-                const match = data.find((d) => d.lineCode === lineCode);
+            const match = data.find((d) => d.lineCode === lineCode);
 
             if (match) {
                 setTargets(match.target);
@@ -291,7 +291,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
                 const monthlySummary = Array.from({ length: 12 }, (_, i) => {
                     const monthIndex = i + 1;
-                    const label = monthIndex.toString(); // Shows 1 to 12 as labels
+                 const label = monthMap?.[String(monthIndex).padStart(2, "0")]?.slice(0, 3).toUpperCase();
 
                     const monthData = transformed.filter(x => x.month === monthIndex);
 

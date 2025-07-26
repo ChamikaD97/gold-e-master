@@ -421,7 +421,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                                                     padding: "14px 24px",
                                                     textAlign: "center",
                                                     fontWeight: 600,
-                                                    color: "#000",
+                                                    color: "#fff",
                                                     boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                                                 }}
                                             >

@@ -7,7 +7,8 @@ import background2 from "../images/background2.png";
 import background3 from "../images/background3.png";
 import background4 from "../images/background4.png";
 import background5 from "../images/background5.png";
-
+import background6 from "../images/background6.png";
+import background7 from "../images/background7.png";
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
@@ -15,21 +16,23 @@ const MainLayout = () => {
   const location = useLocation();
   const isNotFound = location.pathname === "/404";
 
-  const backgrounds = [background1, background2, background3, background4, background5];
+  const backgrounds = [background1, background2, background3, background4, background5, background6, background7];
   const [currentBg, setCurrentBg] = useState(backgrounds[0]);
 
-  // useEffect(() => {
-  //   const randomIndex = Math.floor(Math.random() * backgrounds.length);
-  //   setCurrentBg(backgrounds[randomIndex]);
+  useEffect(() => {
+    // ✅ Set an initial random background on mount
+    const initialIndex = Math.floor(Math.random() * backgrounds.length);
+    setCurrentBg(backgrounds[initialIndex]);
 
-  //   // Optional: change background every 15 seconds
-  //   const interval = setInterval(() => {
-  //     const index = Math.floor(Math.random() * backgrounds.length);
-  //     setCurrentBg(backgrounds[index]);
-  //   }, 50000); // 15000ms = 15 seconds
+    // ✅ Change background every 15 minutes (900,000 ms)
+    const interval = setInterval(() => {
+      const index = Math.floor(Math.random() * backgrounds.length);
+      setCurrentBg(backgrounds[index]);
+    }, 900000); // 15 minutes in ms
 
-  //   return () => clearInterval(interval);
-  // }, []);
+    // ✅ Clean up on unmount
+    return () => clearInterval(interval);
+  }, []);
 
   const NotFoundTextOnly = () => (
     <div

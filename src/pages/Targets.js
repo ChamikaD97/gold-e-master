@@ -175,6 +175,8 @@ const Targets = () => {
           </Button>
           <Button
             danger
+            type="primary"
+
             style={{
               padding: "0 10px",
               fontWeight: "normal",
@@ -313,11 +315,94 @@ const Targets = () => {
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         onOk={handleSaveTarget}
-        okText="Save"
+        okText="Update"
         cancelText="Cancel"
       >
-        <p><strong>Line Code:</strong> {editingRecord?.lineCode}</p>
-        <p>
+        <span
+          style={{
+            background: "#8b5400ff",
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "24px",
+            fontWeight: 400,
+            fontSize: 15,
+            display: "inline-block",
+            minWidth: "60px",
+            textAlign: "center",
+            marginRight: "5px",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+            transition: "transform 0.2s",
+          }}
+
+          onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+        >
+          {editingRecord?.lineCode}
+        </span>
+         <span
+          style={{
+            background: "#000000ff",
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "24px",
+            fontWeight: 400,
+            fontSize: 15,
+            display: "inline-block",
+            minWidth: "60px",            marginRight: "5px",
+
+            textAlign: "center",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+            transition: "transform 0.2s",
+          }}
+
+          onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+        >
+          {filters.year}
+        </span>
+         <span
+          style={{
+            background: "#000000ff",
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "24px",
+            fontWeight: 400,
+            fontSize: 15,
+            display: "inline-block",
+            minWidth: "60px",            marginRight: "10px",
+
+            textAlign: "center",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+            transition: "transform 0.2s",
+          }}
+
+          onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+        >
+          {monthMap[filters.month] || filters.month}
+        </span>
+
+<span
+          style={{
+            background: "#00792eff",
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "24px",
+            fontWeight: 400,
+            fontSize: 15,
+            display: "inline-block",
+            minWidth: "60px",            marginRight: "10px",
+
+            textAlign: "center",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+            transition: "transform 0.2s",
+          }}
+
+          onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+        >
+         Current Target - {editingRecord?.target}
+        </span>        <p>
           <strong>Target (Kg):</strong>
           <InputNumber
             min={0}
@@ -420,7 +505,7 @@ const Targets = () => {
             <Col span={4}>
               <Button
                 danger
-
+  type="primary"
                 onClick={() => {
                   const updated = [...newTargets];
                   updated.splice(idx, 1);
@@ -437,19 +522,17 @@ const Targets = () => {
 
         <Button
           type="primary"
-          block
+          
           onClick={() => setNewTargets(prev => [...prev, { lineCode: "", target: null }])}
         >
-          + Add Another Line
+          Add Another Line
         </Button>
       </Modal>
 
       <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
 
-          <Col>
-
-          </Col>
+        
           <Card bordered={false} style={cardStyle}>
             <Row justify="space-evenly" gutter={[16, 16]}>
               <Col span={24}>
@@ -520,16 +603,7 @@ const Targets = () => {
                       onClick={() => getTargets()}
                     />
                   </Col>
-                  <Col md={3}>
-                    <Button
-                      type="primary"
-                      onClick={() => setAddModalOpen(true)}
-                      style={{ marginLeft: 8 }}
-                    >
-                      Add New Month
-                    </Button>
-
-                  </Col>
+                  
                   <Col md={4}>
                     <Input
                       className="custom-supplier-input"
@@ -548,7 +622,16 @@ const Targets = () => {
                       allowClear
                     />
                   </Col>
+<Col md={3}>
+                    <Button
+                      type="primary"
+                      onClick={() => setAddModalOpen(true)}
+                      style={{ marginLeft: 8 }}
+                    >
+                      Add New Month
+                    </Button>
 
+                  </Col>
                 </Row>
               </Col>
             </Row>
@@ -593,7 +676,7 @@ const Targets = () => {
                 dataSource={filteredData}
                 columns={targetColumns}
                 pagination={false}
-                bordered
+
                 size="middle"
 
               />

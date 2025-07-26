@@ -193,7 +193,8 @@ const Suppliers = () => {
       render: text => (
         <span
           style={{
-            background: "#ff000e",
+            background: "#8b5400ff",
+
             color: "#fff",
             padding: "6px 12px",
             borderRadius: "24px",
@@ -251,17 +252,31 @@ const Suppliers = () => {
         { text: "Type 3", value: 3 }
       ],
       onFilter: (value, record) => record.Pay === value,
-      render: (text) => (
-        <Tag
+      render: text => (
+        <span
           style={{
-            color: "#000",
-            border: "none",
-            fontWeight: "normal"
+            background: "#008b68ff",
+
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "24px",
+            fontWeight: 400,
+            fontSize: 13,
+            display: "inline-block",
+            minWidth: "60px",
+            textAlign: "center",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+            transition: "transform 0.2s",
           }}
+          onClick={() => handleSearchSupplier(text)}
+
+          onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
         >
           {parseInt(text) == 1 ? 'Cash' : 'Bank'}
-        </Tag>
+        </span>
       )
+
     },
 
     {
@@ -455,7 +470,7 @@ const Suppliers = () => {
                 total={filteredData.length}
                 showSizeChanger
                 pageSizeOptions={["5", "10", "15", "20", "50", "100"]}
-                showTotal={(total, range) => `${range[0]}–${range[1]} of ${total} suppliers`}
+                showTo32tal={(total, range) => `${range[0]}–${range[1]} of ${total} suppliers`}
                 onChange={(page, size) => {
                   setCurrentPage(page);
                   setPageSize(size);

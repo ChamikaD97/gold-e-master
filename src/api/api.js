@@ -19,13 +19,28 @@ export const createOrUpdateLeafCount = (payload) => {
 };
 
 // 📤 Get all records
-export const getAllLeafCounts = () => {
-  return axios.get(`${API_BASE}/leaf-count`);
+export const getAllLeafCounts = async () => {
+
+  try {
+    const response = await axios.get(`${API_BASE}/leaf-count`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch leaf counts", error);
+    throw error;
+  }
+
 };
 
 // 📆 Get all records for specific year/month
-export const getLeafCountsByMonthYear = (year, month) => {
-  return axios.get(`${API_BASE}/leaf-count/${year}/${month}`);
+export const getLeafCountsByMonthYear = async (year, month) => {
+
+  try {
+    const response = await axios.get(`${API_BASE}/leaf-count/${year}/${month}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch leaf counts", error);
+    throw error;
+  }
 };
 
 // 🔍 Get one record by lineCode, year, month
@@ -82,7 +97,7 @@ export const fetchMonthlyTargets = async (year, month) => {
     const response = await axios.get(`${API_BASE}/targets/${year}/${month}`);
     return response.data;
   } catch (error) {
-    console.error("❌ Failed to fetch targets:", error);
+    console.error("Failed to fetch targets:", error);
     throw error;
   }
 };
@@ -306,3 +321,73 @@ export const chamodLines = '91, 67, 68, 69, 138, 124';
 
 
 
+
+export const getUsers = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/users`);
+    return res.data;
+  } catch (err) {
+    console.error(" Failed to fetch users:", err);
+    throw err;
+  }
+};
+
+export const getUserById = async (id) => {
+  try {
+    const res = await axios.get(`${API_BASE}/users/${id}`);
+    return res.data;
+  } catch (err) {
+    console.error(` Failed to fetch user ID ${id}:`, err);
+    throw err;
+  }
+};
+
+export const createUser = async (userData) => {
+  try {
+    const res = await axios.post(`${API_BASE}/users`, userData);
+    return res.data;
+  } catch (err) {
+    console.error(" Failed to create user:", err);
+    throw err;
+  }
+};
+
+export const updateUser = async (id, userData) => {
+  try {
+    const res = await axios.put(`${API_BASE}/users/${id}`, userData);
+    return res.data;
+  } catch (err) {
+    console.error(` Failed to update user ID ${id}:`, err);
+    throw err;
+  }
+};
+
+export const deleteUser = async (id) => {
+  try {
+    const res = await axios.delete(`${API_BASE}/users/${id}`);
+    return res.data;
+  } catch (err) {
+    console.error(` Failed to delete user ID ${id}:`, err);
+    throw err;
+  }
+};
+
+export const toggleUserStatus = async (id, status) => {
+  try {
+    const res = await axios.patch(`${API_BASE}/users/${id}/status`, { status });
+    return res.data;
+  } catch (err) {
+    console.error(` Failed to toggle status for user ID ${id}:`, err);
+    throw err;
+  }
+};
+
+export const updateUserRole = async (id, role) => {
+  try {
+    const res = await axios.patch(`${API_BASE}/users/${id}/role`, { role });
+    return res.data;
+  } catch (err) {
+    console.error(` Failed to update role for user ID ${id}:`, err);
+    throw err;
+  }
+};

@@ -334,34 +334,60 @@ const SupplierInfo = () => {
                     <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
                       <Col>
                         <Text style={{ color: "#ccc", fontSize: 18, fontWeight: 600 }}>
-                          📄 Leaf Records Summary
+                          Leaf Records Summary
                         </Text>
                         <div>
                           <Text style={{ color: "#bbb", fontSize: 15 }}>
-                            📅 Date Range:&nbsp;
+                            Date Range:&nbsp;
                             <strong>{dayjs(dateRange[0]).format("YYYY-MM-DD")}</strong> to&nbsp;
                             <strong>{dayjs(dateRange[1]).format("YYYY-MM-DD")}</strong>
                           </Text>
                         </div>
                       </Col>
                       <Col>
-                        <Card
-                          bordered={false}
-                          bodyStyle={{
-                            backgroundColor: "#1a1a1a",
-                            color: "#fff",
-                            padding: "8px 16px",
-                            borderRadius: 8,
-                          }}
-                        >
+                        <Card bordered={false} style={cardStyle}>
                           <Text style={{ fontSize: 16, color: "#fff" }}>
-                            Super Total: <strong>{totals.super.toFixed(2)} kg</strong>&nbsp;&nbsp;|&nbsp;&nbsp;
-                            Normal Total: <strong>{totals.normal.toFixed(2)} kg</strong>&nbsp;&nbsp;|&nbsp;&nbsp;
-                            Total: <strong>{totals.super + totals.normal} kg</strong>
+                            <span
+                              style={{
+                                backgroundColor: "#ffa347",
+                                padding: "4px 8px", 
+                                borderRadius: 6, color: "#000",
+                                fontWeight: "bold",
+                                marginRight: 8,
+                                display: "inline-block",
+                              }}
+                            >
+                              Super Total: {totals.super.toFixed(0)} kg
+                            </span>
 
+                            <span
+                              style={{
+                                backgroundColor: "#47a3ff", // Blue for normal
+                                padding: "4px 8px",
+                                borderRadius: 6,
+                                fontWeight: "bold",
+                                marginRight: 8,
+                                display: "inline-block", color: "#000",
+                              }}
+                            >
+                              Normal Total: {totals.normal.toFixed(0)} kg
+                            </span>
+
+                            <span
+                              style={{
+                                backgroundColor: "#28a745", // Orange for combined total
+                                padding: "4px 8px",
+                                borderRadius: 6,
+                                fontWeight: "bold", color: "#000",
+                                display: "inline-block",
+                              }}
+                            >
+                              Total: {(totals.super + totals.normal).toFixed(0)} kg
+                            </span>
                           </Text>
                         </Card>
                       </Col>
+
                     </Row>
 
                     {/* Table */}

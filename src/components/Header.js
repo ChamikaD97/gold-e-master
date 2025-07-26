@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout, Menu, Button, Tooltip, Avatar } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -24,7 +24,18 @@ const { SubMenu } = Menu;
 const HeaderComponent = () => {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
-  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+  const [role, setRole] = useState('');
+  const [username, setUserName] = useState('');
+
+  useEffect(() => {
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    if (loggedInUser) {
+      const role = loggedInUser.role || ''
+      setRole(role)
+      setUserName(loggedInUser.username)
+    }
+
+  }, [])
 
 
   const handleLogout = () => {
@@ -59,7 +70,7 @@ const HeaderComponent = () => {
           <img
             src={icon}
             alt="SLMS"
-            style={{ width: 24, height: 24, marginRight: 8 }}
+            style={{ width: 24, height: 24, marginRight: 2 }}
           />
           <span style={{ fontSize: 18, fontWeight: "bold", color: "white" }}>
             SLMS
@@ -87,9 +98,15 @@ const HeaderComponent = () => {
 
 
           <SubMenu key="factory-targets" icon={<FileOutlined />} title="Targets & Achievements">
-            <Menu.Item key="target-prediction">
-              <Link to="/factory-targets/prediction">Target Prediction</Link>
-            </Menu.Item>
+            {
+              role !== 'User' && (
+                <Menu.Item key="target-prediction">
+                  <Link to="/factory-targets/prediction">Target Prediction</Link>
+                </Menu.Item>
+
+
+              )}
+
             <Menu.Item key="officer-targets">
               <Link to="/factory-targets/officer">Officer Targets</Link>
             </Menu.Item>
@@ -97,10 +114,15 @@ const HeaderComponent = () => {
           </SubMenu>
 
 
+          {
+            role === 'Super Admin' && (
 
- <Menu.Item key="targets" icon={<AimOutlined />}>
-            <Link to="/targets">Targets</Link>
-          </Menu.Item>
+              <Menu.Item key="targets" icon={<AimOutlined />}>
+                <Link to="/targets">Targets</Link>
+              </Menu.Item>
+
+            )}
+
 
           <SubMenu key="leaf" icon={<FundOutlined />} title="Leaf">
             <Menu.Item key="leaf-supply">
@@ -121,37 +143,60 @@ const HeaderComponent = () => {
               <Link to="/leaf/dailyLeafSupply">Daily Leaf Supply</Link>
             </Menu.Item>
           </SubMenu>
-          <Menu.Item key="summery" icon={<SummarizeRounded />}>
-            <Link to="/summery">Summery</Link>
-          </Menu.Item>
-          <Menu.Item key="missing" icon={<CardTravelSharp />}>
-            <Link to="/missing">Missing & Rejoing Cards</Link>
-          </Menu.Item>
-          {/* <Menu.Item key="meal" icon={<CoffeeOutlined />}>
-            <Link to="/meal">Meal Management</Link>
-          </Menu.Item> */}
+
+
+          {
+            role !== 'User' && (
+              <Menu.Item key="summery" icon={<SummarizeRounded />}>
+                <Link to="/summery">Summery</Link>
+              </Menu.Item>
+
+            )}
+
+
+          {
+            role !== 'User' && (
+
+
+              <Menu.Item key="missing" icon={<CardTravelSharp />}>
+                <Link to="/missing">Missing/Rejoing</Link>
+              </Menu.Item>
+            )}
+
+
+
+          {
+            role === 'Super Admin' && (
+              <Menu.Item key="users" icon={<CardTravelSharp />}>
+                <Link to="/users">Users</Link>
+              </Menu.Item>
+
+            )}
+
         </Menu>
         <Avatar style={{ backgroundColor: '#206b00ff' }} icon={<UserOutlined />} />
-        {loggedInUser && (
-          <Tooltip title="Logged in user">
-            <div style={{ color: "white", fontWeight: "normal", marginLeft: 16 }}>
-           Hi,   {loggedInUser.username}
-            </div>
-          </Tooltip>
-        )}
+        <Tooltip title="Logged in user">
+          <div style={{ color: "white", fontWeight: "normal", marginLeft: 16 }}>
+            {username ? 'Hi , ' + username : ''}
+          </div>
+        </Tooltip>
 
         {/* Action Buttons */}
         <div style={{ padding: "0 25px", display: "flex", gap: 15 }}>
 
+          {
+            role === 'Super Admin' && (
+              <Tooltip title="Settings">
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<SettingOutlined />}
+                  onClick={() => setShowSettings(true)}
+                />
+              </Tooltip>
+            )
+          }
 
-          <Tooltip title="Settings">
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<SettingOutlined />}
-              onClick={() => setShowSettings(true)}
-            />
-          </Tooltip>
 
           <Tooltip title="Logout">
             <Button
