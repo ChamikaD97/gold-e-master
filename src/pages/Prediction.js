@@ -564,7 +564,7 @@ const Prediction = () => {
     doc.setFontSize(9);
     doc.line(14, 32, 196, 32);
     doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 40);
+    doc.text("Factory: Panakaduwa, Rotumba.nayakapura", 14, 40);
     doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
 
     doc.setFontSize(11);

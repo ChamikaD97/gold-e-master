@@ -104,7 +104,7 @@ const MissRejo = () => {
     doc.setFontSize(9);
     doc.line(14, 22, 196, 22);
     doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 30);
+    doc.text("Factory: Panakaduwa, Rotumba.nayakapura", 14, 30);
     doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
     doc.line(14, 39, 196, 39);
 
@@ -210,7 +210,7 @@ const MissRejo = () => {
     doc.setFontSize(9);
     doc.line(14, 22, 196, 22);
     doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, No: 40, Rotumba, Bandaranayakapura", 14, 30);
+    doc.text("Factory: Panakaduwa, Rotumba.nayakapura", 14, 30);
     doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
     doc.line(14, 39, 196, 39);
 
