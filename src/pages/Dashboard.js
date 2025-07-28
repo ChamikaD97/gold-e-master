@@ -6,10 +6,7 @@ import "./Dashboard.css";
 import { SearchRounded } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { setSelectedSupplier } from "../redux/commonDataSlice";
-import { showLoader, hideLoader } from "../redux/loaderSlice";
-import dayjs from "dayjs";
-import { API_KEY } from "../api/api";
-import { toast } from "react-toastify";
+import { showLoader } from "../redux/loaderSlice";
 import Clock from "../components/dashboardCards/Clock";
 
 const { Text, Title } = Typography;
@@ -20,19 +17,7 @@ const cardStyle = {
   borderRadius: 12,
   marginBottom: 16,
 };
-const ajithLines = ['60,154,129', '65', '146', '152', '33', '8', '98', '145', '81,97'];
-const udaraLines = ['23', '72', '96', '149', '21', '9', '162'];
-const udayangaLines = ['6', '7', '25', '61', '150', '155', '36', '102,161', '48,64,62', '129'];
-const gaminiLines = ['70', '31,157', '34', '12,109,127'];
-const chamodLines = ['91', '67,68,69', '138,124'];
 
-const officerLines = [
-  { name: "Ajith", routes: ajithLines.join(",") },
-  { name: "Udara", routes: udaraLines.join(",") },
-  { name: "Udayanga", routes: udayangaLines.join(",") },
-  { name: "Gamini", routes: gaminiLines.join(",") },
-  { name: "Chamod", routes: chamodLines.join(",") }
-];
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -41,9 +26,6 @@ const Dashboard = () => {
   const currentMonth = new Date().getMonth() + 1;
 
   const [filters, setFilters] = useState({ searchById: "", year: currentYear, month: currentMonth });
-  const [data, setData] = useState([]);
-  const [totals, setTotals] = useState({ super: 0, normal: 0 });
-  const [officerSummaries, setOfficerSummaries] = useState([]);
 
 
   const handleSearchSupplier = (supplierId) => {

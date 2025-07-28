@@ -9,10 +9,8 @@ import {
   Table,
   Modal,
   message,
-  Switch,
   Input,
 } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
@@ -30,7 +28,6 @@ const Users = () => {
 
   const [searchText, setSearchText] = useState("");
 
-  const user = localStorage.getItem("loggedInUser");
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -61,7 +58,7 @@ const Users = () => {
     if (!editingUser) return;
 
     try {
-      const res = await updateUser(editingUser.id, {
+       await updateUser(editingUser.id, {
         username: editingUser.username,
         role: editingUser.role,
         status: editingUser.status,
@@ -255,13 +252,7 @@ const Users = () => {
 
 
                     />
-                    <Button
-                      icon={<ReloadOutlined />}
-                      onClick={fetchData}
-                      loading={loading}
-                    >
-                      Reload
-                    </Button>
+                  
                   </Space>
                 </Col>
               </Row>
@@ -269,7 +260,6 @@ const Users = () => {
             </Card>
           )}
 
-          {loading && <CircularLoader />}
 
           {userList.length > 0 && (
             
@@ -331,7 +321,8 @@ const Users = () => {
             )}
           </Modal>
 
-        </div>
+        </div>          {loading && <CircularLoader />}
+
       </div>
     </>
   );

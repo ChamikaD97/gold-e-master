@@ -1,6 +1,6 @@
 import React, {  useRef, useState } from "react";
 import {
-  Card, Col, Row, Select, Button, Table, Input, Modal,
+  Card, Col, Row, Select, Button, Table, 
   message
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
@@ -14,7 +14,6 @@ import { API_KEY, fetchMonthlyTargets,  getPreviousMonthDateRange } from "../api
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import CountUp from "react-countup";
-import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { SearchRounded } from "@mui/icons-material";
 
@@ -34,29 +33,10 @@ const Prediction = () => {
     const match = lineIdCodeMap.find((line) => line.lineId === lineId);
     return match ? match.officer : null;
   };
-  const [selectedMonth, setSelectedMonth] = useState(dayjs()); // default to current month
   const targetsN = useRef();
 
-  const loadTargetsForMonth = async (filters) => {
 
-
-    try {
-      const data2 = await fetchMonthlyTargets(filters.year, filters.month);
-      const target2 = data2.default.filter(item => item.lineCode === filters.lineCode)
-
-
-      if (data2) {
-        targetsN.current = target2[0].target
-      } else {
-        toast.warn("⚠️ No target found for selected line.");
-      }
-
-    } catch (err) {
-
-      toast.error("❌ Target file not found", err);
-      targetsN.current = []
-    }
-  };
+  
 
   const handleTargetSearch = async () => {
     try {
@@ -97,8 +77,6 @@ const Prediction = () => {
     }
   };
 
-
-  const [xSupplierDetails, setXSupplierDetails] = useState([]); // array of detailed supplier objects
   const leafRound = useSelector((state) => state.commonData?.leafRound);
   const cellStyle = {
     background: "linear-gradient(135deg, #C6F6D5,rgb(255, 230, 0))",
@@ -158,7 +136,6 @@ const Prediction = () => {
       highlightValueMap[supplierId] = lastRecord.kg;
     });
 
-    const today = new Date();
 
     const supplierTotalsMap = {};
     const rows = suppliers.map(supplier_id => {
@@ -515,7 +492,6 @@ const Prediction = () => {
       });
 
       setData(transformed);
-      //downloadXSupplierListAsPDF(transformed, false);
       setColData(transformed, targetsN.current);
 
     } catch (err) {
@@ -665,7 +641,7 @@ const Prediction = () => {
                 <Button icon={<ReloadOutlined />} danger type="primary" block onClick={() => {
 
                   setLineWiseTotals({})
-                  setXSupplierDetails([]);
+       
 
                   setFilters({ year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: "" })
                 }} />

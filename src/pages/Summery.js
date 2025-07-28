@@ -290,7 +290,7 @@ const Summary = () => {
             // Highlight super % column
             if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
               const percent = parseFloat(cellValue.replace('%', ''));
-              data.cell.styles.fillColor = percent > 50 ? [153, 255, 153] : [255, 102, 102];
+              data.cell.styles.fillColor = percent >= 50 ? [153, 255, 153] : [255, 102, 102];
               data.cell.styles.fontStyle = "bold";
               data.cell.styles.textColor = [0, 0, 0];
             }
