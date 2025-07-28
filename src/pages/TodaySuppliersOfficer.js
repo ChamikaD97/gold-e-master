@@ -303,7 +303,7 @@ const TodaySuppliersOfficer = () => {
 
 
       } catch (err) {
-                  toast.error("Error While Loading Data,Please Try Again");
+        toast.error("Error While Loading Data,Please Try Again");
       }
     }
 
@@ -544,7 +544,7 @@ const TodaySuppliersOfficer = () => {
 
   return (
 
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
       <Card bordered={false} style={cardStyle}>
         <Row gutter={[16, 16]} align="middle">
 

@@ -57,12 +57,106 @@ const Summary = () => {
   const today = new Date();
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const daysRemaining = endOfMonth.getDate() - today.getDate() + 1;
-
-
-  const exportToPDF = (pdfData, title) => {
+  const exportToPDFOfficer = (pdfData, title, key) => {
     const doc = new jsPDF();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    // Header
+    const renderTable = (data, startY) => {
+      const tableData = data.map((row, index) => {
+        let lineCode = "";
+        if (row.isTotal) {
+          lineCode = "Total";
+        } else if (row.line.includes("(")) {
+          const [code] = row.line.split("(");
+          lineCode = code.trim();
+        } else {
+          lineCode = row.line;
+        }
+
+        return [
+          row.isTotal ? "" : index + 1,
+          lineCode,
+          row.target.toLocaleString(),
+          row.total.toLocaleString(),
+          row.difference.toLocaleString(),
+          row.target > 0 ? ((row.total / row.target) * 100).toFixed(0) + "%" : "-",
+          row.super.toLocaleString(),
+          row.super > 0 ? ((row.super / row.total) * 100).toFixed(0) + "%" : "-",
+          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
+        ];
+      });
+
+      autoTable(doc, {
+        startY: startY,
+        head: [["#", "Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
+        body: tableData,
+        styles: {
+          fontSize: 10,
+          cellPadding: 1.5,
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2,
+        },
+        headStyles: {
+          fillColor: [22, 160, 133],
+          textColor: 255,
+          halign: "center",
+          valign: "middle",
+        },
+        bodyStyles: {
+          halign: "center",
+          valign: "middle",
+        },
+        margin: { left: 14, right: 14 },
+        didParseCell: function (data) {
+          const columnIndex = data.column.index;
+          const cellValue = data.cell.raw;
+          const rowIndex = data.row.index;
+          const lastIndex = data.table.body.length - 1;
+
+          if (data.section === 'body') {
+            if (columnIndex === 1 && cellValue !== "Total" && rowIndex !== lastIndex) {
+              data.cell.styles.fillColor = [255, 255, 153];
+            }
+
+            if (rowIndex === lastIndex && data.row.cells[1].raw === "Total") {
+              data.cell.styles.fillColor = [255, 192, 203];
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.textColor = [0, 0, 0];
+            }
+
+            if (columnIndex === 5 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
+              const percent = parseFloat(cellValue.replace('%', ''));
+              if (percent >= 100) {
+                data.cell.raw = `${cellValue} ✅ Done`;
+                data.cell.styles.fillColor = [0, 255, 127];
+              } else if (percent >= 70) {
+                data.cell.styles.fillColor = [153, 255, 153];
+              } else if (percent >= 50) {
+                data.cell.styles.fillColor = [255, 204, 102];
+              } else if (percent >= 20) {
+                data.cell.styles.fillColor = [255, 255, 153];
+              } else {
+                data.cell.styles.fillColor = [255, 102, 102];
+              }
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.textColor = [0, 0, 0];
+            }
+
+            if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
+              const percent = parseFloat(cellValue.replace('%', ''));
+              data.cell.styles.fillColor = percent > 50 ? [153, 255, 153] : [255, 102, 102];
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.textColor = [0, 0, 0];
+            }
+          }
+        }
+      });
+
+      return doc.lastAutoTable.finalY + 10;
+    };
+
+    // === Header ===
     doc.setFontSize(14);
     doc.setTextColor(0);
     doc.line(14, 12, 196, 12);
@@ -76,532 +170,177 @@ const Summary = () => {
     doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
     doc.line(14, 39, 196, 39);
 
-    let startY = 56;
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (title === 'Full Summery') {
-      doc.text(`Leaf Summary on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
+    doc.text(`Leaf Summary by Mr. ${title} on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
+    doc.line(14, 50, 196, 50);
 
-    } else {
-      doc.text(`${title}`, 14, 46);
-
+    let startY = 56;
+    const officer = officerOrder[key];
+    const data = pdfData.filter(row => row.officer === officer);
+    if (data.length > 0) {
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(10);
+      doc.text(`Mr. ${officer} Summary`, 14, startY);
+      doc.setFont(undefined, 'normal');
+      startY = renderTable(data, startY + 9);
     }
 
-    doc.line(14, 50, 196, 50);
-    // First Page: Officers 0, 1, 2
-    officerOrder.slice(0, 3).forEach(officer => {
-      const data = pdfData.filter(row => row.officer === officer);
-      if (!data.length) return;
-
-      const title = `Mr. ${officer} Summary`;
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
-      doc.text(title, 14, startY);
-      doc.setFont(undefined, 'normal');
-
-      const tableData = data.map(row => {
-        let lineCode = "";
-        if (row.isTotal) {
-          lineCode = "Total";
-        } else if (row.line.includes("(")) {
-          const [code, ids] = row.line.split("(");
-          lineCode = code.trim();
-        } else {
-          lineCode = row.line;
-        }
-
-        return [
-          lineCode,
-
-          row.target.toLocaleString(),
-          row.total.toLocaleString(),
-          row.difference.toLocaleString(),
-          row.target > 0 ?
-            ((row.total / row.target) * 100).toFixed(0) + "%" :
-            '-',
-
-          row.super.toLocaleString(),
-          row.super > 0 ?
-            ((row.super / row.total) * 100).toFixed(0) + "%" :
-            '-',
-
-
-          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
-
-        ];
-      });
-
-      autoTable(doc, {
-        startY: startY + 9,
-        head: [["Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
-
-        body: tableData,
-        styles: {
-          fontSize: 10,
-
-          cellPadding: 1.5,
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2,
-        },
-        headStyles: {
-          fillColor: [22, 160, 133],
-          textColor: 255,
-          halign: "center",
-          valign: "middle",
-        },
-        bodyStyles: {
-          halign: "center",
-          valign: "middle",
-        },
-        tableLineColor: [0, 0, 0],
-        tableLineWidth: 0.2,
-        horizontalLineColor: [0, 0, 0],
-        horizontalLineWidth: 0.2,
-        verticalLineColor: [0, 0, 0],
-        verticalLineWidth: 0.2,
-        margin: { left: 14, right: 14 },
-        didParseCell: function (data) {
-          const columnIndex = data.column.index;
-          const cellValue = data.cell.raw;
-          const rowIndex = data.row.index;
-          const lastIndex = tableData.length - 1;
-
-          // ✅ First column: Light yellow background
-          if (
-            data.section === 'body' &&
-            columnIndex === 0 &&
-            cellValue !== "Total" &&
-            rowIndex !== lastIndex
-          ) {
-            data.cell.styles.fillColor = [255, 255, 153];
-          }
-
-          // 🎯 Highlight "Total" row
-          if (
-            data.section === 'body' &&
-            rowIndex === lastIndex &&
-            tableData[lastIndex][0] === "Total"
-          ) {
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-            data.cell.styles.fillColor = [255, 192, 203];
-          }
-
-          // 🎯 Main % column (last column)
-          if (
-            data.section === 'body' &&
-            columnIndex === data.table.columns.length - 4 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
-
-            if (percent >= 100) {
-              data.cell.raw = `${cellValue} ✅ Done`;
-              data.cell.styles.fillColor = [0, 255, 127];
-            } else if (percent >= 70) {
-              data.cell.styles.fillColor = [153, 255, 153];
-            } else if (percent >= 50) {
-              data.cell.styles.fillColor = [255, 204, 102];
-            } else if (percent >= 20) {
-              data.cell.styles.fillColor = [255, 255, 153];
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102];
-            }
-
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-
-          // ✅ Super % column styling (assuming columnIndex === 2)
-          if (
-            data.section === 'body' &&
-            columnIndex === 6 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
-            if (percent > 50) {
-              data.cell.styles.fillColor = [153, 255, 153]; // green
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102]; // red
-            }
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-        }
-
-
-      });
-
-      startY = doc.lastAutoTable.finalY + 10;
-    });
-    // Add Second Page
-    doc.addPage();
-    startY = 20; // Reset Y for new page
-    // Second Page: Officers 3 and 4
-    officerOrder.slice(3, 5).forEach(officer => {
-      const data = pdfData.filter(row => row.officer === officer);
-      if (!data.length) return;
-
-      const title = `Mr. ${officer} Summary`;
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
-      doc.text(title, 14, startY);
-      doc.setFont(undefined, 'normal');
-
-      const tableData = data.map(row => {
-        let lineCode = "";
-        if (row.isTotal) {
-          lineCode = "Total";
-        } else if (row.line.includes("(")) {
-          const [code, ids] = row.line.split("(");
-          lineCode = code.trim();
-        } else {
-          lineCode = row.line;
-        }
-
-        return [
-          lineCode,
-
-          row.target.toLocaleString(),
-          row.total.toLocaleString(),
-          row.difference.toLocaleString(),
-          row.target > 0 ?
-            ((row.total / row.target) * 100).toFixed(0) + "%" :
-            '-',
-
-          row.super.toLocaleString(),
-          row.super > 0 ?
-            ((row.super / row.total) * 100).toFixed(0) + "%" :
-            '-',
-
-
-          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
-
-        ];
-      });
-
-      autoTable(doc, {
-        startY: startY + 9,
-        head: [["Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
-
-        body: tableData,
-        styles: {
-          fontSize: 10,
-          cellPadding: 1.5,
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2,
-        },
-        headStyles: {
-          fillColor: [22, 160, 133],
-          textColor: 255,
-          halign: "center",
-          valign: "middle",
-        },
-        bodyStyles: {
-          halign: "center",
-          valign: "middle",
-        },
-        tableLineColor: [0, 0, 0],
-        tableLineWidth: 0.2,
-        horizontalLineColor: [0, 0, 0],
-        horizontalLineWidth: 0.2,
-        verticalLineColor: [0, 0, 0],
-        verticalLineWidth: 0.2,
-        margin: { left: 14, right: 14 },
-        didParseCell: function (data) {
-          const columnIndex = data.column.index;
-          const cellValue = data.cell.raw;
-          const rowIndex = data.row.index;
-          const lastIndex = tableData.length - 1;
-
-          // ✅ First column: Light yellow background
-          if (
-            data.section === 'body' &&
-            columnIndex === 0 &&
-            cellValue !== "Total" &&
-            rowIndex !== lastIndex
-          ) {
-            data.cell.styles.fillColor = [255, 255, 153];
-          }
-
-          // 🎯 Highlight "Total" row
-          if (
-            data.section === 'body' &&
-            rowIndex === lastIndex &&
-            tableData[lastIndex][0] === "Total"
-          ) {
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-            data.cell.styles.fillColor = [255, 192, 203];
-          }
-
-          // 🎯 Main % column (last column)
-          if (
-            data.section === 'body' &&
-            columnIndex === data.table.columns.length - 4 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
-
-            if (percent >= 100) {
-              data.cell.raw = `${cellValue} ✅ Done`;
-              data.cell.styles.fillColor = [0, 255, 127];
-            } else if (percent >= 70) {
-              data.cell.styles.fillColor = [153, 255, 153];
-            } else if (percent >= 50) {
-              data.cell.styles.fillColor = [255, 204, 102];
-            } else if (percent >= 20) {
-              data.cell.styles.fillColor = [255, 255, 153];
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102];
-            }
-
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-
-          // ✅ Super % column styling (assuming columnIndex === 2)
-          if (
-            data.section === 'body' &&
-            columnIndex === 6 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
-            if (percent > 50) {
-              data.cell.styles.fillColor = [153, 255, 153]; // green
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102]; // red
-            }
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-        }
-
-
-      });
-
-      startY = doc.lastAutoTable.finalY + 10;
-    });
-
-
-    officerOrder.slice(5, 6).forEach(officer => {
-      const data = pdfData.filter(row => row.officer === officer);
-      if (!data.length) return;
-
-
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-
-      const tableData = data.map(row => {
-        let lineCode = "";
-        if (row.isTotal) {
-          lineCode = "Total";
-        } else if (row.line.includes("(")) {
-          const [code, ids] = row.line.split("(");
-          lineCode = code.trim();
-        } else {
-          lineCode = row.line;
-        }
-
-        return [
-          lineCode,
-
-          row.target.toLocaleString(),
-          row.total.toLocaleString(),
-          row.difference.toLocaleString(),
-          row.target > 0 ?
-            ((row.total / row.target) * 100).toFixed(0) + "%" :
-            '-',
-
-          row.super.toLocaleString(),
-          row.super > 0 ?
-            ((row.super / row.total) * 100).toFixed(0) + "%" :
-            '-',
-
-
-          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
-
-        ];
-      });
-
-      autoTable(doc, {
-        startY: startY + 9,
-        head: [["Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
-
-        body: tableData,
-        styles: {
-          fontSize: 10,
-          cellPadding: 1.5,
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2,
-        },
-        headStyles: {
-          fillColor: [22, 160, 133],
-          textColor: 255,
-          halign: "center",
-          valign: "middle",
-        },
-        bodyStyles: {
-          halign: "center",
-          valign: "middle",
-        },
-        tableLineColor: [0, 0, 0],
-        tableLineWidth: 0.2,
-        horizontalLineColor: [0, 0, 0],
-        horizontalLineWidth: 0.2,
-        verticalLineColor: [0, 0, 0],
-        verticalLineWidth: 0.2,
-        margin: { left: 14, right: 14 },
-
-        didParseCell: function (data) {
-          const columnIndex = data.column.index;
-          const cellValue = data.cell.raw;
-          const rowIndex = data.row.index;
-          const lastIndex = tableData.length - 1;
-
-          // ✅ First column: Light yellow background
-          if (
-            data.section === 'body' &&
-            columnIndex === 0 &&
-            cellValue !== "Total" &&
-            rowIndex !== lastIndex
-          ) {
-            data.cell.styles.fillColor = [255, 255, 153];
-          }
-
-          // 🎯 Highlight "Total" row
-          if (
-            data.section === 'body' &&
-            rowIndex === lastIndex &&
-            tableData[lastIndex][0] === "Total"
-          ) {
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-            data.cell.styles.fillColor = [255, 192, 203];
-          }
-
-          // 🎯 Main % column (last column)
-          if (
-            data.section === 'body' &&
-            columnIndex === data.table.columns.length - 4 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
-
-            if (percent >= 100) {
-              data.cell.raw = `${cellValue} ✅ Done`;
-              data.cell.styles.fillColor = [0, 255, 127];
-            } else if (percent >= 70) {
-              data.cell.styles.fillColor = [153, 255, 153];
-            } else if (percent >= 50) {
-              data.cell.styles.fillColor = [255, 204, 102];
-            } else if (percent >= 20) {
-              data.cell.styles.fillColor = [255, 255, 153];
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102];
-            }
-
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-
-          // ✅ Super % column styling (assuming columnIndex === 2)
-          if (
-            data.section === 'body' &&
-            columnIndex === 6 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
-            if (percent > 50) {
-              data.cell.styles.fillColor = [153, 255, 153]; // green
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102]; // red
-            }
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-        }
-
-
-
-
-      });
-
-      startY = doc.lastAutoTable.finalY + 10;
-    });
-
-    officerOrder.slice(5, 7).forEach(officer => {
-      const data = pdfData.filter(row => row.officer === officer);
-      if (!data.length) return;
-
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
-
-      doc.setFont(undefined, 'normal');
-
-      // ✅ Calculate overall totals from officer total rows
-
-
-      // ✅ Build table data
-      const summaryTableData = [[
-
-        summery.totalSuper,
-        summery.totalTarget, summery.totalReceived,
-
-
-      ]];
-
-      // ✅ Add spacing
-      startY = doc.lastAutoTable.finalY + 10;
-
-      // ✅ Add Summary Table
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'bold');
-      doc.text("Grand Total Summary", 14, startY);
-      doc.setFont(undefined, 'normal');
-
-      autoTable(doc, {
-        startY: startY + 4,
-        head: [["Super", "Target", "Received"]],
-        body: summaryTableData,
-        styles: {
-          fontSize: 10,
-          cellPadding: 1.5,
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2,
-        },
-        headStyles: {
-          fillColor: [0, 123, 255], // blue header
-          textColor: 255,
-          halign: "center",
-          valign: "middle",
-        },
-        bodyStyles: {
-          halign: "center",
-          valign: "middle",
-          fontStyle: "bold",
-          fillColor: [255, 255, 200], // light yellow background
-        },
-        margin: { left: 14, right: 14 },
-      });
-
-      startY = doc.lastAutoTable.finalY + 10;
-    });
-    // Go to last page
     const pageCount = doc.internal.getNumberOfPages();
     doc.setPage(pageCount);
+    doc.line(14, 275, 196, 275);
+    doc.setFontSize(8);
+    doc.setTextColor(5);
+    doc.setFont(undefined, 'normal');
+    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-    // Footer only on last page
+    doc.save(`Leaf Summary by Mr. ${title} on Date: ${yesterday.toLocaleDateString()}.pdf`);
+  };
+
+  const exportToPDF = (pdfData, title) => {
+    const doc = new jsPDF();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const renderTable = (data, startY) => {
+      const tableData = data.map((row, index) => {
+        let lineCode = "";
+        if (row.isTotal) {
+          lineCode = "Total";
+        } else if (row.line.includes("(")) {
+          const [code] = row.line.split("(");
+          lineCode = code.trim();
+        } else {
+          lineCode = row.line;
+        }
+
+        return [
+          row.isTotal ? "" : index + 1,
+          lineCode,
+          row.target.toLocaleString(),
+          row.total.toLocaleString(),
+          row.difference.toLocaleString(),
+          row.target > 0 ? ((row.total / row.target) * 100).toFixed(0) + "%" : "-",
+          row.super.toLocaleString(),
+          row.super > 0 ? ((row.super / row.total) * 100).toFixed(0) + "%" : "-",
+          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
+        ];
+      });
+
+      autoTable(doc, {
+        startY: startY,
+        head: [["#", "Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
+        body: tableData,
+        styles: {
+          fontSize: 10,
+          cellPadding: 1.5,
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2,
+        },
+        headStyles: {
+          fillColor: [22, 160, 133],
+          textColor: 255,
+          halign: "center",
+          valign: "middle",
+        },
+        bodyStyles: {
+          halign: "center",
+          valign: "middle",
+        },
+        margin: { left: 14, right: 14 },
+        didParseCell: function (data) {
+          const columnIndex = data.column.index;
+          const cellValue = data.cell.raw;
+          const rowIndex = data.row.index;
+          const lastIndex = data.table.body.length - 1;
+
+          if (data.section === 'body') {
+            // Highlight line column
+            if (columnIndex === 1 && cellValue !== "Total" && rowIndex !== lastIndex) {
+              data.cell.styles.fillColor = [255, 255, 153];
+            }
+
+            // Highlight Total row
+            if (rowIndex === lastIndex && data.row.cells[1].raw === "Total") {
+              data.cell.styles.fillColor = [255, 192, 203];
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.textColor = [0, 0, 0];
+            }
+
+            // Highlight percentage column
+            if (columnIndex === 5 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
+              const percent = parseFloat(cellValue.replace('%', ''));
+              if (percent >= 100) {
+                data.cell.raw = `${cellValue} ✅ Done`;
+                data.cell.styles.fillColor = [0, 255, 127];
+              } else if (percent >= 70) {
+                data.cell.styles.fillColor = [153, 255, 153];
+              } else if (percent >= 50) {
+                data.cell.styles.fillColor = [255, 204, 102];
+              } else if (percent >= 20) {
+                data.cell.styles.fillColor = [255, 255, 153];
+              } else {
+                data.cell.styles.fillColor = [255, 102, 102];
+              }
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.textColor = [0, 0, 0];
+            }
+
+            // Highlight super % column
+            if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
+              const percent = parseFloat(cellValue.replace('%', ''));
+              data.cell.styles.fillColor = percent > 50 ? [153, 255, 153] : [255, 102, 102];
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.textColor = [0, 0, 0];
+            }
+          }
+        }
+      });
+
+      return doc.lastAutoTable.finalY + 10;
+    };
+
+    // === Header ===
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.line(14, 12, 196, 12);
+    doc.setFont(undefined, 'bold');
+    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 18, { align: "center" });
+
+    doc.setFontSize(9);
+    doc.line(14, 22, 196, 22);
+    doc.setFont(undefined, 'normal');
+    doc.text("Factory: Panakaduwa, Rotumba.", 14, 30);
+    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
+    doc.line(14, 39, 196, 39);
+
+    // === Title ===
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    const summaryTitle = title === 'Full Summery' ? `Leaf Summary on Date: ${yesterday.toLocaleDateString()}` : title;
+    doc.text(summaryTitle, 14, 46);
+    doc.line(14, 50, 196, 50);
+
+    let startY = 56;
+    officerOrder.forEach((officer, i) => {
+      const data = pdfData.filter(row => row.officer === officer);
+      if (!data.length) return;
+
+      if (i === 3 || i === 5) doc.addPage();
+      if (i === 3 || i === 5) startY = 20;
+
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(10);
+      doc.text(`Mr. ${officer} Summary`, 14, startY);
+      doc.setFont(undefined, 'normal');
+
+      startY = renderTable(data, startY + 9);
+    });
+
+    // === Footer ===
+    const pageCount = doc.internal.getNumberOfPages();
+    doc.setPage(pageCount);
     doc.line(14, 275, 196, 275);
     doc.setFontSize(8);
     doc.setTextColor(5);
@@ -612,203 +351,6 @@ const Summary = () => {
     doc.save("GreenHouse_Summary.pdf");
   };
 
-
-
-  const exportToPDFOfficer = (pdfData, title, key) => {
-    const doc = new jsPDF();
-
-    // Header
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.line(14, 12, 196, 12);
-    doc.setFont(undefined, 'bold');
-    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 18, { align: "center" });
-
-    doc.setFontSize(9);
-    doc.line(14, 22, 196, 22);
-    doc.setFont(undefined, 'normal');
-    doc.text("Factory: Panakaduwa, Rotumba.", 14, 30);
-    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
-    doc.line(14, 39, 196, 39);
-
-    let startY = 56;
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'normal');
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    doc.text(`Leaf Summary by Mr. ${title} on Date: ${yesterday.toLocaleDateString()} `, 14, 46);
-
-
-    doc.line(14, 50, 196, 50);
-    // First Page: Officers 0, 1, 2
-    officerOrder.slice(key, key + 1).forEach(officer => {
-      const data = pdfData.filter(row => row.officer === officer);
-      if (!data.length) return;
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
-
-      const tableData = data.map(row => {
-        let lineCode = "";
-        if (row.isTotal) {
-          lineCode = "Total";
-        } else if (row.line.includes("(")) {
-          const [code, ids] = row.line.split("(");
-          lineCode = code.trim();
-        } else {
-          lineCode = row.line;
-        }
-
-        return [
-          lineCode,
-
-          row.target.toLocaleString(),
-          row.total.toLocaleString(),
-          row.difference.toLocaleString(),
-          row.target > 0 ?
-            ((row.total / row.target) * 100).toFixed(0) + "%" :
-            '-',
-
-          row.super.toLocaleString(),
-          row.super > 0 ?
-            ((row.super / row.total) * 100).toFixed(0) + "%" :
-            '-',
-
-
-          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
-
-        ];
-      });
-
-      autoTable(doc, {
-        startY: startY + 4,
-        head: [["Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
-
-        body: tableData,
-        styles: {
-          fontSize: 10,
-
-          cellPadding: 1.5,
-          lineColor: [0, 0, 0],
-          lineWidth: 0.2,
-        },
-        headStyles: {
-          fillColor: [22, 160, 133],
-          textColor: 255,
-          halign: "center",
-          valign: "middle",
-        },
-        bodyStyles: {
-          halign: "center",
-          valign: "middle",
-        },
-        tableLineColor: [0, 0, 0],
-        tableLineWidth: 0.2,
-        horizontalLineColor: [0, 0, 0],
-        horizontalLineWidth: 0.2,
-        verticalLineColor: [0, 0, 0],
-        verticalLineWidth: 0.2,
-        margin: { left: 14, right: 14 },
-        didParseCell: function (data) {
-          const columnIndex = data.column.index;
-          const cellValue = data.cell.raw;
-          const rowIndex = data.row.index;
-          const lastIndex = tableData.length - 1;
-
-          // ✅ First column: Light yellow background
-          if (
-            data.section === 'body' &&
-            columnIndex === 0 &&
-            cellValue !== "Total" &&
-            rowIndex !== lastIndex
-          ) {
-            data.cell.styles.fillColor = [255, 255, 153];
-          }
-
-          // 🎯 Highlight "Total" row
-          if (
-            data.section === 'body' &&
-            rowIndex === lastIndex &&
-            tableData[lastIndex][0] === "Total"
-          ) {
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-            data.cell.styles.fillColor = [255, 192, 203];
-          }
-
-          // 🎯 Main % column (last column)
-          if (
-            data.section === 'body' &&
-            columnIndex === data.table.columns.length - 4 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
-
-            if (percent >= 100) {
-              data.cell.raw = `${cellValue} ✅ Done`;
-              data.cell.styles.fillColor = [0, 255, 127];
-            } else if (percent >= 70) {
-              data.cell.styles.fillColor = [153, 255, 153];
-            } else if (percent >= 50) {
-              data.cell.styles.fillColor = [255, 204, 102];
-            } else if (percent >= 20) {
-              data.cell.styles.fillColor = [255, 255, 153];
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102];
-            }
-
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-
-          // ✅ Super % column styling (assuming columnIndex === 2)
-          if (
-            data.section === 'body' &&
-            columnIndex === 6 &&
-            typeof cellValue === 'string' &&
-            cellValue.endsWith('%')
-          ) {
-            const percent = parseFloat(cellValue.replace('%', ''));
-            if (percent > 50) {
-              data.cell.styles.fillColor = [153, 255, 153]; // green
-            } else {
-              data.cell.styles.fillColor = [255, 102, 102]; // red
-            }
-            data.cell.styles.textColor = [0, 0, 0];
-            data.cell.styles.fontStyle = "bold";
-          }
-        }
-
-
-      });
-
-      startY = doc.lastAutoTable.finalY + 10;
-    });
-
-
-
-
-
-
-
-    // Go to last page
-    const pageCount = doc.internal.getNumberOfPages();
-    doc.setPage(pageCount);
-
-    // Footer only on last page
-    doc.line(14, 275, 196, 275);
-    doc.setFontSize(8);
-    doc.setTextColor(5);
-    doc.setFont(undefined, 'normal');
-    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
-    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
-
-    doc.save(`Leaf Summary by Mr. ${title} on Date: ${yesterday.toLocaleDateString()}.pdf`);
-
-
-
-  };
 
 
   const columns = [
@@ -1343,7 +885,7 @@ const Summary = () => {
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
         <Card bordered={false} style={cardStyle}>
-          <Row justify="space-between" gutter={[16, 16]}>
+          <Row justify="space-evenly" gutter={[16, 16]}>
             <Col span={24}>
               <Row gutter={[16, 16]}>
                 <Col xs={12} sm={8} md={1}>

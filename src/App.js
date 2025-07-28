@@ -32,9 +32,6 @@ export const isSessionValid = () => {
 
   const token = localStorage.getItem("token");
 
-
-
-
   try {
 
 
@@ -121,7 +118,7 @@ const App = () => {
             <Route path="/targets" element={<PrivateRoute element={<Targets />} />} />
 
             <Route path="/leaf/count" element={<PrivateRoute element={<LeafCount />} />} />
- <Route path="/users" element={<PrivateRoute element={<Users />} />} />
+            <Route path="/users" element={<PrivateRoute element={<Users />} />} />
             {/* 404 */}
             <Route path="/404" element={<div>404 - Page Not Found</div>} />
             <Route path="*" element={<Navigate to="/404" replace />} />

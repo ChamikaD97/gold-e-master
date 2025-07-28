@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Button, Table, Select, DatePicker } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMap from "../data/SummeryData.json";
+import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
@@ -34,14 +34,6 @@ const MissRejo = () => {
   const filteredMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
     .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
 
-  const officerOrder = ["Ajith", "Chamod", "Udara", "Gamini", "Udayanga", "Other"];
-  const customLineCodeOrder = [
-    "MT", "PH", "PW", "PP", "GO", "MP", "BM", "TP", "UP",
-    "BA", "BK", "K", "PT", "PK", "A", "KM", "N", "DM",
-    "NG", "S", "DR",
-    "J", "T", "SELF 02", "TK", "HA", "D",
-    "SLF", "DG", "ML", "MV"
-  ];
   const ajithLines = ['60,154,129', '65', '146', '74', '33', '8', '98', '145', '81,97'];
   const udaraLines = ['23', '72', '96', '149', '21', '9', '162'];
   const udayangaLines = ['6', '7', '25', '61', '150', '36', '102,161,129', '48,64,62', '155'];
@@ -58,7 +50,6 @@ const MissRejo = () => {
   ];
   const today = new Date();
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  const daysRemaining = endOfMonth.getDate() - today.getDate() + 1;
 
   const [currentSupplierTable, setCurrentSupplierTable] = useState([]);
   const [previousSupplierTable, setPreviousSupplierTable] = useState([]);
@@ -66,8 +57,7 @@ const MissRejo = () => {
   const [selectedOfficer, setSelectedOfficer] = useState({ name: "Select Officer", line: "All" });
   const [selectedLine, setSelectedLine] = useState(null);
 
-  const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMap.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
-  const filteredLines = filters.officer === "All" ? [] : ["All", ...(officerLineMap[filters.officer] || [])];
+  const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMapForAll.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
   const [missedSuppliers, setMissedSuppliers] = useState([]);
   const [rejoinedSuppliers, setRejoinedSuppliers] = useState([]);
   const [missedTotal, setMissedTotal] = useState("0.00");
@@ -84,7 +74,7 @@ const MissRejo = () => {
 
 
   const getOfficerByLineId = (lineId) => {
-    const match = lineIdCodeMap.find((line) => line.lineId === lineId);
+    const match = lineIdCodeMapForAll.find((line) => line.lineId === lineId);
     return match ? match.officer : null;
   };
 
@@ -195,6 +185,11 @@ const MissRejo = () => {
   };
 
 
+  const filteredLines = selectedOfficer.name === "Select Officer"
+    ? uniqueLines
+    : uniqueLines.filter(line =>
+      selectedOfficer.line.includes(line.value)
+    );
 
 
   const exportToPDF = () => {
@@ -308,46 +303,12 @@ const MissRejo = () => {
   };
 
 
-  const supplierTableColumns = [
-    {
-      title: "Supplier ID",
-      dataIndex: "supplier_id",
-      key: "supplier_id",
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Contact",
-      dataIndex: "contact",
-      key: "contact",
-    },
-    {
-      title: "Line",
-      dataIndex: "line",
-      key: "line",
-    },
-    {
-      title: "Officer",
-      dataIndex: "officer",
-      key: "officer",
-    },
-    {
-      title: "Total Net (kg)",
-      dataIndex: "total_kg",
-      key: "total_kg",
-      align: "right"
-    },
-  ];
 
 
-  const [routeSummary, setRouteSummary] = useState({ current: [], previous: [] });
   const [supplierCounts, setSupplierCounts] = useState({ current: 0, previous: 0 });
   const getMergedMap = () => {
     const map = {};
-    lineIdCodeMap.forEach(item => {
+    lineIdCodeMapForAll.forEach(item => {
       const mergedCode = item.lineCode;
       const lineIds = item.lineId.split(",").map(id => id.trim());
       lineIds.forEach(id => {
@@ -356,43 +317,17 @@ const MissRejo = () => {
     });
     return map;
   };
-  const mergedMap = getMergedMap();
 
   const supplierMap = {};
 
 
   const getOfficerByLineCode = (lineCode) => {
-    const entry = lineIdCodeMap.find(item => item.lineCode === lineCode);
+    const entry = lineIdCodeMapForAll.find(item => item.lineCode === lineCode);
     return entry?.officer || "Unknown";
   };
 
 
 
-  const groupBySupplier = (dataArr) => {
-    const map = {};
-    dataArr.forEach(d => {
-      const sid = d["Supplier Id"];
-      const net = parseFloat(d["Net"]) || 0;
-      const sup = supplierMap[sid] || {};
-
-      if (!map[sid]) {
-        map[sid] = {
-          supplier_id: sid,
-          total_kg: 0,
-          name: sup.name || "Unknown",
-          contact: sup.contact || "-",
-          line: sup.lineCode || "Unknown",
-          officer: sup.officer || "Unknown"
-        };
-      }
-      map[sid].total_kg += net;
-    });
-
-    return Object.values(map).map(item => ({
-      ...item,
-      total_kg: item.total_kg.toFixed(0)
-    }));
-  };
 
 
 
@@ -402,6 +337,12 @@ const MissRejo = () => {
 
 
   const getLeafRecordsByDates = async () => {
+    setMissedSuppliers([]);
+    setRejoinedSuppliers([]);
+
+    setMissedTotal(0);
+    setRejoinedTotal(0);
+
     const selectedYear = parseInt(filters.year);
     const selectedMonth = parseInt(filters.month);
     if (isNaN(selectedYear) || isNaN(selectedMonth)) {
@@ -416,14 +357,17 @@ const MissRejo = () => {
     const prevYear = prev.year();
     const prevMonth = String(prev.month() + 1).padStart(2, "0");
     const prevStart = getMonthDateRangeFromParts(prevYear, prevMonth);
+    console.log(filters);
 
     let ids = filters.line;
-    if (selectedOfficer.line !== 'All') {
+    console.log(ids);
+
+    if (filters.line == 'Select Line') {
       ids = selectedOfficer.line;
     } else if (selectedOfficer.line === 'All' && filters.line !== 'Select Line') {
       ids = filters.line;
     }
-
+    console.log(ids);
     const currentUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${currentStart}`;
     const prevUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${prevStart}`;
     const supplierUrl = `/quiX/ControllerV1/supdata?k=${API_KEY}&r=${ids}`;
@@ -545,6 +489,8 @@ const MissRejo = () => {
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
         <Card bordered={false} style={cardStyle}>
+
+
           <Row justify="space-between" gutter={[16, 16]}>
             <Col span={24}>
               <Row gutter={[16, 16]}>
@@ -561,6 +507,9 @@ const MissRejo = () => {
                       setSelectedOfficer({ name: "Select Officer", line: "All" })
                       setMissedSuppliers([]);
                       setRejoinedSuppliers([]);
+
+                      setMissedTotal(0);
+                      setRejoinedTotal(0);
                       setFilters({
                         year: "Select Year",
                         month: "Select Month",
@@ -606,21 +555,39 @@ const MissRejo = () => {
                     placeholder="Select Line"
                     value={filters.line}
                     onChange={val => {
-                      const selectedLine = uniqueLines.find(line => line.value === val);
-                      const officerMatch = Object.entries(officerLineMap).find(([officer, lines]) => lines.includes(val));
-                      const matchedOfficer = officerMatch ? officerMatch[0] : "All";
-                      setFilters(f => ({ ...f, officer: val.officer, line: val, lineCode: selectedLine?.label || "", officer: matchedOfficer, month: "Select Month" }));
+                      if (val === "Select Line") {
+                        setFilters(f => ({
+                          ...f,
+                          line: val, // Only update the selected line
+                        }));
+                        return;
+                      }
+
+                      const selectedLineObj = uniqueLines.find(line => line.value === val);
+                      const matchedOfficer = selectedLineObj?.officer || "All";
+
+                      setFilters(f => ({
+                        ...f,
+                        line: val,
+                        lineCode: selectedLineObj?.label || "",
+                        officer: matchedOfficer,
+                        month: "Select Month"
+                      }));
                     }}
+
+
+
                     style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
                     dropdownStyle={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
                     bordered={false}
                     optionFilterProp="children"
                     filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
                   >
-                    {uniqueLines.map(line => (
+                    {filteredLines.map(line => (
                       <Option key={line.value} value={line.value}>{line.label}</Option>
                     ))}
                   </Select>
+
                 </Col>
                 <Col md={3}>
                   <Select showSearch
@@ -641,6 +608,7 @@ const MissRejo = () => {
 
                   </Select>
                 </Col>
+
                 <Col md={3}>
                   <Select
                     showSearch
@@ -662,41 +630,59 @@ const MissRejo = () => {
                     onClick={() => getLeafRecordsByDates()}
                   />
                 </Col>
-                <Col md={3}>
-                  <Button
-                    type="primary"
-                    style={{ marginLeft: 8 }}
-                    onClick={() => exportToPDF()}
-                  >
-                    All
-                  </Button>
-                </Col>
-                <Col md={3}>
-                  <Button
-                    type="primary"
-                    style={{ marginLeft: 8 }}
-                    onClick={() => exportGroupedPDF(missedSuppliers, "Missed")}
-                  >
-                    Missed
-                  </Button>
-                </Col>
-                <Col md={4}>
-                  <Button
-                    type="primary"
-                    style={{ marginLeft: 8 }}
-                    onClick={() => exportGroupedPDF(rejoinedSuppliers, "Rejoined")}
-                  >
-                    Rejoined
-                  </Button>
-                </Col>
+
+
+
+                {missedSuppliers.length > 0 && (
+
+                  <>
+
+                    <Col md={3}>
+                      <Button
+                        type="primary"
+                        style={{ marginLeft: 8 }}
+                        onClick={() => exportToPDF()}
+                      >
+                        All
+                      </Button>
+                    </Col>
+                    <Col md={3}>
+                      <Button
+                        type="primary"
+                        style={{ marginLeft: 8 }}
+                        onClick={() => exportGroupedPDF(missedSuppliers, "Missed")}
+                      >
+                        Missed
+                      </Button>
+                    </Col>
+                    <Col md={4}>
+                      <Button
+                        type="primary"
+                        style={{ marginLeft: 8 }}
+                        onClick={() => exportGroupedPDF(rejoinedSuppliers, "Rejoined")}
+                      >
+                        Rejoined
+                      </Button>
+                    </Col>
+                  </>
+
+                )}
+
+
+
+
 
 
               </Row>
             </Col>
           </Row>
+
+
+
+
         </Card>
 
-        {loading && <CircularLoader />}
+
 
 
         {
@@ -704,7 +690,7 @@ const MissRejo = () => {
 
             <Card bordered={false} style={cardStyle}>
 
-              <Row gutter={[16, 16]} style={{ marginTop: 32 }}>
+              <Row gutter={[16, 16]}>
                 <Col xs={24} sm={12} md={12}>
                   <div
                     style={{
@@ -784,11 +770,11 @@ const MissRejo = () => {
           )
         }
 
+        {loading && <CircularLoader />}
 
 
-
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

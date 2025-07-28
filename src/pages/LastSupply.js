@@ -214,7 +214,7 @@ const LastSupply = () => {
   ];
 
   return (
-    <div style={{ padding: 16 }}>
+     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}  className="fade-in">
       <Card bordered={false} style={{ background: "rgba(0, 0, 0, 0.6)", color: "#fff", borderRadius: 12, marginBottom: 16 }}>
         <Row gutter={[16, 16]}>
           <Col md={1}>

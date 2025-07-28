@@ -272,7 +272,8 @@ const Users = () => {
           {loading && <CircularLoader />}
 
           {userList.length > 0 && (
-            <Card style={cardStyle} headStyle={{ color: "#fff" }}>
+            
+            
               <Table
                 className="sup-bordered-table"
                 dataSource={
@@ -287,7 +288,7 @@ const Users = () => {
                 size="middle"
               />
 
-            </Card>
+              
           )}
 
           <Modal

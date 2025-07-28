@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import { API_KEY } from "../api/api";
 
 import * as XLSX from 'xlsx';
+import { SearchOutlined, SearchRounded } from "@mui/icons-material";
 
 const Suppliers = () => {
 
@@ -39,72 +40,7 @@ const Suppliers = () => {
 
   const navigate = useNavigate();
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
 
-    doc.setFontSize(14);
-    doc.text("Supplier List", 10, 10);
-
-    const headers = [["Supplier ID", "Supplier Name", "Contact"]];
-    const rows = filteredData.map(s => [
-      s["Supplier Id"],
-      s["Supplier Name"],
-      s["Contact"],
-
-    ]);
-
-    autoTable(doc, {
-      startY: 16,
-      head: headers,
-      body: rows,
-      styles: {
-        fontSize: 10,
-        cellPadding: 3,
-        lineWidth: 0.1,
-        lineColor: [0, 0, 0],
-      },
-      headStyles: {
-        fillColor: [40, 40, 40],
-        textColor: 255,
-      },
-      alternateRowStyles: {
-        fillColor: [245, 245, 245],
-      },
-      margin: { top: 16, left: 10, right: 10 }
-    });
-
-    const selectedLine = filters.line === "Select Line" ? "AllLines" : lineIdToCodeMap[filters.line] || filters.line;
-    doc.save(`Supplier_List_${selectedLine}.pdf`);
-  };
-
-
-
-  const exportAllToExcel = () => {
-    const lines = Object.keys(lineIdToCodeMap); // e.g., { "1": "L001", "2": "L002" }
-
-    const delay = 500; // milliseconds between downloads
-
-
-
-    const worksheetData = filteredData.map(supplier => ({
-      'Supplier ID': supplier['Supplier Id'],
-      'Supplier Name': supplier['Supplier Name'],
-      'Contact': supplier['Contact']
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Suppliers");
-    const selectedLine = filters.line === "All" ? "AllLines" : lineIdToCodeMap[filters.line] || filters.line;
-
-    XLSX.writeFile(workbook, `Supplier_List_${selectedLine}.xlsx`);
-
-    lines.forEach((lineId, index) => {
-      setTimeout(() => {
-
-      }, index * delay);
-    });
-  };
 
 
   const [loading, setLoading] = useState(false);
@@ -150,13 +86,8 @@ const Suppliers = () => {
       .map(l => ({ label: l.lineCode, value: l.lineId }))
   ];
 
-  useEffect(() => {
-    if (filters.line !== "Select Line") {
-      fetchSupplierDataFromAPI(filters.line);
-    } else {
-      setSuppliers([]);
-    }
-  }, [filters.line]);
+
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
@@ -309,94 +240,71 @@ const Suppliers = () => {
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
-        <Card bordered={false} style={cardStyle}>
-          <Row justify="space-between" gutter={[16, 16]}>
-            {/* Left Side: Reload + Line Filter */}
-            <Col span={12}>
-              <Row gutter={[8, 8]}>
-                <Col md={2}>
-                  <Button
-                    icon={<ReloadOutlined />}
-                    danger
-                    type="primary"
-                    block
-                    onClick={() => setFilters({ line: "Select Line", search: "" })}
-                  />
-                </Col>
-                <Col md={8}>
-                  <Select
-                    showSearch
-                    className="line-select"
-                    placeholder="Select Line"
-                    value={filters.line}
-                    onChange={val => setFilters(prev => ({ ...prev, line: val }))}
-                    style={{
-                      width: "100%",
-                      backgroundColor: "rgba(0, 0, 0, 0.6)",
-                      color: "#fff",
-                      border: "1px solid #333",
-                      borderRadius: 6
-                    }}
-                    dropdownStyle={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-                    bordered={false}
-                    optionFilterProp="children"
-                    filterOption={(input, option) =>
-                      option.children.toLowerCase().includes(input.toLowerCase())
-                    }
-                  >
-                    {uniqueLines.map(line => (
-                      <Option key={line.value} value={line.value}>
-                        {line.label}
-                      </Option>
-                    ))}
-                  </Select>
-                </Col>
-              </Row>
-            </Col>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
 
-
-
-            {suppliers.length > 0 && (
-              <Col span={12}>
-                <Row gutter={[8, 8]} justify="end">
-
-
-
-                  <Col md={8}>
-                    <Input
-                      className="custom-supplier-input"
-                      value={filters.search}
-                      onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-
-                      placeholder="Search by ID or Name"
-                      style={{
-                        width: "100%",
-                        backgroundColor: "rgb(0, 0, 0)",
-                        color: "#fff",
-                        border: "1px solid #333",
-                        borderRadius: 6
-                      }}
-                      allowClear
-                    />
-                  </Col>
-
-                  <Col>
-                    <Button type="primary" onClick={exportAllToExcel}>
-                      Download PDF
-                    </Button>
-                  </Col>
-                </Row>
+      <Row gutter={[8, 8]} justify="center">
+        <Col md={12}>
+          <Card bordered={false} style={cardStyle}>
+            <Row gutter={[8, 8]} align="middle">
+              <Col span={6}>
+                <Text style={{ color: "#fff" }}>Search By Line</Text>
               </Col>
-            )}
-            {/* Right Side: Search */}
+              <Col span={14}>
+                <Select
+                  showSearch
+                  className="line-select"
+                  placeholder="Select Line"
+                  value={filters.line}
+                  onChange={val => setFilters(prev => ({ ...prev, line: val }))}
+                  style={{
+                    width: "100%",
+                    backgroundColor: "rgba(0, 0, 0, 0.6)",
+                    color: "#fff",
+                    border: "1px solid #333",
+                    borderRadius: 6
+                  }}
+                  dropdownStyle={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
+                  bordered={false}
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {uniqueLines.map(line => (
+                    <Option key={line.value} value={line.value}>
+                      {line.label}
+                    </Option>
+                  ))}
+                </Select>
 
+              </Col>
+              <Col span={2}>
+                <Button
+                  icon={<SearchRounded />}
+                  type="primary"
+                  onClick={() => fetchSupplierDataFromAPI(filters.line)}
+                />
+              </Col>
+              <Col md={2}>
+                <Button
+                  icon={<ReloadOutlined />}
+                  danger
+                  type="primary"
+                  block
+                  onClick={() => {
 
+                    setSuppliers([])
+                    setFilters({ line: "Select Line", search: "", searchById: "" })
+                  }}
+                />
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+      </Row>
 
-          </Row>
+      <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
 
-        </Card>
 
         <Modal
           open={showSingleModel}
@@ -440,7 +348,7 @@ const Suppliers = () => {
         </Modal>
 
 
-        {loading && <CircularLoader />}
+     
 
         {!loading && filteredData.length > 0 && (
           <Card
@@ -453,7 +361,7 @@ const Suppliers = () => {
             }}
             bodyStyle={{ padding: 0 }}
           >
-            <div style={{ maxHeight: "460px", overflowY: "auto" }}>
+            <div style={{ maxHeight: "460px", overflowY: "auto" }} className="fade-in">
               <Table
                 className="sup-bordered-table"
                 columns={columns}
@@ -481,6 +389,7 @@ const Suppliers = () => {
           </Card>
         )}
       </div>
+         {loading && <CircularLoader />}
     </div>
   );
 };

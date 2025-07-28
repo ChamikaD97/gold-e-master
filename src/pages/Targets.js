@@ -217,24 +217,6 @@ const Targets = () => {
   };
 
 
-  const getMergeDisplayMap = () => {
-    const displayMap = {};
-    lineIdCodeMap.forEach(item => {
-      const ids = item.lineId.split(",");
-      if (ids.length > 1) {
-        ids.forEach(id => {
-          displayMap[item.lineCode] = item.lineCode + " (" + item.lineId + ")";
-        });
-      }
-    });
-    return displayMap;
-  };
-
-  const getTargetByLineCode = (lineCode, target) => {
-    const entry = target.find(item => item.lineCode === lineCode);
-    return entry ? entry.target : "";
-  };
-
 
 
 
@@ -535,12 +517,13 @@ const Targets = () => {
       <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
 
-
-          <Card bordered={false} style={cardStyle}>
+  <Row gutter={[8, 8]} justify="center">
+        <Col md={12}>
+           <Card bordered={false} style={cardStyle}>
             <Row justify="space-evenly" gutter={[16, 16]}>
               <Col span={24}>
                 <Row gutter={[16, 16]}>
-                  <Col xs={12} sm={8} md={1}>
+                  <Col md={2}>
                     <Button
                       icon={<ReloadOutlined />}
                       type="primary"
@@ -565,7 +548,7 @@ const Targets = () => {
 
                     </Button>
                   </Col>
-                  <Col md={3}>
+                  <Col md={6}>
                     <Select showSearch
                       style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
@@ -585,7 +568,7 @@ const Targets = () => {
 
                     </Select>
                   </Col>
-                  <Col md={3}>
+                  <Col md={6}>
                     <Select
                       showSearch
                       value={filters.month}
@@ -598,7 +581,7 @@ const Targets = () => {
                       ))}
                     </Select>
                   </Col>
-                  <Col md={3}>
+                  <Col md={2}>
 
                     <Button
                       icon={<SearchRounded />}
@@ -612,9 +595,6 @@ const Targets = () => {
                       className="custom-supplier-input"
                       value={filters.search}
                       onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-
-
-                      placeholder="Search by ID or Name"
                       style={{
                         width: "100%",
                         backgroundColor: "rgb(0, 0, 0)",
@@ -625,13 +605,13 @@ const Targets = () => {
                       allowClear
                     />
                   </Col>
-                  <Col md={3}>
+                  <Col md={4}>
                     <Button
                       type="primary"
                       onClick={() => setAddModalOpen(true)}
-                      style={{ marginLeft: 8 }}
+                  
                     >
-                      Add New Month
+                      Add New
                     </Button>
 
                   </Col>
@@ -640,6 +620,10 @@ const Targets = () => {
             </Row>
 
           </Card>
+        
+        </Col>
+       </Row>
+       
           {totalTarget > 0 && (
             <Card bordered={false} style={cardStyle}>
               <Row justify="space-evenly" gutter={[16, 16]}>

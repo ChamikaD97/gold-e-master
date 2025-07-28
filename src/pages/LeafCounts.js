@@ -302,12 +302,8 @@ const LeafCount = () => {
 
 
 
-      <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
         <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
-
-          <Col>
-
-          </Col>
           <Card bordered={false} style={cardStyle}>
             <Row justify="space-evenly" gutter={[16, 16]}>
               <Col span={24}>
@@ -413,55 +409,57 @@ const LeafCount = () => {
             </Row>
 
           </Card>
-          {Array.isArray(lineLeafCounts.current) && lineLeafCounts.current.length > 0 && (
-            <Card bordered={false} style={cardStyle}>
-              <Row justify="space-evenly" gutter={[16, 16]}>
-                <Col span={24}>
-                  <Row gutter={[16, 16]}>
+          <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
+
+            {Array.isArray(lineLeafCounts.current) && lineLeafCounts.current.length > 0 && (
+              <Card bordered={false} style={cardStyle}>
+                <Row justify="space-evenly" gutter={[16, 16]}>
+                  <Col span={24}>
+                    <Row gutter={[16, 16]}>
 
 
-                    <Col md={12}>
-                      <div style={{ fontWeight: 'normal', fontSize: 20 }}>
-                        Leaf Count for {filters.year} {monthMap[filters.month] || filters.month}
-                      </div>
-                    </Col>
-
-
-
-
-                  </Row>
-                </Col>
-              </Row>
-
-            </Card>
-          )}
+                      <Col md={12}>
+                        <div style={{ fontWeight: 'normal', fontSize: 20 }}>
+                          Leaf Count for {filters.year} {monthMap[filters.month] || filters.month}
+                        </div>
+                      </Col>
 
 
 
-          {loading && <CircularLoader />}
-          {Array.isArray(lineLeafCounts.current) && lineLeafCounts.current.length > 0 && (
-            <Card
+
+                    </Row>
+                  </Col>
+                </Row>
+
+              </Card>
+            )}
 
 
 
-              style={cardStyle}
-              headStyle={{ color: "#fff" }}
-            >
-              <Table
-                className="sup-bordered-table"
-                dataSource={filteredData}
-                columns={targetColumns}
-                pagination={false}
-                size="middle"
-
-              />
-            </Card>
-          )}
+            {loading && <CircularLoader />}
+            {Array.isArray(lineLeafCounts.current) && lineLeafCounts.current.length > 0 && (
+              <Card
 
 
-        </div>
-      </div> </>
-  );
+
+                style={cardStyle}
+                headStyle={{ color: "#fff" }}
+              >
+                <Table
+                  className="sup-bordered-table"
+                  dataSource={filteredData}
+                  columns={targetColumns}
+                  pagination={false}
+                  size="middle"
+
+                />
+              </Card>
+            )}
+</div>            <div />
+
+          </div>
+        </div> </>
+      );
 };
 
-export default LeafCount;
+      export default LeafCount;

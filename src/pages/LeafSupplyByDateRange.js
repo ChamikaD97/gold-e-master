@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
-  Card, Col, Row, Select, Typography, Button, message
+  Card, Col, Row, Select, Typography, Button, message,
+  DatePicker
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
@@ -14,13 +15,17 @@ import CircularLoader from "../components/CircularLoader";
 
 const { Option } = Select;
 const { Text } = Typography;
+const { RangePicker } = DatePicker;
 
 const LeafSupplyByDateRange = () => {
   const today = new Date();
   const currentYear = today.getFullYear().toString();
   const currentMonth = (today.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-indexed
   const currentDay = today.getDate().toString().padStart(2, "0");
-
+  const [dateRange, setDateRange] = useState([
+    dayjs().startOf("month"),
+    dayjs()
+  ]);
   const [filters, setFilters] = useState({
     fromYear: currentYear,
     fromMonth: currentMonth,
@@ -28,7 +33,7 @@ const LeafSupplyByDateRange = () => {
     toYear: currentYear,
     toMonth: currentMonth,
     toDay: currentDay,
-    line: ""
+    line: "Select Line",
   });
 
   const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMap.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
@@ -59,9 +64,12 @@ const LeafSupplyByDateRange = () => {
   };
 
   const getLeafRecordsByDates = async (lineId, range) => {
-    const id = lineId?.toString().padStart(5, "0").trim();
+    console.log(dateRange);
     const formattedDates = range.map(date => dayjs(date).format("YYYY-MM-DD"));
     const dd = `${formattedDates[0]}~${formattedDates[1]}`;
+    const id = lineId?.toString().padStart(5, "0").trim();
+
+
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${id}&d=${dd}`;
 
     setData([]);
@@ -124,95 +132,69 @@ const LeafSupplyByDateRange = () => {
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div style={{ flex: "0 0 auto" }} className="fade-in">
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
+      <Card bordered={false} style={cardStyle}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} md={1}>
 
 
-        <Row gutter={[16, 16]} style={{ marginBottom: 12 }}>
-          <Col xs={24} sm={12} md={2}>
-
-            <Card bordered={false} style={cardStyle}>
 
 
-              <Button icon={<ReloadOutlined />} danger type="primary" block onClick={() => {
-                setLineWiseSummary([]);
-                setData([]);
-                setTotals({ super: 0, normal: 0 });
-                setFilters({
-                  fromYear: "", fromMonth: "", fromDay: "",
-                  toYear: "", toMonth: "", toDay: "",
-                  line: ""
-                });
-              }} />
-            </Card>
+            <Button icon={<ReloadOutlined />} danger type="primary" block onClick={() => {
+              setLineWiseSummary([]);
+              setData([]);
+              setTotals({ super: 0, normal: 0 });
+              setFilters({
+                fromYear: "", fromMonth: "", fromDay: "",
+                toYear: "", toMonth: "", toDay: "",
+                line: "Select Line",
+              });
+            }} />
+
           </Col>
           <Col xs={24} sm={12} md={4}>
 
-            <Card bordered={false} style={cardStyle}>
 
 
-              <Select
-                showSearch
-                bordered={false}
-                placeholder="Select Line"
-                value={filters.line}
-
-
-
-                onChange={val => {
-                  const selectedLine = uniqueLines.find(line => line.value === val);
-                  const officerMatch = Object.entries(officerLineMap).find(([officer, lines]) => lines.includes(val));
-                  const matchedOfficer = officerMatch ? officerMatch[0] : "All";
-                  setFilters(f => ({ ...f, officer: val.officer, line: val, lineCode: selectedLine?.label || "", officer: matchedOfficer, month: "Select Month" }));
-                }}
+            <Select
+              showSearch
+              bordered={false}
+              placeholder="Select Line"
+              value={filters.line}
 
 
 
-                style={selectStyle}
-                dropdownStyle={{ backgroundColor: "#1e1e1e" }}
-              >
-                {lineIdCodeMap.map(l => (
-                  <Option key={l.lineId} value={l.lineId}>{l.lineCode}</Option>
-                ))}
-              </Select>
-            </Card>
+              onChange={val => {
+                const selectedLine = uniqueLines.find(line => line.value === val);
+                const officerMatch = Object.entries(officerLineMap).find(([officer, lines]) => lines.includes(val));
+                const matchedOfficer = officerMatch ? officerMatch[0] : "All";
+                setFilters(f => ({ ...f, officer: val.officer, line: val, lineCode: selectedLine?.label || "", officer: matchedOfficer, month: "Select Month" }));
+              }}
+
+
+
+              style={selectStyle}
+              dropdownStyle={{ backgroundColor: "#1e1e1e" }}
+            >
+              {lineIdCodeMap.map(l => (
+                <Option key={l.lineId} value={l.lineId}>{l.lineCode}</Option>
+              ))}
+            </Select>
+
           </Col>
 
           <Col xs={24} sm={12} md={8}>
-
-            <Card bordered={false} style={cardStyle}>
-              <Row gutter={[8, 8]} style={{ marginTop: 0 }}>
-                {["Year", "Month", "Day"].map(unit => {
-                  const key = `from${unit}`;
-                  return (
-                    <Col span={8} key={key}>
-                      <Select
-                        value={filters[key]}
-                        onChange={(val) => setFilters(prev => ({ ...prev, [key]: val }))}
-                        placeholder={unit}
-                        bordered={false}
-                        style={selectStyle}
-                        dropdownStyle={{ backgroundColor: "#1e1e1e" }}
-                      >
-                        {unit === "Day"
-                          ? Array.from({ length: 31 }, (_, i) => (
-                            <Option key={i + 1} value={String(i + 1).padStart(2, "0")}>{i + 1}</Option>
-                          ))
-                          : unit === "Month"
-                            ? Object.entries(monthMap).map(([val, label]) => (
-                              <Option key={val} value={val}>{label}</Option>
-                            ))
-                            : ["2023", "2024", "2025"].map(year => (
-                              <Option key={year} value={year}>{year}</Option>
-                            ))}
-                      </Select>
-                    </Col>
-                  );
-                })}
-              </Row>
+            <RangePicker
+              style={{ width: "100%" }}
+              value={dateRange}
+              onChange={(dates) => setDateRange(dates)}
+              allowClear
+            />
 
 
-            </Card>
+
+
+
 
 
 
@@ -220,68 +202,65 @@ const LeafSupplyByDateRange = () => {
 
           <Col xs={24} sm={12} md={8}>
 
-            <Card bordered={false} style={cardStyle}>
-              <Row gutter={[8, 8]} style={{ marginTop: 0 }}>
-                {["Year", "Month", "Day"].map(unit => {
-                  const key = `to${unit}`;
-                  return (
-                    <Col span={8} key={key}>
-                      <Select
-                        value={filters[key]}
-                        onChange={(val) => setFilters(prev => ({ ...prev, [key]: val }))}
-                        placeholder={unit}
-                        bordered={false}
-                        style={selectStyle}
-                        dropdownStyle={{ backgroundColor: "#1e1e1e" }}
-                      >
-                        {unit === "Day"
-                          ? Array.from({ length: 31 }, (_, i) => (
-                            <Option key={i + 1} value={String(i + 1).padStart(2, "0")}>{i + 1}</Option>
-                          ))
-                          : unit === "Month"
-                            ? Object.entries(monthMap).map(([val, label]) => (
-                              <Option key={val} value={val}>{label}</Option>
-                            ))
-                            : ["2023", "2024", "2025"].map(year => (
-                              <Option key={year} value={year}>{year}</Option>
-                            ))}
-                      </Select>
-                    </Col>
-                  );
-                })}
-              </Row>
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={2}>
-            <Card bordered={false} style={cardStyle}>
-              <Button
-                type="primary"
-                block
-                icon={<SearchRounded />}
-                onClick={() => {
-                  const {
-                    fromYear, fromMonth, fromDay,
-                    toYear, toMonth, toDay
-                  } = filters;
 
-                  if (fromYear && fromMonth && fromDay && toYear && toMonth && toDay) {
-                    const fromDate = `${fromYear}-${fromMonth}-${fromDay}`;
-                    const toDate = `${toYear}-${toMonth}-${toDay}`;
-                    if (filters.line) {
-                      getLeafRecordsByDates(filters.line, [fromDate, toDate]);
-                    } else {
-                      message.warning("⚠️ Please select a line.");
-                    }
-                  } else {
-                    message.warning("⚠️ Please complete all date fields.");
-                  }
-                }}
-              />
-            </Card>
+            {/* <Row gutter={[8, 8]} style={{ marginTop: 0 }}>
+              {["Year", "Month", "Day"].map(unit => {
+                const key = `to${unit}`;
+                return (
+                  <Col span={8} key={key}>
+                    <Select
+                      value={filters[key]}
+                      onChange={(val) => setFilters(prev => ({ ...prev, [key]: val }))}
+                      placeholder={unit}
+                      bordered={false}
+                      style={selectStyle}
+                      dropdownStyle={{ backgroundColor: "#1e1e1e" }}
+                    >
+                      {unit === "Day"
+                        ? Array.from({ length: 31 }, (_, i) => (
+                          <Option key={i + 1} value={String(i + 1).padStart(2, "0")}>{i + 1}</Option>
+                        ))
+                        : unit === "Month"
+                          ? Object.entries(monthMap).map(([val, label]) => (
+                            <Option key={val} value={val}>{label}</Option>
+                          ))
+                          : ["2023", "2024", "2025"].map(year => (
+                            <Option key={year} value={year}>{year}</Option>
+                          ))}
+                    </Select>
+                  </Col>
+                );
+              })}
+            </Row> */}
+
+          </Col>
+          <Col xs={24} sm={12} md={1}>
+
+            <Button
+              type="primary"
+              block
+              icon={<SearchRounded />}
+              onClick={() => {
+                const {
+                  fromYear, fromMonth, fromDay,
+                  toYear, toMonth, toDay
+                } = filters;
+                console.log(dateRange);
+
+                if (filters.line) {
+                  getLeafRecordsByDates(filters.line, dateRange);
+                } else {
+                  message.warning("⚠️ Please select a line.");
+                }
+              }}
+            />
           </Col>
         </Row>
-      </div>
-      {isLoading && <CircularLoader />}
+
+      </Card>
+
+
+
       {/* Display Totals */}
       {lineWiseSummary.length > 0 && (
         <Card bordered={false} style={{ ...cardStyle, marginTop: 12 }}>
@@ -318,6 +297,7 @@ const LeafSupplyByDateRange = () => {
           </Row>
         </Card>
       )}
+      {isLoading && <CircularLoader />}
     </div>
   );
 };

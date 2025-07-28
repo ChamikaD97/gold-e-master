@@ -1,25 +1,24 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {  useRef, useState } from "react";
 import {
-  Card, Col, Row, Select, Typography, Button, Table, Input, Modal,
+  Card, Col, Row, Select, Button, Table, Input, Modal,
   message
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import '../App.css';
 import lineIdCodeMap from "../data/SummeryData.json";
-import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
 import CircularLoader from "../components/CircularLoader";
 import SupplierLeafModal from "../components/SupplierLeafModal";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { API_KEY, fetchMonthlyTargets, getMonthDateRangeFromParts, getPreviousMonthDateRange } from "../api/api";
+import { API_KEY, fetchMonthlyTargets,  getPreviousMonthDateRange } from "../api/api";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import CountUp from "react-countup";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
+import { SearchRounded } from "@mui/icons-material";
 
 const { Option } = Select;
-const { Text } = Typography;
 
 const Prediction = () => {
   const [data, setData] = useState([]);
@@ -60,44 +59,43 @@ const Prediction = () => {
   };
 
   const handleTargetSearch = async () => {
-  try {
+    try {
 
-    // ✅ Wait until this API call completes
-    const data2 = await fetchMonthlyTargets(filters.year, filters.month);
+      // ✅ Wait until this API call completes
+      const data2 = await fetchMonthlyTargets(filters.year, filters.month);
 
-    const target2 = data2.filter(item => item.lineCode === filters.lineCode);
+      const target2 = data2.filter(item => item.lineCode === filters.lineCode);
 
-    if (!target2.length) {
-      toast.warn("⚠️ No target found for selected line.");
-      return;
+      if (!target2.length) {
+        toast.warn("⚠️ No target found for selected line.");
+        return;
+      }
+
+      targetsN.current = target2[0].target;
+      const enteredTarget = targetsN.current;
+
+      if (!enteredTarget) {
+        message.warning("Please enter a target value to search.");
+        return;
+      }
+
+      // ✅ Wait for leaf records to load before comparing
+      await getLeafRecordsByRoutes();
+
+      const matched = lineWiseTotals && Object.entries(lineWiseTotals).find(
+        ([line, value]) => value.target?.toString() === enteredTarget.toString()
+      );
+
+      if (matched) {
+        message.success(`✅ Found line ${matched[0]} with target ${enteredTarget}`);
+      } else {
+        message.error("❌ No line found with the entered target");
+      }
+
+    } catch (err) {
+      toast.error("Something went wrong while searching target.");
     }
-
-    targetsN.current = target2[0].target;
-    const enteredTarget = targetsN.current;
-
-    if (!enteredTarget) {
-      message.warning("Please enter a target value to search.");
-      return;
-    }
-
-    // ✅ Wait for leaf records to load before comparing
-    await getLeafRecordsByRoutes();
-
-    const matched = lineWiseTotals && Object.entries(lineWiseTotals).find(
-      ([line, value]) => value.target?.toString() === enteredTarget.toString()
-    );
-
-    if (matched) {
-      message.success(`✅ Found line ${matched[0]} with target ${enteredTarget}`);
-    } else {
-      message.error("❌ No line found with the entered target");
-    }
-
-  } catch (err) {
-    console.error("🔴 Error in handleTargetSearch:", err);
-    toast.error("Something went wrong while searching target.");
-  }
-};
+  };
 
 
   const [xSupplierDetails, setXSupplierDetails] = useState([]); // array of detailed supplier objects
@@ -656,109 +654,115 @@ const Prediction = () => {
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
       <SupplierLeafModal open={modalOpen} filters={filters} onClose={() => setModalOpen(false)} supplierId={selectedSupplierId} selectedDate={selectedDate} />
 
+      <Row gutter={[8, 8]} justify="center">
+        <Col md={20}>
+          <Card bordered={false} style={cardStyle}>
+            <Row gutter={[8, 8]} justify="center">
+              <Col md={1}>
+                <Button icon={<ReloadOutlined />} danger type="primary" block onClick={() => {
+
+                  setLineWiseTotals({})
+                  setXSupplierDetails([]);
+
+                  setFilters({ year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: "" })
+                }} />
+              </Col>
+              <Col md={4}>
+                <Select
+                  showSearch
+                  placeholder="Select Line"
+                  value={filters.line}
+                  onChange={val => {
+                    const selectedLine = uniqueLines.find(line => line.value === val);
+                    const officerMatch = Object.entries(officerLineMap).find(([officer, lines]) => lines.includes(val));
+                    const matchedOfficer = officerMatch ? officerMatch[0] : "All";
+                    setFilters(f => ({ ...f, officer: val.officer, line: val, lineCode: selectedLine?.label || "", officer: matchedOfficer, month: "Select Month" }));
+                  }}
+                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                  dropdownStyle={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
+                  bordered={false}
+                  optionFilterProp="children"
+                  filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                >
+                  {uniqueLines.map(line => (
+                    <Option key={line.value} value={line.value}>{line.label}</Option>
+                  ))}
+                </Select>
+              </Col>
+              <Col md={3}>
+                <Select showSearch
+                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+
+                  value={filters.year}
+                  bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
+
+                  {[...Array(5)].map((_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return (
+                      <Option key={year} value={year}>
+                        {year}
+                      </Option>
+                    );
+                  })}
+
+                </Select>
+              </Col>
+              <Col md={4}>
+                <Select
+                  showSearch
+
+                  value={filters.month}
+                  onChange={val => setFilters(prev => ({ ...prev, month: val }))}
+                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                  bordered={false}
+                >
+                  {filteredMonths.map(m => (
+                    <Option key={m} value={m}>{monthMap[m]}</Option>
+                  ))}
+                </Select>
+              </Col>
+              <Col md={1}>
+
+
+                <Button
+                  icon={<SearchRounded />}
+                  type="primary"
+                  onClick={handleTargetSearch}
+
+                />
+              </Col>
+              <Col md={5}>
+                <Button
+                  type="primary"
+                  onClick={() => downloadPredictionPDF(false)}
+                  style={{ borderRadius: 6 }}
+                >
+                  Download Without Data
+                </Button>
+              </Col>
+              <Col md={5}>
+                <Button
+                  type="primary"
+                  onClick={() => downloadPredictionPDF(true)}
+                  style={{ borderRadius: 6 }}
+                >
+                  Download With Data
+                </Button>
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+      </Row>
+
+
       <div style={{ flex: "0 0 auto" }} className="fade-in">
-        <Card bordered={false} style={cardStyle}>
-          <Row gutter={[16, 16]}>
-            <Col md={1}>
-              <Button icon={<ReloadOutlined />} danger type="primary" block onClick={() => {
 
-                setLineWiseTotals({})
-                setXSupplierDetails([]);
 
-                setFilters({ year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: "" })
-              }} />
-            </Col>
-            <Col md={3}>
-              <Select
-                showSearch
-                placeholder="Select Line"
-                value={filters.line}
-                onChange={val => {
-                  const selectedLine = uniqueLines.find(line => line.value === val);
-                  const officerMatch = Object.entries(officerLineMap).find(([officer, lines]) => lines.includes(val));
-                  const matchedOfficer = officerMatch ? officerMatch[0] : "All";
-                  setFilters(f => ({ ...f, officer: val.officer, line: val, lineCode: selectedLine?.label || "", officer: matchedOfficer, month: "Select Month" }));
-                }}
-                style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
-                dropdownStyle={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-                bordered={false}
-                optionFilterProp="children"
-                filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-              >
-                {uniqueLines.map(line => (
-                  <Option key={line.value} value={line.value}>{line.label}</Option>
-                ))}
-              </Select>
-            </Col>
-            <Col md={3}>
-              <Select showSearch
-                style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
-                value={filters.year}
-                bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
 
-                {[...Array(5)].map((_, i) => {
-                  const year = new Date().getFullYear() - i;
-                  return (
-                    <Option key={year} value={year}>
-                      {year}
-                    </Option>
-                  );
-                })}
-
-              </Select>
-            </Col>
-            <Col md={3}>
-              <Select
-                showSearch
-
-                value={filters.month}
-                onChange={val => setFilters(prev => ({ ...prev, month: val }))}
-                style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
-                bordered={false}
-              >
-                {filteredMonths.map(m => (
-                  <Option key={m} value={m}>{monthMap[m]}</Option>
-                ))}
-              </Select>
-            </Col>
-            <Col md={3}>
-
-              {targetsN.current ? targetsN.current : ''}
-            </Col>
-            <Col md={3}>
-              <Button
-                type="primary"
-                onClick={handleTargetSearch}
-                style={{ borderRadius: 6 }}
-              >
-                Search
-              </Button>
-            </Col>
-            <Col md={4}>
-              <Button
-                type="primary"
-                onClick={() => downloadPredictionPDF(false)}
-                style={{ borderRadius: 6 }}
-              >
-                Download Without Data
-              </Button>
-            </Col>
-            <Col md={4}>
-              <Button
-                type="primary"
-                onClick={() => downloadPredictionPDF(true)}
-                style={{ borderRadius: 6 }}
-              >
-                Download With Data
-              </Button>
-            </Col>
-
-          </Row>
-        </Card>
       </div>
 
       {filters.line !== "M" && filters.officer !== "All" && filters.month !== "Select Month" && (

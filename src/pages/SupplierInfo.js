@@ -10,6 +10,8 @@ import {
   Table,
   message
 } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
+
 import { SearchRounded } from "@mui/icons-material";
 import dayjs from "dayjs";
 import CircularLoader from "../components/CircularLoader";
@@ -78,8 +80,6 @@ const SupplierInfo = () => {
   };
 
 
-
-
   useEffect(() => {
     if (supplierId && supplierId.length === 5) {
       dispatch(showLoader());
@@ -89,6 +89,8 @@ const SupplierInfo = () => {
 
     }
   }, []);
+
+
 
   const lineIdToCodeMap = (id) => {
     const record = lineIdCodeMap.find(item => parseInt(item.lineId) === id);
@@ -101,6 +103,7 @@ const SupplierInfo = () => {
   };
 
   const getLeafRecordsByDates = async (supId, range) => {
+    dispatch(showLoader())
     const id = supId?.toString().padStart(5, "0").trim();
     const formattedDates = range.map(date => dayjs(date).format("YYYY-MM-DD"));
     const dd = `${formattedDates[0]}~${formattedDates[1]}`;
@@ -145,6 +148,9 @@ const SupplierInfo = () => {
         { super: 0, normal: 0 }
       );
       setTotals(calculatedTotals);
+      if (transformed.lenth == 0) {
+        toast.warning(`⚠️ No  leaf records data found for ID`);
+      }
       setData(transformed);
     } catch (err) {
       message.error("❌ Failed to load leaf records");
@@ -166,16 +172,16 @@ const SupplierInfo = () => {
   const valueStyle = { color: "#fff" };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
       {/* Search Bar */}
       <Row gutter={[8, 8]} justify="center">
         <Col md={12}>
           <Card bordered={false} style={cardStyle}>
             <Row gutter={[8, 8]} align="middle">
-              <Col flex="60px">
-                <Text style={{ color: "#fff" }}>Search</Text>
+              <Col md={6}>
+                <Text style={{ color: "#fff" }}>Search By Id</Text>
               </Col>
-              <Col flex="auto">
+              <Col span={14}>
                 <Input
                   value={filters.searchById}
                   onChange={(e) =>
@@ -190,14 +196,29 @@ const SupplierInfo = () => {
                     border: "1px solid #333",
                     borderRadius: 6,
                   }}
+
                   allowClear
                 />
               </Col>
-              <Col flex="60px">
+              <Col span={2}>
+
                 <Button
                   icon={<SearchRounded />}
                   type="primary"
                   onClick={() => fetchSupplierDataFromId(filters.searchById)}
+                />
+              </Col>
+              <Col md={2}>
+                <Button
+                  icon={<ReloadOutlined />}
+                  danger
+                  type="primary"
+                  block
+                  onClick={() => {
+                    setSupplier(null)
+                    setData([]);
+                    setFilters({ searchById: "" });
+                  }}
                 />
               </Col>
             </Row>
@@ -350,7 +371,7 @@ const SupplierInfo = () => {
                             <span
                               style={{
                                 backgroundColor: "#ffa347",
-                                padding: "4px 8px", 
+                                padding: "4px 8px",
                                 borderRadius: 6, color: "#000",
                                 fontWeight: "bold",
                                 marginRight: 8,
@@ -402,8 +423,29 @@ const SupplierInfo = () => {
                             title: "Leaf Type",
                             dataIndex: "leaf_type",
                             key: "leaf_type",
-                            render: (val) => val === "Super" ? "Super" : "Normal"
-                          },
+                            render: (val) => (
+                              <span
+                                style={{
+                                  background: val === "Super" ? "#ffa347" : "#1890ff", // gold for Super, blue for Normal
+                                  fontWeight: "bold",
+                                  color: "#000",
+                                  padding: "6px 12px",
+                                  borderRadius: "24px",
+                                  fontWeight: 600,
+                                  fontSize: 13,
+                                  display: "inline-block",
+                                  minWidth: "60px",
+                                  textAlign: "center",
+                                  boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+                                  transition: "transform 0.2s",
+                                }}
+                              >
+
+                                {val === "Super" ? "Super" : "Normal"}
+                              </span>
+                            )
+                          }
+                          ,
                           { title: "Net KG", dataIndex: "net_kg", key: "net_kg" },
                           { title: "Gross Weight", dataIndex: "gross_weight", key: "gross_weight" },
                           { title: "Full Weight", dataIndex: "full_weight", key: "full_weight" },

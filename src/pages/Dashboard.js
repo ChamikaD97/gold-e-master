@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import { Card, Col, Row, Typography, Input, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import icon from "../images/logo.ico";
@@ -9,10 +9,6 @@ import { setSelectedSupplier } from "../redux/commonDataSlice";
 import { showLoader, hideLoader } from "../redux/loaderSlice";
 import dayjs from "dayjs";
 import { API_KEY } from "../api/api";
-import LeafPieChart from "../components/dashboardCards/LeafPieChart";
-import LeafLineChart from "../components/dashboardCards/LeafLineChart";
-import TotalCard from "../components/dashboardCards/TotalCard";
-import OfficerSummaryList from "../components/dashboardCards/OfficerSummaryList";
 import { toast } from "react-toastify";
 import Clock from "../components/dashboardCards/Clock";
 
@@ -49,61 +45,6 @@ const Dashboard = () => {
   const [totals, setTotals] = useState({ super: 0, normal: 0 });
   const [officerSummaries, setOfficerSummaries] = useState([]);
 
-  const getOfficerSummaries = async () => {
-    const { year, month } = filters;
-    const start = dayjs(`${year}-${month}-01`);
-    const end = start.endOf("month");
-    const dd = `${start.format("YYYY-MM-DD")}~${end.format("YYYY-MM-DD")}`;
-
-    if (!Array.isArray(officerLines) || officerLines.length === 0) {
-      toast.error("No officer lines defined.");
-      return;
-    }
-
-    dispatch(showLoader());
-
-    try {
-      const results = await Promise.all(
-        officerLines.map(async (officer) => {
-          const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${officer.routes}&d=${dd}`;
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`Fetch failed for ${officer.name}`);
-          const json = await res.json();
-
-          const transformed = Array.isArray(json)
-            ? json.map((item) => ({
-              leaf_type: item["Leaf Type"] === 2 ? "Super" : "Normal",
-              net_kg: parseFloat(item["Net"]) || 0,
-            }))
-            : [];
-
-          const total = transformed.reduce(
-            (acc, item) => {
-              if (item.leaf_type === "Super") acc.super += item.net_kg;
-              else acc.normal += item.net_kg;
-              return acc;
-            },
-            { super: 0, normal: 0 }
-          );
-
-          return {
-            name: officer.name,
-            total: Math.round(total.super + total.normal),
-          };
-        })
-      );
-
-      setOfficerSummaries(results);
-    } catch (err) {
-      console.error(err);
-      toast.error("Error while loading data. Please try again.");
-      setOfficerSummaries([]);
-    } finally {
-      dispatch(hideLoader());
-    }
-  };
-
-
 
   const handleSearchSupplier = (supplierId) => {
     dispatch(showLoader());
@@ -115,30 +56,6 @@ const Dashboard = () => {
 
   
 
-  const pieData = [
-    { name: "Super", value: totals.super },
-    { name: "Normal", value: totals.normal }
-  ];
-
-  // Optional monthly aggregation for Line Chart
-  const lineChartData = data.reduce((acc, item) => {
-    const day = dayjs(item.date).format("D");
-    const existing = acc.find(d => d.name === day);
-    if (!existing) {
-      acc.push({
-        name: day,
-        Super: item.leaf_type === "Super" ? item.net_kg : 0,
-        Normal: item.leaf_type === "Normal" ? item.net_kg : 0,
-        Total: item.net_kg
-      });
-    } else {
-      if (item.leaf_type === "Super") existing.Super += item.net_kg;
-      if (item.leaf_type === "Normal") existing.Normal += item.net_kg;
-      existing.Total += item.net_kg;
-    }
-    return acc;
-  }, []);
-
 
   const handleTodaySupply = () => navigate("/leaf/todaySupply/officer");
 
@@ -149,7 +66,7 @@ const Dashboard = () => {
     <div style={{ padding: 10 }}>
       {/* Logo Header */}
       <Card bordered={false} style={cardStyle}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly" }} className="fade-in">
           <img
             src={icon}
             alt="SLMS"
@@ -174,12 +91,8 @@ const Dashboard = () => {
 
       {/* Chart 1 | Chart 2 | Search Supplier by ID */}
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-        {/* 
-        <Col span={8}>
-          <TotalCard label="This Month Collection" value={totals.super + totals.normal} type="total" />
-
-        </Col> */}
-        <Col span={10}>
+     
+        <Col span={10} className="fade-in">
           <Card bordered={false} style={cardStyle}>
             <Row gutter={[8, 8]} align="middle">
               <Col span={10}>
@@ -215,21 +128,21 @@ const Dashboard = () => {
         </Col>
 
 
-        <Col span={4}>
+        <Col span={4}  className="fade-in">
           <Card bordered={false} style={cardStyle}>
             <Button type="primary" onClick={handleTodaySupply} block>
               Today Suppliers
             </Button>
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={6}  className="fade-in">
           <Card bordered={false} style={cardStyle}>
             <Button type="primary" onClick={handelTargets} block>
               Targets And Achievements
             </Button>
           </Card>
         </Col>
-        <Col span={4}>
+        <Col span={4} className="fade-in">
           <Card bordered={false} style={cardStyle}>
             <Button type="primary" onClick={handleSummery} block>
               Summery Reports
