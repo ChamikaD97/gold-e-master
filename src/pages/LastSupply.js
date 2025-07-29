@@ -1,30 +1,24 @@
 import React, { useMemo, useState } from "react";
 import {
-  Card, Col, Row, Button, Select, Table,
+  Card, Col, Row, Button, Select, Table, Input
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
 import { useDispatch, useSelector } from "react-redux";
-import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { API_KEY } from "../api/api";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import dayjs from "dayjs";
-import { Input } from "antd";
 import CircularLoader from "../components/CircularLoader";
+import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
+import { API_KEY } from "../api/api";
+import { showLoader, hideLoader } from "../redux/loaderSlice";
 
 const LastSupply = () => {
   const { Option } = Select;
   const dispatch = useDispatch();
+
   const [filters, setFilters] = useState({ line: "All" });
-  const [data, setData] = useState([]);
-  const [remainingSuppliers, setRemainingSuppliers] = useState([]);
   const [allSuppliers, setAllSuppliers] = useState([]);
-  const startDate = dayjs().startOf("month");
-  const endDate = dayjs().endOf("month");
-  const { isLoading } = useSelector((state) => state.loader);
-
   const [searchText, setSearchText] = useState("");
-
+  const { isLoading } = useSelector((state) => state.loader);
 
   const uniqueLines = [
     { label: "All", value: "All" },
@@ -57,64 +51,31 @@ const LastSupply = () => {
       const allSuppliersRaw = await supRes.json();
 
       const supplierLastDateMap = {};
+      const supplierTotalKgMap = {};
+
       result.forEach(item => {
         const sid = item["Supplier Id"];
         const date = item["Leaf Date"];
+        const net = parseFloat(item["Net"] || 0);
+
         if (!supplierLastDateMap[sid] || new Date(date) > new Date(supplierLastDateMap[sid])) {
           supplierLastDateMap[sid] = date;
         }
+
+        if (!supplierTotalKgMap[sid]) supplierTotalKgMap[sid] = 0;
+        supplierTotalKgMap[sid] += net;
       });
 
-      const enrichedSuppliers = allSuppliersRaw.map(supplier => ({
-        ...supplier,
-        last_supply_date: supplierLastDateMap[supplier["Supplier Id"]] || "-"
-      }));
-
-      setAllSuppliers(enrichedSuppliers);
-
-      const groupedMap = {};
-      result.forEach(item => {
-        const leafDate = new Date(item["Leaf Date"]);
-        if (leafDate >= startDate.toDate() && leafDate <= endDate.toDate()) {
-          const key = `${item["Supplier Id"]}_${item["Leaf Date"]}`;
-          if (!groupedMap[key]) {
-            groupedMap[key] = {
-              supplier_id: item["Supplier Id"],
-              date: item["Leaf Date"],
-              lineCode: parseInt(item["Route"]),
-              super_kg: 0,
-              normal_kg: 0,
-            };
-          }
-          const net = parseFloat(item["Net"] || 0);
-          item["Leaf Type"] === 2
-            ? groupedMap[key].super_kg += net
-            : groupedMap[key].normal_kg += net;
-        }
-      });
-
-      const transformed = Object.values(groupedMap).map(item => {
-        const total_kg = item.super_kg + item.normal_kg;
+      const enrichedSuppliers = allSuppliersRaw.map(supplier => {
+        const sid = supplier["Supplier Id"];
         return {
-          ...item,
-          leaf_type:
-            item.super_kg > 0 && item.normal_kg > 0
-              ? "Both"
-              : item.super_kg > 0
-                ? "Super"
-                : "Normal",
-          total_kg: total_kg.toFixed(2),
-          last_supply_date: supplierLastDateMap[item.supplier_id] || "-"
+          ...supplier,
+          last_supply_date: supplierLastDateMap[sid] || "-",
+          total_supplied_kg: supplierTotalKgMap[sid]?.toFixed(0) || "0.00"
         };
       });
 
-      const activeSupplierIds = new Set(transformed.map(item => String(item.supplier_id)));
-      const remainingSuppliers = enrichedSuppliers.filter(
-        sup => !activeSupplierIds.has(String(sup["Supplier Id"]))
-      );
-
-      setData(transformed);
-      setRemainingSuppliers(remainingSuppliers);
+      setAllSuppliers(enrichedSuppliers);
     } catch (err) {
       toast.error("❌ Failed to load leaf collection or supplier data");
     } finally {
@@ -122,29 +83,18 @@ const LastSupply = () => {
     }
   };
 
-
   const lastSupplyColumns = [
     {
       title: "Supplier ID",
       dataIndex: "Supplier Id",
       key: "Supplier Id",
       render: text => (
-        <span
-          style={{
-            background: "#8b5400ff",
-
-            color: "#fff",
-            padding: "6px 12px",
-            borderRadius: "24px",
-            fontWeight: 600,
-            fontSize: 13,
-            display: "inline-block",
-            minWidth: "60px",
-            textAlign: "center",
-            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
-            transition: "transform 0.2s",
-          }}
-
+        <span style={{
+          background: "#8b5400ff", color: "#fff", padding: "6px 12px",
+          borderRadius: "24px", fontWeight: 600, fontSize: 13, display: "inline-block",
+          minWidth: "60px", textAlign: "center", boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+          transition: "transform 0.2s",
+        }}
           onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")}
           onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
         >
@@ -157,12 +107,11 @@ const LastSupply = () => {
       dataIndex: "Supplier Name",
       key: "Supplier Name",
       sorter: (a, b) => a["Supplier Name"].localeCompare(b["Supplier Name"]),
-      filterSearch: true,
-      onFilter: (value, record) =>
-        record["Supplier Name"]?.toLowerCase().includes(value.toLowerCase()),
       filters: Array.from(new Set(allSuppliers.map(s => s["Supplier Name"])))
         .sort()
         .map(name => ({ text: name, value: name })),
+      onFilter: (value, record) =>
+        record["Supplier Name"]?.toLowerCase().includes(value.toLowerCase()),
     },
     {
       title: "Mobile",
@@ -175,13 +124,19 @@ const LastSupply = () => {
       key: "last_supply_date",
       sorter: (a, b) =>
         new Date(a.last_supply_date) - new Date(b.last_supply_date),
-    }, {
-      title: "Total Supplied (kg)",
-      dataIndex: "total_kg",
-      key: "total_kg",
-      sorter: (a, b) => parseFloat(a.total_kg) - parseFloat(b.total_kg),
     },
-
+    {
+      title: "Total Supplied (kg)",
+      dataIndex: "total_supplied_kg",
+      key: "total_supplied_kg",
+      align: "center",
+      sorter: (a, b) => parseFloat(a.total_supplied_kg) - parseFloat(b.total_supplied_kg),
+      render: (text) => (
+        <span style={{ fontWeight: 500, color: "#ffffffff" }}>
+          {parseFloat(text).toFixed(0)}
+        </span>
+      )
+    },
     {
       title: "Inactive For",
       key: "inactive_for",
@@ -203,18 +158,14 @@ const LastSupply = () => {
         return parts.length > 0 ? parts.join(" ") : "0 days";
       },
       sorter: (a, b) => {
-        const getTotalDays = (d) => {
-          if (!d || d === "-") return -1;
-          return dayjs().diff(dayjs(d), "day");
-        };
+        const getTotalDays = (d) => (!d || d === "-") ? -1 : dayjs().diff(dayjs(d), "day");
         return getTotalDays(a.last_supply_date) - getTotalDays(b.last_supply_date);
-      },
+      }
     }
-
   ];
 
   return (
-     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}  className="fade-in">
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
       <Card bordered={false} style={{ background: "rgba(0, 0, 0, 0.6)", color: "#fff", borderRadius: 12, marginBottom: 16 }}>
         <Row gutter={[16, 16]}>
           <Col md={1}>
@@ -225,8 +176,7 @@ const LastSupply = () => {
               block
               onClick={() => {
                 setFilters({ line: "All" });
-                setData([]);
-                setRemainingSuppliers([]);
+                setAllSuppliers([]);
               }}
             />
           </Col>
@@ -256,13 +206,13 @@ const LastSupply = () => {
               ))}
             </Select>
           </Col>
+
           <Col md={4}>
             <Button type="primary" block onClick={getLeafRecordsByRoutes}>
               Get Supplier History
             </Button>
           </Col>
-          <Col flex="60px">
-            Search          </Col>
+
           <Col md={4}>
             <Input
               value={searchText}
@@ -277,22 +227,12 @@ const LastSupply = () => {
               }}
               allowClear
             />
-
           </Col>
-
         </Row>
       </Card>
 
       {!isLoading && allSuppliers.length > 0 && (
-        <Card
-          size="small"
-          style={{
-            marginTop: 12,
-            background: "rgba(0, 0, 0, 0.6)",
-            borderRadius: 16
-          }}
-          bodyStyle={{ padding: 0 }}
-        >
+        <Card size="small" style={{ marginTop: 12, background: "rgba(0, 0, 0, 0.6)", borderRadius: 16 }} bodyStyle={{ padding: 0 }}>
           <Table
             className="sup-bordered-table"
             columns={lastSupplyColumns}
@@ -306,18 +246,10 @@ const LastSupply = () => {
               isInactiveOverMonths(record.last_supply_date) ? "inactive-row" : ""
             }
           />
-
-
         </Card>
-
       )}
 
-      {isLoading
-        && <CircularLoader />
-
-
-
-      }
+      {isLoading && <CircularLoader />}
     </div>
   );
 };
