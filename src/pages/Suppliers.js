@@ -28,12 +28,12 @@ const Suppliers = () => {
   const dispatch = useDispatch();
 
   const [filters, setFilters] = useState({
-
-
     line: "Select Line",
     search: "",
     searchById: "",
+    searchByObject: "", // 🔍 NEW
   });
+
 
   const [suppliers, setSuppliers] = useState([]);
   const [singleSupplier, setSingleSupplier] = useState([]);
@@ -69,6 +69,90 @@ const Suppliers = () => {
       setLoading(false);
     }
   };
+  const handleDelete = () => {
+    if (filteredData.length === 0) {
+      toast.warn("No supplier data to export");
+      return;
+    }
+
+    const doc = new jsPDF();
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    const selectedLine = filters.line || "All";
+    const currentMonthName = today.toLocaleString("default", { month: "long" });
+
+    // --- Header ---
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.line(14, 20, 196, 20);
+    doc.setFont(undefined, 'bold');
+    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 28, { align: "center" });
+
+    doc.setFontSize(9);
+    doc.line(14, 32, 196, 32);
+    doc.setFont(undefined, 'normal');
+    doc.text("Factory: Panakaduwa, Rotumba.", 14, 40);
+    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 45);
+
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text("Supplier List", 14, 52);
+    doc.text(`Line: ${lineIdToCodeMap[selectedLine] || "All"}`, 14, 58);
+    doc.setFont(undefined, 'normal');
+    doc.line(14, 63, 196, 63);
+    doc.text(`Date: ${formattedDate}`, 14, 69);
+    doc.line(14, 72, 196, 72);
+
+    // --- Table Data ---
+    const tableBody = filteredData.map((s) => [
+      s["Supplier Id"],
+      s["Supplier Name"],
+      lineIdToCodeMap[s.Route] || s.Route,
+      s["Pay"] === 1 ? "Cash" : "Bank",
+      s["NIC"],
+      s["Contact"],
+      s["Joined Date"]
+    ]);
+
+    doc.autoTable({
+      startY: 78,
+      head: [["ID", "Name", "Route", "Payment", "NIC", "Contact", "Joined"]],
+      body: tableBody,
+      styles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontSize: 9,
+        halign: 'center',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.1
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2
+      },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.1
+    });
+
+    // --- Footer on Last Page ---
+    const pageCount = doc.internal.getNumberOfPages();
+    doc.setPage(pageCount);
+    const y = doc.lastAutoTable.finalY + 10;
+
+    doc.setFontSize(8);
+    doc.setTextColor(50);
+    doc.line(14, 275, 196, 275);
+    doc.setFont(undefined, 'normal');
+    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
+    doc.text(`Page ${pageCount}`, 190, 290, { align: 'right' });
+
+    doc.save(`Supplier_List_${selectedLine}_${formattedDate}.pdf`);
+  };
 
 
   const lineIdToCodeMap = useMemo(() => {
@@ -92,15 +176,27 @@ const Suppliers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
 
+
+
   const filteredData = suppliers
-    .filter(s => {
-      const search = (filters.search || "").toLowerCase();
-      return (
+    .filter((s) => {
+      const search = filters.search?.toLowerCase() || "";
+      const objectSearch = filters.searchByObject?.toLowerCase() || "";
+
+      const matchesBasicSearch =
         s["Supplier Id"]?.toLowerCase().includes(search) ||
-        s["Supplier Name"]?.toLowerCase().includes(search)
-      );
+        s["Supplier Name"]?.toLowerCase().includes(search);
+
+      const matchesObjectSearch = objectSearch
+        ? Object.values(s).some((val) =>
+          val?.toString().toLowerCase().includes(objectSearch)
+        )
+        : true;
+
+      return matchesBasicSearch && matchesObjectSearch;
     })
     .map((s, index) => ({ ...s, key: index }));
+
 
   const paginatedData = filteredData.slice(
     (currentPage - 1) * pageSize,
@@ -243,13 +339,26 @@ const Suppliers = () => {
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
 
       <Row gutter={[8, 8]} justify="center">
-        <Col md={12}>
+        <Col md={24}>
           <Card bordered={false} style={cardStyle}>
             <Row gutter={[8, 8]} align="middle">
-              <Col span={6}>
+              <Col md={1}>
+                <Button
+                  icon={<ReloadOutlined />}
+                  danger
+                  type="primary"
+                  block
+                  onClick={() => {
+
+                    setSuppliers([])
+                    setFilters({ line: "Select Line", search: "", searchById: "" })
+                  }}
+                />
+              </Col>
+              <Col span={2}>
                 <Text style={{ color: "#fff" }}>Search By Line</Text>
               </Col>
-              <Col span={14}>
+              <Col span={4}>
                 <Select
                   showSearch
                   className="line-select"
@@ -285,19 +394,40 @@ const Suppliers = () => {
                   onClick={() => fetchSupplierDataFromAPI(filters.line)}
                 />
               </Col>
-              <Col md={2}>
-                <Button
-                  icon={<ReloadOutlined />}
-                  danger
-                  type="primary"
-                  block
-                  onClick={() => {
 
-                    setSuppliers([])
-                    setFilters({ line: "Select Line", search: "", searchById: "" })
+
+              <Col span={5}>
+                <Input
+                  value={filters.searchByObject}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      searchByObject: e.target.value,
+                    }))
+                  }
+                  placeholder="Enter object-related keyword"
+                  style={{
+                    width: "100%",
+                    backgroundColor: "rgba(0, 0, 0, 0.6)",
+                    color: "#fff",
+                    border: "1px solid #333",
+                    borderRadius: 6,
                   }}
+                  allowClear
                 />
               </Col>
+
+              <Col span={3}>
+                <Button
+                  type="primary"
+                  onClick={() => handleDelete()}
+                  style={{ width: "100%", borderColor: "#3e8e41" }}
+                >
+                  Download
+                </Button>
+              </Col>
+
+
             </Row>
           </Card>
         </Col>
@@ -348,7 +478,7 @@ const Suppliers = () => {
         </Modal>
 
 
-     
+
 
         {!loading && filteredData.length > 0 && (
           <Card
@@ -389,7 +519,7 @@ const Suppliers = () => {
           </Card>
         )}
       </div>
-         {loading && <CircularLoader />}
+      {loading && <CircularLoader />}
     </div>
   );
 };

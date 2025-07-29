@@ -72,67 +72,7 @@ const Dashboard = () => {
       </Card>
 
       {/* Chart 1 | Chart 2 | Search Supplier by ID */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-     
-        <Col span={10} className="fade-in">
-          <Card bordered={false} style={cardStyle}>
-            <Row gutter={[8, 8]} align="middle">
-              <Col span={10}>
-                <Text style={{ color: "#fff" }}>Enter Supplier Id To Search</Text>
-              </Col>
-              <Col span={12}>
-                <Input
-                  value={filters.searchById}
-                  onChange={(e) =>
-                    setFilters((prev) => ({ ...prev, searchById: e.target.value }))
-                  }
-                  onPressEnter={() => handleSearchSupplier(filters.searchById)}
-                  placeholder="Search by ID or Name"
-                  style={{
-                    width: "100%",
-                    backgroundColor: "rgb(0, 0, 0)",
-                    color: "#fff",
-                    border: "1px solid #333",
-                    borderRadius: 6,
-                  }}
-                  allowClear
-                />
-              </Col>
-              <Col span={2}>
-                <Button
-                  icon={<SearchRounded />}
-                  type="primary"
-                  onClick={() => handleSearchSupplier(filters.searchById)}
-                />
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-
-
-        <Col span={4}  className="fade-in">
-          <Card bordered={false} style={cardStyle}>
-            <Button type="primary" onClick={handleTodaySupply} block>
-              Today Suppliers
-            </Button>
-          </Card>
-        </Col>
-        <Col span={6}  className="fade-in">
-          <Card bordered={false} style={cardStyle}>
-            <Button type="primary" onClick={handelTargets} block>
-              Targets And Achievements
-            </Button>
-          </Card>
-        </Col>
-        <Col span={4} className="fade-in">
-          <Card bordered={false} style={cardStyle}>
-            <Button type="primary" onClick={handleSummery} block>
-              Summery Reports
-            </Button>
-          </Card>
-        </Col>
-      </Row>
-
+      
 
 
 

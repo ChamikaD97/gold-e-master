@@ -713,7 +713,6 @@ const Prediction = () => {
               <Col md={5}>
                 <Button
                   type="primary"
-                  disabled={!lineWiseTotals.length}
                   onClick={() => downloadPredictionPDF(false)}
                   style={{ borderRadius: 6 }}
                 >
@@ -723,8 +722,6 @@ const Prediction = () => {
               <Col md={5}>
                 <Button
                   type="primary"
-                                    disabled={!lineWiseTotals.length}
-
                   onClick={() => downloadPredictionPDF(true)}
                   style={{ borderRadius: 6 }}
                 >

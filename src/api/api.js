@@ -7,7 +7,6 @@ import axios from "axios";
 export const BASE_URL = "http://newserver:46597/quiX/ControllerV1";
 
 
-export const base_sql = "http://localhost:3000/";
 // src/api.js
 
 const API_BASE = "http://localhost:8000"; // Update for production

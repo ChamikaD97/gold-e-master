@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Card, Col, Row, Button, Select, Input, Table, InputNumber } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import { ReloadOutlined, DeleteOutlined } from "@ant-design/icons";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
@@ -10,7 +10,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SearchRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
-import CountUp from "react-countup";
+import { Modal } from "antd";
+const { confirm } = Modal;
 const { Option } = Select;
 const LeafCount = () => {
 
@@ -42,8 +43,6 @@ const LeafCount = () => {
       })
       .map((item, index) => ({ ...item, key: index }))
     : [];
-
-
 
 
   const targetColumns = [
@@ -141,14 +140,62 @@ const LeafCount = () => {
           {text}%
         </span>
       )
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      align: 'center',
+      render: (_, record, index) => (
+        <Button
+          type="primary"
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => handleDeleteRow(index)}
+        >
+          Delete
+        </Button>
+      ),
     }
   ];
 
 
 
+const handleDeleteRow = (index) => {
+  const deletedItem = lineLeafCounts.current[index];
 
+  confirm({
+    title: `Are you sure you want to delete data for line ${deletedItem.lineCode}?`,
+    content: "This action cannot be undone.",
+    okText: "Yes, Delete",
+    okType: "danger",
+    cancelText: "Cancel",
+    onOk: async () => {
+      try {
+        dispatch(showLoader());
+        setLoading(true);
 
+        const updated = [...lineLeafCounts.current];
+        updated.splice(index, 1);
 
+        // Optionally call API to delete by lineCode if supported
+         await deleteLeafCount(deletedItem.lineCode, filters.year, filters.month);
+
+        lineLeafCounts.current = updated;
+        toast.success(`✅ Deleted entry for line ${deletedItem.lineCode}`);
+      } catch (error) {
+        console.error("Error deleting leaf count row:", error);
+        toast.error("❌ Failed to delete row");
+      } finally {
+        setLoading(false);
+getLeafCount()
+        dispatch(hideLoader());
+      }
+    },
+    onCancel() {
+      toast.info("Deletion cancelled");
+    },
+  });
+};
 
 
 
@@ -396,7 +443,6 @@ const LeafCount = () => {
                   <Col md={4}>
                     <Button
                       type="primary"
-                      disabled={!lineLeafCounts.current.length}
                       onClick={() => exportToPDF()}
                       style={{ marginLeft: 8 }}
                     >
@@ -455,11 +501,11 @@ const LeafCount = () => {
                 />
               </Card>
             )}
-</div>            <div />
+          </div>            <div />
 
-          </div>
-        </div> </>
-      );
+        </div>
+      </div> </>
+  );
 };
 
-      export default LeafCount;
+export default LeafCount;
