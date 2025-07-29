@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import {
     Modal,
-    Typography,
     Select,
     Button,
     Row,
     Col,
-    InputNumber
 } from "antd";
 import { showLoader, hideLoader } from "../redux/loaderSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,11 +16,10 @@ import {
     PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, LineChart, Line, XAxis, YAxis
 } from 'recharts';
 import { ReloadOutlined } from "@ant-design/icons";
-import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
+import { ArrowLeft, ArrowRight } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import TargetSummaryCards from "./TargetSummaryCards";
 
-const { Title } = Typography;
 const { Option } = Select;
 
 const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
@@ -35,7 +32,6 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
     ];
     const [monthlyTarget, setMonthlyTarget] = useState(0);
 
-    const actualTotal = totals.super + totals.normal;
 
     const COLORS = ['#ffa347', '#47a3ff'];
     const currentDate = new Date();
@@ -78,11 +74,11 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
     }, [filters.month, showMore, chartType, visible]);
 
     const monthMap = useSelector((state) => state.commonData?.monthMap);
-  const monthMapN = {
-  "1": "Jan", "2": "Feb", "3": "Mar", "4": "Apr",
-  "5": "May", "6": "Jun", "7": "Jul", "8": "Aug",
-  "9": "Sep", "10": "Oct", "11": "Nov", "12": "Dec"
-};
+    const monthMapN = {
+        "1": "Jan", "2": "Feb", "3": "Mar", "4": "Apr",
+        "5": "May", "6": "Jun", "7": "Jul", "8": "Aug",
+        "9": "Sep", "10": "Oct", "11": "Nov", "12": "Dec"
+    };
 
     const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
     const filteredMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]

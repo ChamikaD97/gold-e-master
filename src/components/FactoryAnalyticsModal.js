@@ -17,8 +17,8 @@ import CountUp from "react-countup";
 import {
     PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, LineChart, Line, XAxis, YAxis
 } from 'recharts';
-import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
-import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
+import { ReloadOutlined } from "@ant-design/icons";
+import { ArrowLeft, ArrowRight } from "@mui/icons-material";
 import { toast } from "react-toastify";
 
 

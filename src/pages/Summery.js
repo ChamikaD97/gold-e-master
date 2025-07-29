@@ -961,7 +961,7 @@ const Summary = () => {
                     disabled={!routeSummary.length}
                     onClick={() => exportToPDF(routeSummary, 'Full Summery')}
                   >
-                    All
+                    Download
                   </Button>
                 </Col>
                 <Col md={3}>
