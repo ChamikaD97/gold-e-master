@@ -158,7 +158,7 @@ const HeaderComponent = () => {
           {
             role !== 'User' && (
               <Menu.Item key="summery" icon={<SummarizeRounded />}>
-                <Link to="/summery">Reports</Link>
+                <Link to="/summery">Summery</Link>
               </Menu.Item>
 
             )}

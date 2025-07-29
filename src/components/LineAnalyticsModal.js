@@ -78,6 +78,11 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
     }, [filters.month, showMore, chartType, visible]);
 
     const monthMap = useSelector((state) => state.commonData?.monthMap);
+  const monthMapN = {
+  "1": "Jan", "2": "Feb", "3": "Mar", "4": "Apr",
+  "5": "May", "6": "Jun", "7": "Jul", "8": "Aug",
+  "9": "Sep", "10": "Oct", "11": "Nov", "12": "Dec"
+};
 
     const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
     const filteredMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
@@ -303,7 +308,8 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                     overallNormal += totalNormal;
 
                     return {
-                        name: label,
+                        name: monthMapN[label],
+
                         Super: parseFloat(totalSuper.toFixed(2)),
                         Normal: parseFloat(totalNormal.toFixed(2)),
                         Total: parseFloat((totalSuper + totalNormal).toFixed(2)) // 👈 add this

@@ -71,5 +71,5 @@ const commonDataSlice = createSlice({
   }
 });
 
-export const { setNotificationDate, setdateRangeMonths, setRange6DaysMarkers, setNotificationsVisible, setAutomaticalyInactive, setWeek1Target,setLeafRound, clearMarkers, setSelectedSupplier, setSelectedRoute } = commonDataSlice.actions;
+export const { setNotificationDate, setdateRangeMonths, setRange6DaysMarkers, setNotificationsVisible, setAutomaticalyInactive, setWeek1Target, setLeafRound, clearMarkers, setSelectedSupplier, setSelectedRoute } = commonDataSlice.actions;
 export default commonDataSlice.reducer;
