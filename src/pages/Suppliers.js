@@ -155,13 +155,7 @@ const Suppliers = () => {
   };
 
 
-  const lineIdToCodeMap = useMemo(() => {
-    const map = {};
-    lineIdCodeMapForAll.forEach(item => {
-      map[item.lineId] = item.lineCode;
-    });
-    return map;
-  }, []);
+
 
   const uniqueLines = [
     { label: "All", value: "All" },
@@ -170,7 +164,10 @@ const Suppliers = () => {
       .map(l => ({ label: l.lineCode, value: l.lineId }))
   ];
 
-
+  const lineIdToCodeMap = (id) => {
+    const record = lineIdCodeMapForAll.find(item => parseInt(item.lineId) === id);
+    return record?.lineCode || "Unknown";
+  };
 
 
   const [currentPage, setCurrentPage] = useState(1);

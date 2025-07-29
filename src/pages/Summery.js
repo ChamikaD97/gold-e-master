@@ -181,8 +181,11 @@ const Summary = () => {
     if (data.length > 0) {
       doc.setFont(undefined, 'bold');
       doc.setFontSize(10);
-      doc.text(`Mr. ${officer} Summary`, 14, startY);
-      doc.setFont(undefined, 'normal');
+      if (officer == 'Other') {
+        doc.text(`${officer} Summary`, 14, startY);
+      } else {
+        doc.text(`Mr. ${officer} Summary`, 14, startY);
+      } doc.setFont(undefined, 'normal');
       startY = renderTable(data, startY + 9);
     }
 
@@ -256,19 +259,16 @@ const Summary = () => {
           const lastIndex = data.table.body.length - 1;
 
           if (data.section === 'body') {
-            // Highlight line column
             if (columnIndex === 1 && cellValue !== "Total" && rowIndex !== lastIndex) {
               data.cell.styles.fillColor = [255, 255, 153];
             }
 
-            // Highlight Total row
             if (rowIndex === lastIndex && data.row.cells[1].raw === "Total") {
               data.cell.styles.fillColor = [255, 192, 203];
               data.cell.styles.fontStyle = "bold";
               data.cell.styles.textColor = [0, 0, 0];
             }
 
-            // Highlight percentage column
             if (columnIndex === 5 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
               const percent = parseFloat(cellValue.replace('%', ''));
               if (percent >= 100) {
@@ -287,7 +287,6 @@ const Summary = () => {
               data.cell.styles.textColor = [0, 0, 0];
             }
 
-            // Highlight super % column
             if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
               const percent = parseFloat(cellValue.replace('%', ''));
               data.cell.styles.fillColor = percent >= 50 ? [153, 255, 153] : [255, 102, 102];
@@ -323,6 +322,7 @@ const Summary = () => {
     doc.line(14, 50, 196, 50);
 
     let startY = 56;
+
     officerOrder.forEach((officer, i) => {
       const data = pdfData.filter(row => row.officer === officer);
       if (!data.length) return;
@@ -332,7 +332,11 @@ const Summary = () => {
 
       doc.setFont(undefined, 'bold');
       doc.setFontSize(10);
-      doc.text(`Mr. ${officer} Summary`, 14, startY);
+      if (officer == 'Other') {
+        doc.text(`${officer} Summary`, 14, startY);
+      } else {
+        doc.text(`Mr. ${officer} Summary`, 14, startY);
+      }
       doc.setFont(undefined, 'normal');
 
       startY = renderTable(data, startY + 9);

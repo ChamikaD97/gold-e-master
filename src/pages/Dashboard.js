@@ -25,25 +25,6 @@ const Dashboard = () => {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
 
-  const [filters, setFilters] = useState({ searchById: "", year: currentYear, month: currentMonth });
-
-
-  const handleSearchSupplier = (supplierId) => {
-    dispatch(showLoader());
-
-    const id = supplierId?.toString().padStart(5, "0").trim();
-    dispatch(setSelectedSupplier(id));
-    if (id) navigate(`/supplier/info`);
-  };
-
-  
-
-
-  const handleTodaySupply = () => navigate("/leaf/todaySupply/officer");
-
-  const handelTargets = () => navigate("/factory-targets/officer");
-  const handleSummery = () => navigate("/summery");
-
   return (
     <div style={{ padding: 10 }}>
       {/* Logo Header */}

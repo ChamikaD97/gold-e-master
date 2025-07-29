@@ -421,7 +421,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                                                     padding: "14px 24px",
                                                     textAlign: "center",
                                                     fontWeight: 600,
-                                                    color: "#fff",
+                                                    color: "#000",
                                                     boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                                                 }}
                                             >
@@ -583,20 +583,8 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                 >
                     Yearly Summary
                 </Button>
-                <Button
-                    type={chartType === "more" ? "primary" : "default"}
-                    onClick={() => setChartType("monthly")}
-                    style={{ marginRight: 8 }}
-                >
-                    Achievement
-                </Button>
-                <Button
-                    type={chartType === "yearly" ? "primary" : "default"}
-                    onClick={() => setIsLine(false)}
-                >
-                    Show All
-                </Button>
-
+                
+                
             </div>
         </Modal>
     );

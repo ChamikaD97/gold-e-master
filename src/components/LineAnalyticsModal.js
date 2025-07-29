@@ -10,7 +10,7 @@ import {
 } from "antd";
 import { showLoader, hideLoader } from "../redux/loaderSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { API_KEY, fetchMonthlyTargets } from "../api/api";
+import { API_KEY } from "../api/api";
 import dayjs from "dayjs";
 import CircularLoader from "./CircularLoader";
 import CountUp from "react-countup";
@@ -47,21 +47,17 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
     const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
 
-    const loadTargetsForMonth = async (range) => {
+    const loadTargetsForMonth = async (data) => {
         setTargets([]); // or fallback to default
-
+        const formatted = data.month > 10 ?
+            (data.year + '_' + data.month) : (data.year + '_0' + data.month);
         try {
 
-            const data = await fetchMonthlyTargets(range.year, range.month);
-            const match = data.find((d) => d.lineCode === lineCode);
 
-            if (match) {
-                setTargets(match.target);
-                setMonthlyTarget(match.target);
-            } else {
-                toast.warn("⚠️ No target found for selected line.");
-            }
+            const data = await import(`../data/targets/targets_${formatted}.json`);
 
+            setTargets(data.default.filter((d) => lineCode == d.lineCode)[0].target);
+            setMonthlyTarget(data.default.filter((d) => lineCode == d.lineCode)[0].target);
 
         } catch (err) {
             toast.error("❌ Failed to load target files");
@@ -291,7 +287,7 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
 
                 const monthlySummary = Array.from({ length: 12 }, (_, i) => {
                     const monthIndex = i + 1;
-                 const label = monthMap?.[String(monthIndex).padStart(2, "0")]?.slice(0, 3).toUpperCase();
+                    const label = monthIndex.toString(); // Shows 1 to 12 as labels
 
                     const monthData = transformed.filter(x => x.month === monthIndex);
 
@@ -700,15 +696,8 @@ const LineAnalyticsModal = ({ visible, onClose, lineCode, filteredLines }) => {
                 >
                     Yearly Summary
                 </Button>
-                <Button
-                    type={showMore ? "primary" : "default"}
-                    onClick={() => {
-                        setWeeklySummery([])
-                        setChartType("")
-                        setShowMore(true)
-                    }}
-                >                    Targets And Achievements
-                </Button>
+
+
 
             </div>
 
