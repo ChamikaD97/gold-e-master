@@ -451,8 +451,6 @@ const Summary = () => {
     dispatch(showLoader());
     setLoading(true);
     setError(null);
-
-    console.log('/////////7777777777777777/////');
     try {
       // 👉 Wait until target data is fully loaded
       const data = await fetchMonthlyTargets(filters.year, filters.month);
@@ -527,7 +525,6 @@ const Summary = () => {
         totalReceived,
         totalDifference,
       });
-      console.log('/////////////////////*********////////////////');
       // 👉 Group data by officer and line
       const groupedTotals = {};
       transformed.forEach(item => {
@@ -957,6 +954,7 @@ const Summary = () => {
                   <Button
                     type="primary"
                     style={{ marginLeft: 8 }}
+                    disabled={!routeSummary.length}
                     onClick={() => exportToPDF(routeSummary, 'Full Summery')}
                   >
                     All
@@ -966,6 +964,8 @@ const Summary = () => {
                   <Button
                     type="primary"
                     style={{ marginLeft: 8 }}
+                    disabled={!routeSummary.length}
+
                     onClick={() => exportToPDF(week1Summary, '1st Week Summery')}
                   >
                     Week 1
@@ -974,7 +974,8 @@ const Summary = () => {
                 <Col md={3}>
                   <Button
                     type="primary"
-                    style={{ marginLeft: 8 }}
+                    style={{ marginLeft: 8 }} disabled={!routeSummary.length}
+
                     onClick={() => exportToPDF(week2Summary, '2nd Week Summery')}
                   >
                     Week 2
@@ -983,7 +984,8 @@ const Summary = () => {
                 <Col md={3}>
                   <Button
                     type="primary"
-                    style={{ marginLeft: 8 }}
+                    style={{ marginLeft: 8 }} disabled={!routeSummary.length}
+
                     onClick={() => exportToPDF(week3Summary, '3rd Week Summery')}
                   >
                     Week 3
@@ -992,7 +994,8 @@ const Summary = () => {
                 <Col md={2}>
                   <Button
                     type="primary"
-                    style={{ marginLeft: 8 }}
+                    style={{ marginLeft: 8 }} disabled={!routeSummary.length}
+
                     onClick={() => exportToPDF(week4Summary, 'Last Week Summery')}
                   >
                     Week 4

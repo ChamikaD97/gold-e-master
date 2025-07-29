@@ -58,7 +58,7 @@ const Users = () => {
     if (!editingUser) return;
 
     try {
-       await updateUser(editingUser.id, {
+      await updateUser(editingUser.id, {
         username: editingUser.username,
         role: editingUser.role,
         status: editingUser.status,
@@ -249,10 +249,7 @@ const Users = () => {
                         borderRadius: 6
                       }}
                       allowClear
-
-
                     />
-                  
                   </Space>
                 </Col>
               </Row>
@@ -262,23 +259,23 @@ const Users = () => {
 
 
           {userList.length > 0 && (
-            
-            
-              <Table
-                className="sup-bordered-table"
-                dataSource={
-                  userList
-                    .filter(user =>
-                      user.username?.toLowerCase().includes(searchText.toLowerCase())
-                    )
-                    .map((item, index) => ({ ...item, key: index }))
-                }
-                columns={userColumns}
-                pagination={false}
-                size="middle"
-              />
 
-              
+
+            <Table
+              className="sup-bordered-table"
+              dataSource={
+                userList
+                  .filter(user =>
+                    user.username?.toLowerCase().includes(searchText.toLowerCase())
+                  )
+                  .map((item, index) => ({ ...item, key: index }))
+              }
+              columns={userColumns}
+              pagination={false}
+              size="middle"
+            />
+
+
           )}
 
           <Modal

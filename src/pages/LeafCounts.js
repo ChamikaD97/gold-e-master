@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Card, Col, Row, Button, Select, Input, Table, InputNumber } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMap from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
@@ -397,6 +396,7 @@ const LeafCount = () => {
                   <Col md={4}>
                     <Button
                       type="primary"
+                      disabled={!lineLeafCounts.current.length}
                       onClick={() => exportToPDF()}
                       style={{ marginLeft: 8 }}
                     >

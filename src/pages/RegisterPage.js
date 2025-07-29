@@ -33,24 +33,30 @@ const RegisterPage = () => {
         setError("Could not load initial user data.");
       });
   }, []);
-
   const handleRegister = async () => {
-    const { userName, password, role } = form.getFieldsValue();
-
-
     try {
+      const values = await form.validateFields();
+      const { userName, password, role } = values;
+
       const response = await register(userName, password, role);
 
-
       message.success("Registration successful!");
+      console.log(response);
+
       navigate("/login");
     } catch (error) {
-      console.error("Register failed Try Again");
+      if (error?.errorFields) {
+        // Form validation errors
+        return;
+      }
+      console.log(error);
+
       const errMsg =
         error?.response?.data?.message || "Registration failed. Please try again.";
       message.error(errMsg);
     }
   };
+
 
   const selectedRole = Form.useWatch("role", form);
 

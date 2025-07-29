@@ -27,6 +27,10 @@ const LoginPage = () => {
 
     try {
       const data = await login(userName, password);
+      if (data.user.status) {
+        toast.error(data.user.status);
+        return;
+      }
       localStorage.setItem("loggedInUser", JSON.stringify(data.user));
       localStorage.setItem("token", data.access_token);
       navigate("/dashboard");
