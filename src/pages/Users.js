@@ -94,7 +94,7 @@ const Users = () => {
       cancelText: "Cancel",
       onOk: async () => {
         try {
-          const res = await deleteUser(id);
+           await deleteUser(id);
           message.success("User deleted successfully");
           await fetchData(); // Refresh the user list
         } catch (err) {

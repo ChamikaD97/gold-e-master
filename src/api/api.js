@@ -1,16 +1,14 @@
-import { useDispatch } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import axios from "axios";
 
 
-// api.js
 export const BASE_URL = "http://newserver:46597/quiX/ControllerV1";
 
-const API_BASE6 = "http://localhost:8000"; // Update for production
+const API_BASE = "http://localhost:8000"; // Update for production
 
 // src/api.js
 
-const API_BASE = "/api"; // Update for production
+//const API_BASE9 = "/api"; // Update for production
 
 
 // 📥 Create or update a single leaf count (avg if exists)
