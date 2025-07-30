@@ -104,19 +104,21 @@ const Suppliers = () => {
     doc.line(14, 72, 196, 72);
 
     // --- Table Data ---
-    const tableBody = filteredData.map((s) => [
+    const tableBody = filteredData.map((s,index) => [
+index+1,
       s["Supplier Id"],
       s["Supplier Name"],
-      lineIdToCodeMap[s.Route] || s.Route,
+      lineIdToCodeMap(s.Route),  // ✅ call the function here
       s["Pay"] === 1 ? "Cash" : "Bank",
       s["NIC"],
       s["Contact"],
       s["Joined Date"]
     ]);
 
+
     doc.autoTable({
       startY: 78,
-      head: [["ID", "Name", "Route", "Payment", "NIC", "Contact", "Joined"]],
+      head: [["#","ID", "Name", "Route", "Payment", "NIC", "Contact", "Joined"]],
       body: tableBody,
       styles: {
         fillColor: [255, 255, 255],
@@ -256,15 +258,16 @@ const Suppliers = () => {
       dataIndex: "Route",
       key: "route",
       sorter: (a, b) => {
-        const routeA = lineIdToCodeMap[a.Route] || a.Route;
-        const routeB = lineIdToCodeMap[b.Route] || b.Route;
+        const routeA = lineIdToCodeMap(a.Route);
+        const routeB = lineIdToCodeMap(b.Route);
         return routeA.localeCompare(routeB);
       },
-      render: (value) => lineIdToCodeMap[value] || value,
+      render: (value) => lineIdToCodeMap(value),
       filters: [...new Set(suppliers.map(s => s.Route))]
-        .map(r => ({ text: lineIdToCodeMap[r] || r, value: r })),
+        .map(r => ({ text: lineIdToCodeMap(r), value: r })),
       onFilter: (value, record) => record.Route === value
-    },
+    }
+    ,
     {
       title: "Payemnt",
       dataIndex: "Pay",

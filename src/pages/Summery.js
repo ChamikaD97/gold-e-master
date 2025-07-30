@@ -18,7 +18,9 @@ const Summary = () => {
   const dispatch = useDispatch();
   const [routeSummary, setRouteSummary] = useState([]);
 
+  const [finalTotal, setFinalTotal] = useState([]);
   const [summery, setSummery] = useState([])
+  const [lastRow, setLastRow] = useState([]);
 
   const [week1Summary, setWeek1Summary] = useState([]);
   const [week2Summary, setWeek2Summary] = useState([]);
@@ -45,7 +47,10 @@ const Summary = () => {
     .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
   const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
 
-  const officerOrder = ["Ajith", "Chamod", "Udara", "Gamini", "Udayanga", "Other"];
+  const officerOrder = ["Ajith", "Udayanga", "Udara", "Gamini", "Chamod", "Other"];
+  const lastRows = ["Mr. Ajith", "Mr. Udayanga", "Mr. Udara", "Mr. Gamini", "Mr. Chamod", "Malinduwa/New"];
+
+
   const customLineCodeOrder = [
     "MT", "PH", "PW", "PP", "GO", "MP", "BM", "TP", "UP",
     "BA", "BK", "K", "PT", "PK", "A", "KM", "N", "DM",
@@ -207,6 +212,7 @@ const Summary = () => {
     yesterday.setDate(yesterday.getDate() - 1);
 
     const renderTable = (data, startY) => {
+
       const tableData = data.map((row, index) => {
         let lineCode = "";
         if (row.isTotal) {
@@ -227,7 +233,9 @@ const Summary = () => {
           row.target > 0 ? ((row.total / row.target) * 100).toFixed(0) + "%" : "-",
           row.super.toLocaleString(),
           row.super > 0 ? ((row.super / row.total) * 100).toFixed(0) + "%" : "-",
-          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
+          row.difference > 0 && daysRemaining > 0
+            ? Math.round(row.difference / daysRemaining).toLocaleString()
+            : "-"
         ];
       });
 
@@ -300,6 +308,99 @@ const Summary = () => {
       return doc.lastAutoTable.finalY + 10;
     };
 
+
+const renderTableLast = (data, startY) => {
+  const tableData = data.map((row, index) => {
+    return [
+      index + 1,
+      
+      row.officer,
+      row.target.toLocaleString(),
+      row.total.toLocaleString(),
+      row.difference.toLocaleString(),
+      row.target > 0 ? ((row.total / row.target) * 100).toFixed(0) + "%" : "-",
+      row.super.toLocaleString(),
+      row.total > 0 ? ((row.super / row.total) * 100).toFixed(0) + "%" : "-",
+      row.difference > 0 && daysRemaining > 0
+        ? Math.round(row.difference / daysRemaining).toLocaleString()
+        : "-"
+    ];
+  });
+
+  autoTable(doc, {
+    startY: startY,
+    head: [["#", "Officer", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
+    body: tableData,
+    styles: {
+      fontSize: 10,
+      cellPadding: 1.5,
+      lineColor: [0, 0, 0],
+      lineWidth: 0.2,
+    },
+    headStyles: {
+      fillColor: [22, 160, 133],
+      textColor: 255,
+      halign: "center",
+      valign: "middle",
+    },
+    bodyStyles: {
+      halign: "center",
+      valign: "middle",
+    },
+    margin: { left: 14, right: 14 },
+    didParseCell: function (data) {
+      const columnIndex = data.column.index;
+      const cellValue = data.cell.raw;
+      const rowIndex = data.row.index;
+      const lastIndex = data.table.body.length - 1;
+
+      if (data.section === 'body') {
+        // Highlight officer name column
+        if (columnIndex === 1 && cellValue !== "" && rowIndex !== lastIndex) {
+          data.cell.styles.fillColor = [255, 255, 153];
+        }
+
+        // Highlight final total row
+        if (rowIndex === lastIndex) {
+          data.cell.styles.fillColor = [255, 192, 203];
+          data.cell.styles.fontStyle = "bold";
+          data.cell.styles.textColor = [0, 0, 0];
+        }
+
+        // Achievement %
+        if (columnIndex === 5 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
+          const percent = parseFloat(cellValue.replace('%', ''));
+          if (percent >= 100) {
+            data.cell.raw = `${cellValue} ✅ Done`;
+            data.cell.styles.fillColor = [0, 255, 127];
+          } else if (percent >= 70) {
+            data.cell.styles.fillColor = [153, 255, 153];
+          } else if (percent >= 50) {
+            data.cell.styles.fillColor = [255, 204, 102];
+          } else if (percent >= 20) {
+            data.cell.styles.fillColor = [255, 255, 153];
+          } else {
+            data.cell.styles.fillColor = [255, 102, 102];
+          }
+          data.cell.styles.fontStyle = "bold";
+          data.cell.styles.textColor = [0, 0, 0];
+        }
+
+        // Super % color
+        if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
+          const percent = parseFloat(cellValue.replace('%', ''));
+          data.cell.styles.fillColor = percent >= 50 ? [153, 255, 153] : [255, 102, 102];
+          data.cell.styles.fontStyle = "bold";
+          data.cell.styles.textColor = [0, 0, 0];
+        }
+      }
+    }
+  });
+
+  return doc.lastAutoTable.finalY + 10;
+};
+
+
     // === Header ===
     doc.setFontSize(14);
     doc.setTextColor(0);
@@ -317,30 +418,66 @@ const Summary = () => {
     // === Title ===
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
-    const summaryTitle = title === 'Full Summery' ? `Leaf Summary on Date: ${yesterday.toLocaleDateString()}` : title;
+    const summaryTitle = title === 'Full Summery'
+      ? `Leaf Summary on Date: ${yesterday.toLocaleDateString()}`
+      : title;
     doc.text(summaryTitle, 14, 46);
     doc.line(14, 50, 196, 50);
 
     let startY = 56;
 
+    // === Prepare final summary data ===
+    const finalD = finalTotal
+      .filter(row => row.isTotal)
+      .map(row => ({
+        ...row,
+        target: Number(row.target),
+        total: Number(row.total),
+        super: Number(row.super),
+        difference: Number(row.difference)
+      }));
+
+    const allButLast = finalD.slice(0, -1);
+    const totalRow = {
+      key: "",
+      officer: "Total",
+      line: "Total",
+      lineCode: "",
+      super: allButLast.reduce((sum, row) => sum + row.super, 0),
+      total: allButLast.reduce((sum, row) => sum + row.total, 0),
+      target: allButLast.reduce((sum, row) => sum + row.target, 0),
+      difference: allButLast.reduce((sum, row) => sum + row.difference, 0),
+      officerRowSpan: 0,
+      isTotal: true
+    };
+
+    const updatedFinalD = [...allButLast, totalRow];
+
+    // === Render Officer Summaries ===
     officerOrder.forEach((officer, i) => {
       const data = pdfData.filter(row => row.officer === officer);
       if (!data.length) return;
 
-      if (i === 3 || i === 5) doc.addPage();
-      if (i === 3 || i === 5) startY = 20;
+      if (i === 2 || i === 5) doc.addPage();
+      if (i === 2 || i === 5) startY = 20;
 
       doc.setFont(undefined, 'bold');
       doc.setFontSize(10);
-      if (officer == 'Other') {
-        doc.text(`${officer} Summary`, 14, startY);
-      } else {
-        doc.text(`Mr. ${officer} Summary`, 14, startY);
-      }
+      doc.text(officer === 'Other' ? `${officer} Summary` : `Mr. ${officer} Summary`, 14, startY);
       doc.setFont(undefined, 'normal');
 
       startY = renderTable(data, startY + 9);
     });
+
+    // === Render Full Summary Page ===
+    startY = 70;
+
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(10);
+    doc.text("Full Summary (Combined)", 14, startY);
+    doc.setFont(undefined, 'normal');
+
+    startY = renderTableLast(updatedFinalD, startY + 9);
 
     // === Footer ===
     const pageCount = doc.internal.getNumberOfPages();
@@ -357,58 +494,6 @@ const Summary = () => {
 
 
 
-  const columns = [
-    {
-      title: "Line",
-      dataIndex: "lineCode",
-      key: "lineCode",
-      render: (text, row) =>
-        row.isTotal
-          ? <strong style={{ color: row.officer === "Grand Total" ? "#FFD700" : "orange" }}>{row.officer}</strong>
-          : <span>{text}</span>,
-    },
-    {
-      title: "Super",
-      dataIndex: "super",
-      key: "super",
-      align: "right",
-      render: (value, row) => row.isTotal
-        ? <strong>{value.toLocaleString()}</strong>
-        : value.toLocaleString(),
-    },
-    {
-      title: "Target",
-      dataIndex: "target",
-      key: "target",
-      align: "right",
-      render: (value, row) => row.isTotal
-        ? <strong>{value.toLocaleString()}</strong>
-        : value.toLocaleString(),
-    },
-    {
-      title: "Received",
-      dataIndex: "total",
-      key: "total",
-      align: "right",
-      render: (value, row) => row.isTotal
-        ? <strong>{value.toLocaleString()}</strong>
-        : value.toLocaleString(),
-    },
-    {
-      title: "Difference",
-      dataIndex: "difference",
-      key: "difference",
-      align: "right",
-      render: (value, row) => {
-        const color = value >= 0 ? "lime" : "red";
-        return (
-          <span style={{ color }}>
-            {row.isTotal ? <strong>{value.toLocaleString()}</strong> : value.toLocaleString()}
-          </span>
-        );
-      }
-    }
-  ];
 
   const getOfficerByLineCode = (lineCode) => {
     const entry = lineIdCodeMap.find(item => item.lineCode === lineCode);
@@ -635,11 +720,20 @@ const Summary = () => {
 
       // 👉 Weekly breakdown
       if (typeof getLeafRecordsByWeeks === "function") {
-        getLeafRecordsByWeeks(targetsN.current);
+        await getLeafRecordsByWeeks(targetsN.current); // awaited properly as part of async flow
       }
+      const finalD = finalTableData
+        .filter(row => row.isTotal)
+        .map(row => ({
+          ...row,
+          target: Number(row.target)
+        }));
 
+
+      console.log(finalD);
+
+      setFinalTotal(finalD);
       setRouteSummary(finalTableData);
-      console.log('////////////////////////////////////');
 
     } catch (err) {
       console.error("Error in getLeafRecordsByDates:", err);
@@ -1018,13 +1112,13 @@ const Summary = () => {
             officerOrder.map((officer, key) => {
               const officerData = routeSummary.filter((row) => row.officer === officer);
               if (!officerData.length) return null;
-
               const lastRow = officerData[officerData.length - 1]; // Get last row
-
               const { super: superKg, total, target } = lastRow;
               const achievementPercent = target > 0 ? ((total / target) * 100).toFixed(0) : "0.0";
               const superLeafPercent = target > 0 ? ((superKg / total) * 100).toFixed(0) : "0.0";
               const normal = total - superKg
+
+
               return (
                 <Col key={officer} xs={24} sm={12} md={24}>
                   <div
@@ -1140,14 +1234,8 @@ const Summary = () => {
                     </Row>
 
 
-                    {/* <div style={{ fontSize: 14, lineHeight: 1.6 }}>
-                      <div><strong>Super:</strong> {Math.round(superKg)} kg</div>
-                      <div><strong>Normal:</strong> {Math.round(normal)} kg</div>
-                      <div><strong>Total:</strong> {Math.round(total)} kg</div>
-                      <div><strong>Super:</strong> {superLeafPercent}%</div>
-                      <div><strong>Target:</strong> {Math.round(target)} kg</div>
-                      <div><strong>Achieved:</strong> {achievementPercent}%</div>
-                    </div> */}
+
+
                   </div>
                 </Col>
               );

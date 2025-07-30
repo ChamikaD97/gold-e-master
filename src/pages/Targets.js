@@ -5,13 +5,9 @@ import lineIdCodeMap from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { API_KEY, deleteTarget, fetchMonthlyTargets, getMonthDateRangeFromParts, updateTarget } from "../api/api";
-import dayjs from "dayjs";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { API_KEY, deleteTarget, fetchMonthlyTargets, updateTarget } from "../api/api";
 import { SearchRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
-import CountUp from "react-countup";
 const { Option } = Select;
 const Targets = () => {
 
@@ -65,7 +61,11 @@ const Targets = () => {
     setEditingRecord({ ...record, index });
     setNewTargetValue(record.target);
     setIsModalOpen(true);
-  }; const handleDeleteRow = async (record) => {
+  }; 
+  
+  const handleDeleteRow = async (record) => {
+    console.log(record);
+    
     Modal.confirm({
       title: `Are you sure you want to delete target for ${record.lineCode}?`,
       okText: "Yes",
@@ -517,113 +517,101 @@ const Targets = () => {
       <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
 
-  <Row gutter={[8, 8]} justify="center">
-        <Col md={12}>
-           <Card bordered={false} style={cardStyle}>
-            <Row justify="space-evenly" gutter={[16, 16]}>
-              <Col span={24}>
-                <Row gutter={[16, 16]}>
-                  <Col md={2}>
-                    <Button
-                      icon={<ReloadOutlined />}
-                      type="primary"
-                      block
-                      danger
-                      onClick={() => {
-                        targetsN.current = [];
-                        setTotalTarget(0);
-                        setNewTargets([{ lineCode: "", target: 0 }])
-                        setMalinduwa(0); setFilters({
-                          year: "Select Year",
-                          month: "Select Month",
-                          officer: "All",
-                          line: "Select Line",
-                          lineCode: '',
-                          officer: '',
-                          search: '', // 🔥 add this
-                        });
-                      }}
-
-                    >
-
-                    </Button>
-                  </Col>
-                  <Col md={6}>
-                    <Select showSearch
-                      style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
-
-                      value={filters.year}
-                      bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
-
-                      {[...Array(5)].map((_, i) => {
-                        const year = new Date().getFullYear() - i;
-                        return (
-                          <Option key={year} value={year}>
-                            {year}
-                          </Option>
-                        );
-                      })}
+          <Row gutter={[8, 8]} justify="center">
+            <Col md={12}>
+              <Card bordered={false} style={cardStyle}>
+                <Row justify="space-evenly" gutter={[16, 16]}>
+                  <Col span={24}>
+                    <Row gutter={[16, 16]}>
+                      <Col md={2}>
+                        <Button
+                          icon={<ReloadOutlined />}
+                          type="primary"
+                          block
+                          danger
+                          onClick={() => {
+                            targetsN.current = [];
+                            setTotalTarget(0);
+                            setNewTargets([{ lineCode: "", target: 0 }])
+                            setMalinduwa(0);
 
 
+                            setFilters({
+                              year: "Select Year",
+                              month: "Select Month",
+                              officer: "All",
+                              line: "Select Line",
+                              lineCode: '',
+                              officer: '',
+                              search: '', // 🔥 add this
+                            });
+                          }}
 
-                    </Select>
-                  </Col>
-                  <Col md={6}>
-                    <Select
-                      showSearch
-                      value={filters.month}
-                      onChange={val => setFilters(prev => ({ ...prev, month: val }))}
-                      style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
-                      bordered={false}
-                    >
-                      {allMonths.map(m => (
-                        <Option key={m} value={m}>{monthMap[m]}</Option>
-                      ))}
-                    </Select>
-                  </Col>
-                  <Col md={2}>
+                        >
 
-                    <Button
-                      icon={<SearchRounded />}
-                      type="primary"
-                      onClick={() => getTargets()}
-                    />
-                  </Col>
+                        </Button>
+                      </Col>
+                      <Col md={6}>
+                        <Select showSearch
+                          style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
-                  <Col md={4}>
-                    <Input
-                      className="custom-supplier-input"
-                      value={filters.search}
-                      onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                      style={{
-                        width: "100%",
-                        backgroundColor: "rgb(0, 0, 0)",
-                        color: "#fff",
-                        border: "1px solid #333",
-                        borderRadius: 6
-                      }}
-                      allowClear
-                    />
-                  </Col>
-                  <Col md={4}>
-                    <Button
-                      type="primary"
-                      onClick={() => setAddModalOpen(true)}
-                  
-                    >
-                      Add New
-                    </Button>
+                          value={filters.year}
+                          bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
 
+                          {[...Array(5)].map((_, i) => {
+                            const year = new Date().getFullYear() - i;
+                            return (
+                              <Option key={year} value={year}>
+                                {year}
+                              </Option>
+                            );
+                          })}
+
+
+
+                        </Select>
+                      </Col>
+                      <Col md={6}>
+                        <Select
+                          showSearch
+                          value={filters.month}
+                          onChange={val => setFilters(prev => ({ ...prev, month: val }))}
+                          style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                          bordered={false}
+                        >
+                          {allMonths.map(m => (
+                            <Option key={m} value={m}>{monthMap[m]}</Option>
+                          ))}
+                        </Select>
+                      </Col>
+                      <Col md={2}>
+
+                        <Button
+                          icon={<SearchRounded />}
+                          type="primary"
+                          onClick={() => getTargets()}
+                        />
+                      </Col>
+
+                      <Col md={4}>
+                        <Button
+                          type="primary"
+                          onClick={() => setAddModalOpen(true)}
+
+                        >
+                          Add New
+                        </Button>
+
+                      </Col>
+                    </Row>
                   </Col>
                 </Row>
-              </Col>
-            </Row>
 
-          </Card>
-        
-        </Col>
-       </Row>
-       
+              </Card>
+
+            </Col>
+          </Row>
+
           {totalTarget > 0 && (
             <Card bordered={false} style={cardStyle}>
               <Row justify="space-evenly" gutter={[16, 16]}>

@@ -4,7 +4,7 @@ import {
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import '../App.css';
-import lineIdCodeMap from "../data/lineIdCodeMap.json";
+import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
 import CircularLoader from "../components/CircularLoader";
 import SupplierLeafModal from "../components/SupplierLeafModal";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,7 +31,7 @@ const LeafSupply = () => {
   const [error, setError] = useState(null);
   const [lineTotal, setLineTotal] = useState({ super: 0, normal: 0, overall: 0 });
   const getOfficerByLineId = (lineId) => {
-    const match = lineIdCodeMap.find((line) => line.lineId === lineId);
+    const match = lineIdCodeMapForAll.find((line) => line.lineId === lineId);
     return match ? match.officer : null;
   };
   const [xSupplierDetails, setXSupplierDetails] = useState([]); // array of detailed supplier objects
@@ -646,7 +646,7 @@ const LeafSupply = () => {
   );
 
 
-  const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMap.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
+  const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMapForAll.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
   const filteredLines = filters.officer === "All" ? [] : ["All", ...(officerLineMap[filters.officer] || [])];
 
   const currentDate = new Date();
@@ -1010,7 +1010,16 @@ const LeafSupply = () => {
                 </Card>
               )}
 
-              <Card bordered={false} style={cardStyle}>
+              <Card
+                size="small"
+                bordered={false}
+                style={{
+                  marginTop: 12,
+                  background: "rgba(0, 0, 0, 0.6)",
+                  borderRadius: 16
+                }}
+                bodyStyle={{ padding: 0 }}
+              >
                 {(
                   <Table
                     className="normal-bordered-table"

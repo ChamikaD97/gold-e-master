@@ -9,7 +9,7 @@ import {
   LogoutOutlined,
   FileOutlined,
   UserOutlined,
- 
+
 } from "@ant-design/icons";
 import SettingsModal from "../components/SettingsModal";
 
@@ -148,7 +148,7 @@ const HeaderComponent = () => {
               <Link to="/leaf/lastSupply">Last Supply</Link>
             </Menu.Item>
             <Menu.Item key="daily-leaf-supply">
-              <Link to="/leaf/dailyLeafSupply">Daily Leaf Supply</Link>
+              <Link to="/leaf/dailyLeafSupply">Leaf Supply By Range</Link>
             </Menu.Item>
           </SubMenu>
 
