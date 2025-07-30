@@ -87,6 +87,7 @@ const SupplierLeafModal = ({ open, onClose, filters, supplierId }) => {
             filteredData.current = { year, month: month - 1 };
         }
         setCalendarDate(dayjs(`${filteredData.current.year}-${filteredData.current.month}-01`));
+        setIsChanged(!changed)
 
     };
 
