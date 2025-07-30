@@ -61,40 +61,42 @@ const Targets = () => {
     setEditingRecord({ ...record, index });
     setNewTargetValue(record.target);
     setIsModalOpen(true);
-  }; 
-  
+  };
+
   const handleDeleteRow = async (record) => {
-    console.log(record);
-    
+
     Modal.confirm({
       title: `Are you sure you want to delete target for ${record.lineCode}?`,
       okText: "Yes",
       okType: "danger",
       cancelText: "No",
       onOk: async () => {
-        try {
-          dispatch(showLoader());
+        dispatch(showLoader());
 
-          // ✅ Delete from backend
+        try {
+          // 🔥 Delete from backend
           await deleteTarget(record.lineCode, record.year, record.month);
 
-          // ✅ Remove from local memory
-          const updated = targetsN.current.filter(t =>
+          // 🧹 Remove from local state
+          targetsN.current = targetsN.current.filter(t =>
             t.lineCode !== record.lineCode ||
             t.year !== record.year ||
             t.month !== record.month
           );
 
-          targetsN.current = updated;
-          toast.success(`Deleted target for ${record.lineCode}`);
+          toast.success(`✅ Deleted target for ${record.lineCode}`);
         } catch (error) {
-          console.error("Delete failed", error);
-          toast.error("❌ Failed to delete target");
+          console.error("❌ Delete failed:", error);
+          toast.error("❌ Failed to delete target. Please try again.");
         } finally {
+          getTargets(); // Refresh targets
           dispatch(hideLoader());
         }
       },
     });
+
+     console.log("🗑️ Deleting record:", record);
+
   };
 
 

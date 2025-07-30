@@ -309,96 +309,96 @@ const Summary = () => {
     };
 
 
-const renderTableLast = (data, startY) => {
-  const tableData = data.map((row, index) => {
-    return [
-      index + 1,
-      
-      row.officer,
-      row.target.toLocaleString(),
-      row.total.toLocaleString(),
-      row.difference.toLocaleString(),
-      row.target > 0 ? ((row.total / row.target) * 100).toFixed(0) + "%" : "-",
-      row.super.toLocaleString(),
-      row.total > 0 ? ((row.super / row.total) * 100).toFixed(0) + "%" : "-",
-      row.difference > 0 && daysRemaining > 0
-        ? Math.round(row.difference / daysRemaining).toLocaleString()
-        : "-"
-    ];
-  });
+    const renderTableLast = (data, startY) => {
+      const tableData = data.map((row, index) => {
+        return [
+          index + 1,
 
-  autoTable(doc, {
-    startY: startY,
-    head: [["#", "Officer", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
-    body: tableData,
-    styles: {
-      fontSize: 10,
-      cellPadding: 1.5,
-      lineColor: [0, 0, 0],
-      lineWidth: 0.2,
-    },
-    headStyles: {
-      fillColor: [22, 160, 133],
-      textColor: 255,
-      halign: "center",
-      valign: "middle",
-    },
-    bodyStyles: {
-      halign: "center",
-      valign: "middle",
-    },
-    margin: { left: 14, right: 14 },
-    didParseCell: function (data) {
-      const columnIndex = data.column.index;
-      const cellValue = data.cell.raw;
-      const rowIndex = data.row.index;
-      const lastIndex = data.table.body.length - 1;
+          row.officer,
+          row.target.toLocaleString(),
+          row.total.toLocaleString(),
+          row.difference.toLocaleString(),
+          row.target > 0 ? ((row.total / row.target) * 100).toFixed(0) + "%" : "-",
+          row.super.toLocaleString(),
+          row.total > 0 ? ((row.super / row.total) * 100).toFixed(0) + "%" : "-",
+          row.difference > 0 && daysRemaining > 0
+            ? Math.round(row.difference / daysRemaining).toLocaleString()
+            : "-"
+        ];
+      });
 
-      if (data.section === 'body') {
-        // Highlight officer name column
-        if (columnIndex === 1 && cellValue !== "" && rowIndex !== lastIndex) {
-          data.cell.styles.fillColor = [255, 255, 153];
-        }
+      autoTable(doc, {
+        startY: startY,
+        head: [["#", "Officer", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
+        body: tableData,
+        styles: {
+          fontSize: 10,
+          cellPadding: 1.5,
+          lineColor: [0, 0, 0],
+          lineWidth: 0.2,
+        },
+        headStyles: {
+          fillColor: [22, 160, 133],
+          textColor: 255,
+          halign: "center",
+          valign: "middle",
+        },
+        bodyStyles: {
+          halign: "center",
+          valign: "middle",
+        },
+        margin: { left: 14, right: 14 },
+        didParseCell: function (data) {
+          const columnIndex = data.column.index;
+          const cellValue = data.cell.raw;
+          const rowIndex = data.row.index;
+          const lastIndex = data.table.body.length - 1;
 
-        // Highlight final total row
-        if (rowIndex === lastIndex) {
-          data.cell.styles.fillColor = [255, 192, 203];
-          data.cell.styles.fontStyle = "bold";
-          data.cell.styles.textColor = [0, 0, 0];
-        }
+          if (data.section === 'body') {
+            // Highlight officer name column
+            if (columnIndex === 1 && cellValue !== "" && rowIndex !== lastIndex) {
+              data.cell.styles.fillColor = [255, 255, 153];
+            }
 
-        // Achievement %
-        if (columnIndex === 5 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
-          const percent = parseFloat(cellValue.replace('%', ''));
-          if (percent >= 100) {
-            data.cell.raw = `${cellValue} ✅ Done`;
-            data.cell.styles.fillColor = [0, 255, 127];
-          } else if (percent >= 70) {
-            data.cell.styles.fillColor = [153, 255, 153];
-          } else if (percent >= 50) {
-            data.cell.styles.fillColor = [255, 204, 102];
-          } else if (percent >= 20) {
-            data.cell.styles.fillColor = [255, 255, 153];
-          } else {
-            data.cell.styles.fillColor = [255, 102, 102];
+            // Highlight final total row
+            if (rowIndex === lastIndex) {
+              data.cell.styles.fillColor = [255, 192, 203];
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.textColor = [0, 0, 0];
+            }
+
+            // Achievement %
+            if (columnIndex === 5 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
+              const percent = parseFloat(cellValue.replace('%', ''));
+              if (percent >= 100) {
+                data.cell.raw = `${cellValue} ✅ Done`;
+                data.cell.styles.fillColor = [0, 255, 127];
+              } else if (percent >= 70) {
+                data.cell.styles.fillColor = [153, 255, 153];
+              } else if (percent >= 50) {
+                data.cell.styles.fillColor = [255, 204, 102];
+              } else if (percent >= 20) {
+                data.cell.styles.fillColor = [255, 255, 153];
+              } else {
+                data.cell.styles.fillColor = [255, 102, 102];
+              }
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.textColor = [0, 0, 0];
+            }
+
+            // Super % color
+            if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
+              const percent = parseFloat(cellValue.replace('%', ''));
+              data.cell.styles.fillColor = percent >= 50 ? [153, 255, 153] : [255, 102, 102];
+              data.cell.styles.fontStyle = "bold";
+              data.cell.styles.textColor = [0, 0, 0];
+            }
           }
-          data.cell.styles.fontStyle = "bold";
-          data.cell.styles.textColor = [0, 0, 0];
         }
+      });
 
-        // Super % color
-        if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
-          const percent = parseFloat(cellValue.replace('%', ''));
-          data.cell.styles.fillColor = percent >= 50 ? [153, 255, 153] : [255, 102, 102];
-          data.cell.styles.fontStyle = "bold";
-          data.cell.styles.textColor = [0, 0, 0];
-        }
-      }
-    }
-  });
-
-  return doc.lastAutoTable.finalY + 10;
-};
+      return doc.lastAutoTable.finalY + 10;
+    };
 
 
     // === Header ===
@@ -1105,19 +1105,17 @@ const renderTableLast = (data, startY) => {
           </Row>
         </Card>
 
-
-
         <Row gutter={[16, 16]} justify="center">
           {!loading &&
             officerOrder.map((officer, key) => {
               const officerData = routeSummary.filter((row) => row.officer === officer);
               if (!officerData.length) return null;
-              const lastRow = officerData[officerData.length - 1]; // Get last row
-              const { super: superKg, total, target } = lastRow;
-              const achievementPercent = target > 0 ? ((total / target) * 100).toFixed(0) : "0.0";
-              const superLeafPercent = target > 0 ? ((superKg / total) * 100).toFixed(0) : "0.0";
-              const normal = total - superKg
 
+              const lastOfficerRow = officerData[officerData.length - 1]; // 🔁 Renamed
+              const { super: superKg, total, target } = lastOfficerRow;
+              const achievementPercent = target > 0 ? ((total / target) * 100).toFixed(0) : "0.0";
+              const superLeafPercent = total > 0 ? ((superKg / total) * 100).toFixed(0) : "0.0";
+              const normal = total - superKg;
 
               return (
                 <Col key={officer} xs={24} sm={12} md={24}>
@@ -1135,7 +1133,6 @@ const renderTableLast = (data, startY) => {
                       {officer} Summary
                     </h3>
                     <Row gutter={[16, 16]} justify="center">
-
                       <Col xs={24} sm={12} md={8}>
                         <div
                           style={{
@@ -1150,10 +1147,7 @@ const renderTableLast = (data, startY) => {
                         >
                           Super Total<br />
                           <CountUp style={{ fontSize: 30 }} end={Math.round(superKg)} duration={0.5} separator="," /> kg<br />
-
                         </div>
-
-
                       </Col>
                       <Col xs={24} sm={12} md={8}>
                         <div
@@ -1171,8 +1165,6 @@ const renderTableLast = (data, startY) => {
                           <CountUp style={{ fontSize: 30 }} end={Math.round(normal)} duration={0.5} separator="," /> kg
                         </div>
                       </Col>
-
-                      {/* Overall Total */}
                       <Col xs={24} sm={24} md={8}>
                         <div
                           style={{
@@ -1186,16 +1178,16 @@ const renderTableLast = (data, startY) => {
                             boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)",
                           }}
                         >
-                          Overall Total<br />                        <CountUp style={{ fontSize: 30 }} end={Math.round(total)} duration={0.5} separator="," /> kg<br />
-
+                          Overall Total<br />
+                          <CountUp style={{ fontSize: 30 }} end={Math.round(total)} duration={0.5} separator="," /> kg<br />
                         </div>
                       </Col>
-
                     </Row>
-                    <br></br>
+
+                    <br />
+
                     <Row gutter={[16, 16]} justify="center">
                       <Col xs={24} sm={24} md={22}>
-
                         <Progress
                           percent={parseFloat(achievementPercent)}
                           status="active"
@@ -1216,12 +1208,11 @@ const renderTableLast = (data, startY) => {
                           )}
                         />
                       </Col>
-
                     </Row>
+
                     <br />
+
                     <Row gutter={[16, 16]} justify="end">
-
-
                       <Button
                         type="primary"
                         style={{ marginLeft: 8 }}
@@ -1229,13 +1220,7 @@ const renderTableLast = (data, startY) => {
                       >
                         Download
                       </Button>
-
-
                     </Row>
-
-
-
-
                   </div>
                 </Col>
               );
