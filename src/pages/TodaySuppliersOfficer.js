@@ -41,16 +41,18 @@ const TodaySuppliersOfficer = () => {
 
   const ajithLines = ['60', '65', '146', '74', '33', '8', '98', '145', '81,97'];
   const udaraLines = ['23', '72', '96', '149', '21', '9', '162'];
-  const udayangaLines = ['6', '7', '25', '61', '150', '36', '102,161,129', '48'];
+  const udayangaLines = ['6', '7', '25', '61', '150', '36', '102,161,129', '48', '155'];
   const gaminiLines = ['70', '31,157', '34', '12'];
-  const chamodLines = ['91', '67,68,69', '138', '124'];
+  const chamodLines = ['91', '67,68,69', '138','124'];
+  const newOfficerLines = ['163', '164', '165', '166'];
 
   const officerList = [
     { name: "Ajith", line: ajithLines },
     { name: "Udara", line: udaraLines },
     { name: "Udayanga", line: udayangaLines },
     { name: "Gamini", line: gaminiLines },
-    { name: "Chamod", line: chamodLines }
+    { name: "Chamod", line: chamodLines },
+    { name: "New Officer", line: newOfficerLines },
   ];
   useEffect(() => {
     if (!selectedOfficer) {

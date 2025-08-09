@@ -48,7 +48,6 @@ const Summary = () => {
   const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
 
   const officerOrder = ["Ajith", "Udayanga", "Udara", "Gamini", "Chamod", "Other"];
-  const lastRows = ["Mr. Ajith", "Mr. Udayanga", "Mr. Udara", "Mr. Gamini", "Mr. Chamod", "Malinduwa/New"];
 
 
   const customLineCodeOrder = [

@@ -39,14 +39,15 @@ const MissRejo = () => {
   const udayangaLines = ['6', '7', '25', '61', '150', '36', '102,161,129', '48,64,62', '155'];
   const gaminiLines = ['70', '31,157', '34', '12,109,127'];
   const chamodLines = ['91', '67,68,69', '138,124'];
+  const newOfficerLines = ['163', '164', '165', '166'];
 
   const officerList = [
     { name: "Ajith", line: ajithLines },
     { name: "Udara", line: udaraLines },
     { name: "Udayanga", line: udayangaLines },
     { name: "Gamini", line: gaminiLines },
-    { name: "Chamod", line: chamodLines }
-
+    { name: "Chamod", line: chamodLines },
+    { name: "New Officer", line: newOfficerLines },
   ];
   const today = new Date();
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);

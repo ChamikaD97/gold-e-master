@@ -166,7 +166,11 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
     }, [visible, chartType, filters.month]);
 
 
-
+    const monthMapN = {
+        "1": "Jan", "2": "Feb", "3": "Mar", "4": "Apr",
+        "5": "May", "6": "Jun", "7": "Jul", "8": "Aug",
+        "9": "Sep", "10": "Oct", "11": "Nov", "12": "Dec"
+    };
 
     const handlePrevMonth = () => {
         setFilters(prev => {
@@ -237,7 +241,7 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                     overallNormal += totalNormal;
 
                     return {
-                        name: label,
+                        name: monthMapN[label],
                         Super: parseFloat(totalSuper.toFixed(2)),
                         Normal: parseFloat(totalNormal.toFixed(2)),
                         Total: parseFloat((totalSuper + totalNormal).toFixed(2)) // 👈 add this
@@ -583,8 +587,8 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                 >
                     Yearly Summary
                 </Button>
-                
-                
+
+
             </div>
         </Modal>
     );
