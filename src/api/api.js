@@ -48,7 +48,14 @@ export const getLeafCountByLineMonthYear = (lineCode, year, month) => {
 
 // 🗑️ Delete a record by lineCode, year, month
 export const deleteLeafCount = (lineCode, year, month) => {
-  return axios.delete(`${API_BASE}/leaf-count/${lineCode}/${year}/${month}`);
+  console.log(`Deleting leaf count for ${lineCode} ${year}-${month}`);
+  try {
+    return axios.delete(`${API_BASE}/leaf-count/${lineCode}/${year}/${month}`);
+
+  } catch (error) {
+    // rethrow for caller to handle
+    throw error;
+  }
 };
 
 

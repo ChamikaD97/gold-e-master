@@ -103,7 +103,7 @@ const App = () => {
 
           {/* ✅ Protected Routes */}
           <Route element={<LayoutWithHeader />}>
-<Route index element={<Navigate to="/login" replace />} />
+            <Route index element={<Navigate to="/login" replace />} />
             <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
             <Route path="/leaf/supply" element={<PrivateRoute element={<LeafSupply />} />} />
             <Route path="/leaf/dailyLeafSupply" element={<PrivateRoute element={<LeafSupplyByDateRange />} />} />

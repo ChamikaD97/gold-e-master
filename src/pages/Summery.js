@@ -474,7 +474,7 @@ const Summary = () => {
 
     doc.setFont(undefined, 'bold');
     doc.setFontSize(10);
-    doc.text("Full Summary (Combined)", 14, startY);
+    doc.text("Full Summary", 14, startY);
     doc.setFont(undefined, 'normal');
 
     startY = renderTableLast(updatedFinalD, startY + 9);

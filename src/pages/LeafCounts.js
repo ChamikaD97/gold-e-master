@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import { Card, Col, Row, Button, Select, Input, Table, InputNumber } from "antd";
+import { DatePicker } from "antd";
 import { ReloadOutlined, DeleteOutlined } from "@ant-design/icons";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,16 +12,13 @@ import autoTable from "jspdf-autotable";
 import { SearchRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { Modal } from "antd";
+import lineIdCodeMap from "../data/SummeryData.json";
+import CustomConfirmationModal from "../components/CustomConfirmationModal";
 const { confirm } = Modal;
 const { Option } = Select;
 const LeafCount = () => {
 
   const dispatch = useDispatch();
-
-
-
-
-
   const [loading, setLoading] = useState(false);
   const lineLeafCounts = useRef();
   const currentDate = new Date();
@@ -29,8 +27,7 @@ const LeafCount = () => {
 
   const [filters, setFilters] = useState({ year: "Select Year", month: "Select Month", search: '', officer: "All", line: "Select Line", lineCode: '', officer: '' });
   const monthMap = useSelector((state) => state.commonData?.monthMap);
-  const filteredMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
-    .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
+
   const allMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
   const filteredData = Array.isArray(lineLeafCounts.current)
     ? lineLeafCounts.current
@@ -150,7 +147,10 @@ const LeafCount = () => {
           type="primary"
           danger
           icon={<DeleteOutlined />}
-          onClick={() => handleDeleteRow(index)}
+          onClick={() => {
+            setDeleteRowIndex(index);
+            handleDeleteClick(index)
+          }}
         >
           Delete
         </Button>
@@ -159,51 +159,37 @@ const LeafCount = () => {
   ];
 
 
+  const [newDate, setNewDate] = useState(currentDate); // 🆕 added
 
-const handleDeleteRow = (index) => {
-  const deletedItem = lineLeafCounts.current[index];
-
-  confirm({
-    title: `Are you sure you want to delete data for line ${deletedItem.lineCode}?`,
-    content: "This action cannot be undone.",
-    okText: "Yes, Delete",
-    okType: "danger",
-    cancelText: "Cancel",
-    onOk: async () => {
-      try {
-        dispatch(showLoader());
-        setLoading(true);
-
-        const updated = [...lineLeafCounts.current];
-        updated.splice(index, 1);
-
-        // Optionally call API to delete by lineCode if supported
-         await deleteLeafCount(deletedItem.lineCode, filters.year, filters.month);
-
-        lineLeafCounts.current = updated;
-        toast.success(`✅ Deleted entry for line ${deletedItem.lineCode}`);
-      } catch (error) {
-        console.error("Error deleting leaf count row:", error);
-        toast.error("❌ Failed to delete row");
-      } finally {
-        setLoading(false);
-getLeafCount()
-        dispatch(hideLoader());
-      }
-    },
-    onCancel() {
-      toast.info("Deletion cancelled");
-    },
-  });
-};
-
-
+  const handleDeleteRow = async (index) => {
+    const deletedItem = lineLeafCounts.current[index];
+    try {
+      dispatch(showLoader());
+      setLoading(true);
+      await deleteLeafCount(
+        deletedItem.lineCode,
+        filters.year,
+        filters.month
+      );
+      const updated = [...lineLeafCounts.current];
+      updated.splice(index, 1);
+      lineLeafCounts.current = updated;
+      toast.success(`Deleted entry for line ${deletedItem.lineCode}`);
+      await getLeafCount();
+    } catch (error) {
+      toast.error("Failed to delete row");
+    } finally {
+      setLoading(false);
+      dispatch(hideLoader());
+    }
+  };
 
 
   const getLeafCount = async () => {
     try {
       dispatch(showLoader());
       setLoading(true)
+
       const data = await getLeafCountsByMonthYear(filters.year, filters.month);
 
       if (Array.isArray(data)) {
@@ -337,13 +323,353 @@ getLeafCount()
   };
 
 
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [newYear, setNewYear] = useState(currentYear);
+  const [newMonth, setNewMonth] = useState(currentMonth);
+  // state
+  const [search, setSearch] = useState("");
+  // { [lineCode]: { b, bb, p } }
+  const [leafCounts, setLeafCounts] = useState({});
+
+  // filter lines by search
+  const filteredLines = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+
+    if (!q) return lineIdCodeMap;
+
+    return lineIdCodeMap.filter(l =>
+      l.lineCode.toLowerCase().includes(q)
+    );
+  }, [search, lineIdCodeMap]);
+
+
+  const clearLeafCounts = () => {
+    setLeafCounts({});
+  };
+
+
+
+  // set value helper
+  const setLineValue = (lineCode, field, val) => {
+    setLeafCounts(prev => {
+      const prevLine = prev[lineCode] || { b: 0, bb: 0, p: 0 };
+
+      // Copy existing
+      let updatedLine = { ...prevLine, [field]: val };
+
+      // Auto-calc P if B or BB changes
+      if (field === "b" || field === "bb") {
+        const bVal = field === "b" ? val : prevLine.b ?? 0;
+        const bbVal = field === "bb" ? val : prevLine.bb ?? 0;
+        updatedLine.p = Math.max(0, 100 - (Number(bVal) || 0) - (Number(bbVal) || 0));
+      }
+
+      return {
+        ...prev,
+        [lineCode]: updatedLine
+      };
+    });
+  };
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+
+  const [deleteRowIndex, setDeleteRowIndex] = useState();
+
+
+
+  const handleDeleteClick = (index) => {
+    setDeleteRowIndex(index);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+
+    handleDeleteRow(deleteRowIndex);
+    setConfirmOpen(false);
+    getLeafCount()
+  };
+
+  const handleCancel = () => {
+    setConfirmOpen(false);
+  };
+
+  const ensureValidBeforeSubmit = () => {
+    if (!newDate) {
+      toast.error("Please select a date first.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmitLeafCounts = async () => {
+    try {
+      dispatch(showLoader());
+
+
+      Object.entries(leafCounts).forEach(async ([lineCode, { b, bb, p }]) => {
+        const lineInfo = lineIdCodeMap.find(l => l.lineCode === lineCode);
+        const lineId = lineInfo?.lineId || null;
+
+
+        await createOrUpdateLeafCount({
+          year: newYear,
+          month: newMonth,
+          lineCode,
+          B: b,
+          BB: bb,
+          P: p
+        });
+
+
+      });
+
+
+
+
+      toast.success("Values logged successfully.");
+      setAddModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("❌ Failed to log values");
+    } finally {
+      clearLeafCounts()
+      dispatch(hideLoader());
+    }
+  };
+
+
   return (
-
-
-
     <>
+      <CustomConfirmationModal
+        open={confirmOpen}
+        title="Delete Record"
+        message="Are you sure you want to delete this item? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
+      <Modal
+        title="Add Leaf Counts"
+        open={addModalOpen}
+        onCancel={() => setAddModalOpen(false)}
+        onOk={() => {
+          if (!ensureValidBeforeSubmit()) return;
+          handleSubmitLeafCounts(); // your existing submit
+        }}
+        okText="Submit"
+        cancelText="Cancel"
+        width={600}
+      >
+        <Row gutter={24} style={{ marginBottom: 16 }}>
+
+          <Col span={12}>
+            <DatePicker
+              value={newDate ? dayjs(newDate) : null}
+              onChange={(date) => setNewDate(date ? date.format("YYYY-MM-DD") : null)}
+              style={{
+                width: "100%",
+                backgroundColor: "#000",
+                color: "#fff",
+                border: "1px solid #333",
+                borderRadius: 6,
+              }}
+              placeholder="Select Date"
+            />
+          </Col>
+
+          <Col span={12}>
+            <Input
+              placeholder="Search line code or name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              allowClear
+              bordered
+              style={{
+                width: "100%",
+                height: 40,
+                borderRadius: 10,
+                border: "1px solid black",
+              }}
+            />
+          </Col>
+        </Row>
+        <Row gutter={24} style={{ marginBottom: 16 }}>
 
 
+
+
+          <Col span={6}>
+            <span
+              style={{
+                background: "#ffffffff",
+                color: "#fff",
+                padding: "6px 12px",
+                borderRadius: 24,
+                fontWeight: 500,
+                fontSize: 14,
+                display: "inline-block",
+                minWidth: 60,
+                textAlign: "center",
+                boxShadow: "0 2px 5px rgba(255, 255, 255, 0.15)",
+              }}
+
+            >
+
+
+            </span>
+          </Col>
+
+          <Col span={6}>
+            <span
+              style={{
+                background: "#002c6dff",
+                color: "#fff",
+                padding: "6px 12px",
+                borderRadius: 24,
+                fontWeight: 300,
+                fontSize: 14,
+                minWidth: 60,
+                textAlign: "center",
+                boxShadow: "0 2px 5px rgba(255, 255, 255, 0.15)",
+              }}
+
+            >
+
+              B %
+            </span>
+          </Col>
+
+          <Col span={6}>
+
+            <span
+              style={{
+                background: "#002c6dff",
+                color: "#fff",
+                padding: "6px 12px",
+                borderRadius: 24,
+                fontWeight: 300,
+                fontSize: 14,
+                minWidth: 60,
+                textAlign: "center",
+                boxShadow: "0 2px 5px rgba(255, 255, 255, 0.15)",
+              }}
+
+            >
+
+              BB %
+            </span>
+          </Col>
+
+          <Col span={6}>
+            <span
+              style={{
+                background: "#ff0000b7",
+                color: "#fff",
+                padding: "6px 12px",
+                borderRadius: 24,
+                fontWeight: 300,
+                fontSize: 14,
+                minWidth: 60,
+                textAlign: "center",
+                boxShadow: "0 2px 5px rgba(255, 255, 255, 0.15)",
+              }}
+
+            >
+
+              P %
+            </span>
+
+          </Col>
+
+        </Row>
+        <Row gutter={[16, 16]}>
+
+
+          {filteredLines.map((line, key) => {
+            const target = leafCounts[line.lineCode] || {};
+            return (
+              <React.Fragment key={key}>
+                <Col span={6}>
+                  <span
+                    style={{
+                      background: "#00461fff",
+                      color: "#fff",
+                      padding: "6px 12px",
+                      borderRadius: 24,
+                      fontWeight: 500,
+                      fontSize: 14,
+                      display: "inline-block",
+                      minWidth: 60,
+                      textAlign: "center",
+                      boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+                    }}
+                    title={line.lineName || ""}
+                  >
+                    {line.lineCode} {line.lineName ? `- ${line.lineName}` : ""}
+                  </span>
+                </Col>
+
+                <Col span={6}>
+                  <InputNumber
+                    min={0}
+                    max={100}
+                    placeholder="B (%)"
+                    style={{
+                      width: "100%",
+                      backgroundColor: "#fff",
+                      color: "#000",
+                      border: "1px solid #333",
+                      borderRadius: 6,
+                    }}
+                    value={target.b ?? null}
+                    onChange={(val) => setLineValue(line.lineCode, "b", val)}
+                    controls={false}
+                  />
+                </Col>
+
+                <Col span={6}>
+                  <InputNumber
+                    min={0}
+                    max={100}
+                    placeholder="BB (%)"
+                    style={{
+                      width: "100%",
+                      backgroundColor: "#fff",
+                      color: "#000",
+                      border: "1px solid #333",
+                      borderRadius: 6,
+                    }}
+                    value={target.bb ?? null}
+                    onChange={(val) => setLineValue(line.lineCode, "bb", val)}
+                    controls={false}
+                  />
+                </Col>
+
+                <Col span={6}>
+                  <InputNumber
+                    min={0}
+                    max={100}
+                    placeholder="P (%)"
+                    style={{
+                      width: "100%",
+                      backgroundColor: "#fff",
+                      color: "#000",
+                      border: "1px solid #333",
+                      borderRadius: 6,
+                    }}
+                    value={target.p ?? null}
+                    onChange={(val) => setLineValue(line.lineCode, "p", val)}
+                    controls={false}
+                  />
+                </Col>
+              </React.Fragment>
+            );
+          })}
+        </Row>
+      </Modal>
 
 
 
@@ -450,6 +776,16 @@ getLeafCount()
                     </Button>
                   </Col>
 
+                  <Col md={4}>
+                    <Button
+                      type="primary"
+                      onClick={() => setAddModalOpen(true)}
+
+                    >
+                      Add New
+                    </Button>
+
+                  </Col>
                 </Row>
               </Col>
             </Row>

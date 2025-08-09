@@ -20,6 +20,7 @@ import { API_KEY } from "../api/api";
 
 import * as XLSX from 'xlsx';
 import { SearchOutlined, SearchRounded } from "@mui/icons-material";
+import CountUp from "react-countup";
 
 const Suppliers = () => {
 
@@ -104,8 +105,8 @@ const Suppliers = () => {
     doc.line(14, 72, 196, 72);
 
     // --- Table Data ---
-    const tableBody = filteredData.map((s,index) => [
-index+1,
+    const tableBody = filteredData.map((s, index) => [
+      index + 1,
       s["Supplier Id"],
       s["Supplier Name"],
       lineIdToCodeMap(s.Route),  // ✅ call the function here
@@ -118,7 +119,7 @@ index+1,
 
     doc.autoTable({
       startY: 78,
-      head: [["#","ID", "Name", "Route", "Payment", "NIC", "Contact", "Joined"]],
+      head: [["#", "ID", "Name", "Route", "Payment", "NIC", "Contact", "Joined"]],
       body: tableBody,
       styles: {
         fillColor: [255, 255, 255],
@@ -339,7 +340,7 @@ index+1,
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
 
       <Row gutter={[8, 8]} justify="center">
-        <Col md={24}>
+        <Col md={18}>
           <Card bordered={false} style={cardStyle}>
             <Row gutter={[8, 8]} align="middle">
               <Col md={1}>
@@ -355,7 +356,7 @@ index+1,
                   }}
                 />
               </Col>
-              <Col span={2}>
+              <Col span={4}>
                 <Text style={{ color: "#fff" }}>Search By Line</Text>
               </Col>
               <Col span={4}>
@@ -387,7 +388,7 @@ index+1,
                 </Select>
 
               </Col>
-              <Col span={2}>
+              <Col span={4}>
                 <Button
                   icon={<SearchRounded />}
                   type="primary"
@@ -417,7 +418,7 @@ index+1,
                 />
               </Col>
 
-              <Col span={3}>
+              <Col span={4}>
                 <Button
                   type="primary"
                   onClick={() => handleDelete()}
@@ -431,6 +432,17 @@ index+1,
             </Row>
           </Card>
         </Col>
+        <Col md={6}>
+          <Card
+            bordered={false}
+            style={{ ...cardStyle, textAlign: "center" }}
+          >
+            <span style={{ fontSize: 20, fontWeight: '600', color: '#fff' }}>
+              <CountUp end={filteredData.length} duration={0.5} separator="," /> Suppliers
+            </span>
+          </Card>
+        </Col>
+
       </Row>
 
       <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">

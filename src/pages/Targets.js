@@ -13,11 +13,6 @@ const Targets = () => {
 
   const dispatch = useDispatch();
   const [routeSummary, setRouteSummary] = useState([]);
-
-
-
-
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const targetsN = useRef();
@@ -64,42 +59,29 @@ const Targets = () => {
   };
 
   const handleDeleteRow = async (record) => {
+    dispatch(showLoader());
 
-    Modal.confirm({
-      title: `Are you sure you want to delete target for ${record.lineCode}?`,
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk: async () => {
-        dispatch(showLoader());
+    try {
+      // 🔥 Delete from backend
+      await deleteTarget(record.lineCode, record.year, record.month);
 
-        try {
-          // 🔥 Delete from backend
-          await deleteTarget(record.lineCode, record.year, record.month);
+      // 🧹 Remove from local state
+      targetsN.current = targetsN.current.filter(t =>
+        t.lineCode !== record.lineCode ||
+        t.year !== record.year ||
+        t.month !== record.month
+      );
 
-          // 🧹 Remove from local state
-          targetsN.current = targetsN.current.filter(t =>
-            t.lineCode !== record.lineCode ||
-            t.year !== record.year ||
-            t.month !== record.month
-          );
-
-          toast.success(`✅ Deleted target for ${record.lineCode}`);
-        } catch (error) {
-          console.error("❌ Delete failed:", error);
-          toast.error("❌ Failed to delete target. Please try again.");
-        } finally {
-          getTargets(); // Refresh targets
-          dispatch(hideLoader());
-        }
-      },
-    });
-
-     console.log("🗑️ Deleting record:", record);
+      toast.success(`✅ Deleted target for ${record.lineCode}`);
+    } catch (error) {
+      console.error("❌ Delete failed:", error);
+      toast.error("❌ Failed to delete target. Please try again.");
+    } finally {
+      getTargets(); // Refresh targets
+      dispatch(hideLoader());
+    }
 
   };
-
-
 
   const targetColumns = [
     {

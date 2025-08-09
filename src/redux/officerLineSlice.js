@@ -257,7 +257,6 @@ const initialState = {
   "ML 02",
   "MP",
   "MT",
-  "MULATIYANA",
   "MV",
   "N",
   "NG",

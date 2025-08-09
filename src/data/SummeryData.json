@@ -1,18 +1,6 @@
 [
   {
     "officer": "Ajith",
-    "lineCode": "MT",
-    "lineId": "81"
-  },
-
-  {
-    "officer": "Udara",
-    "lineCode": "SP",
-    "lineId": "162"
-  },
-
-  {
-    "officer": "Ajith",
     "lineCode": "PH",
     "lineId": "60,154,133"
   },
@@ -57,33 +45,10 @@
     "lineId": "145"
   },
   {
-    "officer": "Ajith",
-    "lineCode": "MULATIYANA",
-    "lineId": "97"
-  },
-  {
     "officer": "Chamod",
     "lineCode": "NG",
     "lineId": "91"
   },
-  {
-    "officer": "Chamod",
-    "lineCode": "S",
-    "lineId": "67"
-  },
- 
-  {
-    "officer": "Chamod",
-    "lineCode": "S2",
-    "lineId": "68"
-  },
-  {
-    "officer": "Chamod",
-    "lineCode": "S2 II",
-    "lineId": "69"
-  },
-
-  
   {
     "officer": "Udara",
     "lineCode": "J",
@@ -119,14 +84,11 @@
     "lineCode": "SP",
     "lineId": "162"
   },
- 
   {
     "officer": "Gamini",
     "lineCode": "SELF",
     "lineId": "70"
   },
-
-  
   {
     "officer": "Gamini",
     "lineCode": "ML",
@@ -134,16 +96,9 @@
   },
   {
     "officer": "Gamini",
-    "lineCode": "ML2",
-    "lineId": "157"
-  },
-  {
-    "officer": "Gamini",
     "lineCode": "MV",
     "lineId": "34"
   },
- 
-  
   {
     "officer": "Udayanga",
     "lineCode": "BA",
@@ -185,37 +140,15 @@
     "lineId": "36"
   },
   {
-    "officer": "Udayanga",
-    "lineCode": "DM",
-    "lineId": "102"
-  },
-  {
-    "officer": "Udayanga",
-    "lineCode": "DM-2",
-    "lineId": "161"
-  },
-  {
-    "officer": "Udayanga",
-    "lineCode": "PT2",
-    "lineId": "64"
-  },
-  {
     "officer": "Chamod",
     "lineCode": "DR",
     "lineId": "124,138"
   },
   {
     "officer": "Udayanga",
-    "lineCode": "O-18",
-    "lineId": "48"
-  },
-  {
-    "officer": "Udayanga",
     "lineCode": "PT",
     "lineId": "48,64,62"
   },
-
-  
   {
     "lineId": "12,109,127",
     "lineCode": "DG",
@@ -250,5 +183,20 @@
     "officer": "Other",
     "lineCode": "Malinduwa",
     "lineId": "151"
+  },
+{
+    "officer": "New 1",
+    "lineCode": "New Line 1",
+    "lineId": "163"
+  },
+  {
+    "officer": "New 2",
+    "lineCode": "New Line 2",
+    "lineId": "164"
+  },
+  {
+    "officer": "New 3",
+    "lineCode": "New Line 3",
+    "lineId": "165"
   }
 ]

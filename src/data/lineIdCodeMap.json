@@ -70,34 +70,14 @@
     "lineId": "145"
   },
   {
-    "officer": "Ajith",
-    "lineCode": "MULATIYANA",
-    "lineId": "97"
-  },
-  {
     "officer": "Chamod",
     "lineCode": "NG",
     "lineId": "91"
   },
   {
     "officer": "Chamod",
-    "lineCode": "S",
-    "lineId": "67"
-  },
-  {
-    "officer": "Chamod",
     "lineCode": "",
     "lineId": "N/A"
-  },
-  {
-    "officer": "Chamod",
-    "lineCode": "S2",
-    "lineId": "68"
-  },
-  {
-    "officer": "Chamod",
-    "lineCode": "S2 II",
-    "lineId": "69"
   },
   {
     "officer": "Chamod",
@@ -230,19 +210,9 @@
     "lineId": "161"
   },
   {
-    "officer": "Udayanga",
-    "lineCode": "PT2",
-    "lineId": "64"
-  },
-  {
     "officer": "Chamod",
     "lineCode": "DR",
     "lineId": "124,138"
-  },
-  {
-    "officer": "Udayanga",
-    "lineCode": "O-18",
-    "lineId": "48"
   },
   {
     "officer": "Udayanga",
@@ -288,5 +258,20 @@
     "officer": "Other",
     "lineCode": "Malinduwa",
     "lineId": "151"
+  },
+{
+    "officer": "New 1",
+    "lineCode": "New Line 1",
+    "lineId": "163"
+  },
+  {
+    "officer": "New 2",
+    "lineCode": "New Line 2",
+    "lineId": "164"
+  },
+  {
+    "officer": "New 3",
+    "lineCode": "New Line 3",
+    "lineId": "165"
   }
 ]
