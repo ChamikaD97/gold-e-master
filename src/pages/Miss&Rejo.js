@@ -54,13 +54,17 @@ const MissRejo = () => {
 
   const [currentSupplierTable, setCurrentSupplierTable] = useState([]);
   const [previousSupplierTable, setPreviousSupplierTable] = useState([]);
-  const [missingSuppliers, setMissingSuppliers] = useState([]);
   const [selectedOfficer, setSelectedOfficer] = useState({ name: "Select Officer", line: "All" });
   const [selectedLine, setSelectedLine] = useState(null);
 
   const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMapForAll.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
   const [missedSuppliers, setMissedSuppliers] = useState([]);
   const [rejoinedSuppliers, setRejoinedSuppliers] = useState([]);
+
+
+  const [missedSuppliersSummery, setMissedSuppliersSummery] = useState([]);
+  const [rejoinedSuppliersSummery, setRejoinedSuppliersSummery] = useState([]);
+
   const [missedTotal, setMissedTotal] = useState("0.00");
   const [rejoinedTotal, setRejoinedTotal] = useState("0.00");
 
@@ -78,6 +82,81 @@ const MissRejo = () => {
     const match = lineIdCodeMapForAll.find((line) => line.lineId === lineId);
     return match ? match.officer : null;
   };
+  const exportLineSummaryPDF = (suppliers, title = "Line Summary") => {
+    const doc = new jsPDF("p", "mm", "a4");
+    const grouped = groupByLine(suppliers);
+    let startY = 46;
+
+    // === HEADER ===
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.line(14, 12, 196, 12);
+    doc.setFont(undefined, 'bold');
+    doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 18, { align: "center" });
+
+    doc.setFontSize(9);
+    doc.line(14, 22, 196, 22);
+    doc.setFont(undefined, 'normal');
+    doc.text("Factory: Panakaduwa, Rotumba.", 14, 30);
+    doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
+    doc.line(14, 39, 196, 39);
+
+    // === DATE HEADER ===
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+
+    doc.text(`${title} Cards on: ${filters.year} - ${monthMap[filters.month]}`, 14, startY);
+    doc.line(14, startY + 4, 196, startY + 4);
+    startY += 12;
+
+    // === BUILD SUMMARY BODY ===
+    const body = Object.keys(grouped).sort().map((line, index) => {
+
+      const lineSuppliers = grouped[line];
+      const totalKg = lineSuppliers.reduce((sum, s) => sum + parseFloat(s.total_kg), 0).toFixed(0);
+      const supplierCount = lineSuppliers.length;
+      return [index + 1, line, supplierCount, totalKg];
+    });
+
+    // === TABLE ===
+    autoTable(doc, {
+      startY,
+      head: [["#", "Line", "Count", "Total (kg)"]],
+      body,
+      theme: "grid",
+      margin: { left: 14, right: 14 },
+      styles: {
+        fontSize: 10,
+        cellPadding: 1.5,
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+      },
+      headStyles: {
+        fillColor: title.includes('Rejoined') ? [22, 160, 133] : [255, 102, 102],
+        textColor: 255,
+        halign: "center",
+        valign: "middle",
+      },
+      bodyStyles: {
+        halign: "center",
+        valign: "middle",
+      },
+    });
+
+    // === Footer ===
+    const totalPages = doc.internal.getNumberOfPages();
+    doc.setPage(totalPages);
+    doc.line(14, 275, 196, 275);
+    doc.setFontSize(8);
+    doc.setTextColor(5);
+    doc.setFont(undefined, 'normal');
+    doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
+    doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
+
+    // === SAVE FILE ===
+    doc.save(`${title.replace(" ", "_")}_${filters.year}_${filters.month}.pdf`);
+  };
+
 
   const exportGroupedPDF = (suppliers, title = "Missing") => {
     const doc = new jsPDF("p", "mm", "a4");
@@ -357,18 +436,16 @@ const MissRejo = () => {
     const prev = dayjs(`${filters.year}-${filters.month}-01`).subtract(1, "month");
     const prevYear = prev.year();
     const prevMonth = String(prev.month() + 1).padStart(2, "0");
+
     const prevStart = getMonthDateRangeFromParts(prevYear, prevMonth);
-    console.log(filters);
 
     let ids = filters.line;
-    console.log(ids);
 
     if (filters.line == 'Select Line') {
       ids = selectedOfficer.line;
     } else if (selectedOfficer.line === 'All' && filters.line !== 'Select Line') {
       ids = filters.line;
     }
-    console.log(ids);
     const currentUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${currentStart}`;
     const prevUrl = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${prevStart}`;
     const supplierUrl = `/quiX/ControllerV1/supdata?k=${API_KEY}&r=${ids}`;
@@ -454,6 +531,29 @@ const MissRejo = () => {
       setMissedSuppliers(missed);
       setRejoinedSuppliers(rejoined);
 
+
+      const summaryrejoined = Object.values(
+        rejoined.reduce((acc, item) => {
+          if (!acc[item.line]) {
+            acc[item.line] = { line: item.line, arrayLength: 0, total_kg: 0 };
+          }
+          acc[item.line].arrayLength += 1;
+          acc[item.line].total_kg += Number(item.total_kg);
+          return acc;
+        }, {})
+      );
+      const summarymissed = Object.values(
+        missed.reduce((acc, item) => {
+          if (!acc[item.line]) {
+            acc[item.line] = { line: item.line, arrayLength: 0, total_kg: 0 };
+          }
+          acc[item.line].arrayLength += 1;
+          acc[item.line].total_kg += Number(item.total_kg);
+          return acc;
+        }, {})
+      );
+      setMissedSuppliersSummery(summarymissed);
+      setRejoinedSuppliersSummery(summaryrejoined);
       const missedTotal = missed.reduce((sum, s) => sum + parseFloat(s.total_kg), 0);
       const rejoinedTotal = rejoined.reduce((sum, s) => sum + parseFloat(s.total_kg), 0);
 
@@ -538,6 +638,10 @@ const MissRejo = () => {
                     bordered={false}
                     value={selectedOfficer?.name}
                     onChange={(value) => {
+                      setFilters(
+                        { year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: '', officer: '' }
+
+                      )
                       const officer = officerList.find(o => o.name === value);
                       setSelectedOfficer(officer);
                       setSelectedLine(null);
@@ -643,15 +747,27 @@ const MissRejo = () => {
                         type="primary"
                         style={{ marginLeft: 8 }}
                         onClick={() => exportToPDF()}
+                        disabled={filters.line == "Select Line"}
                       >
                         All
                       </Button>
                     </Col>
+
+
+
+
+
+
+
+
+
+
+
                     <Col md={3}>
                       <Button
                         type="primary"
                         style={{ marginLeft: 8 }}
-                        onClick={() => exportGroupedPDF(missedSuppliers, "Missed")}
+                        onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(missedSuppliers, "Missed") : exportLineSummaryPDF(missedSuppliers, "Missed")}
                       >
                         Missed
                       </Button>
@@ -660,7 +776,8 @@ const MissRejo = () => {
                       <Button
                         type="primary"
                         style={{ marginLeft: 8 }}
-                        onClick={() => exportGroupedPDF(rejoinedSuppliers, "Rejoined")}
+                        onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(rejoinedSuppliers, "Rejoined") : exportLineSummaryPDF(rejoinedSuppliers, "Rejoined")}
+
                       >
                         Rejoined
                       </Button>
@@ -685,9 +802,8 @@ const MissRejo = () => {
 
 
 
-
         {
-          missedSuppliers.length > 0 && (
+          filters.month !== "Select Month" && filters.line !== "Select Line" && missedSuppliers.length > 0 && (
 
             <Card bordered={false} style={cardStyle}>
 
@@ -771,6 +887,88 @@ const MissRejo = () => {
           )
         }
 
+        {
+          filters.month !== "Select Month" && filters.line === "Select Line" && missedSuppliers.length > 0 && (
+            <Card bordered={false} style={cardStyle}>
+              <Row gutter={[16, 16]}>
+
+                {/* Missing Cards */}
+                <Col xs={24} sm={12} md={12}>
+                  <div
+                    style={{
+                      backgroundColor: "rgba(255, 102, 102, 1)",
+                      borderRadius: 10,
+                      padding: "14px 24px",
+                      color: "#000",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                    }}
+                  >
+                    <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>
+                      Missing Cards
+                    </div>
+                    <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "rgba(0, 0, 0, 0.85)", borderRadius: 10 }}>
+                      <thead>
+                        <tr>
+                          <th style={thStyle}>Line</th>
+                          <th style={thStyle}>Count</th>
+                          <th style={thStyle}>Total (kg)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {missedSuppliersSummery.map(item => (
+                          <tr key={item.line}>
+                            <td style={tdStyle}>{item.line}</td>
+                            <td style={tdStyle}>{item.arrayLength}</td>
+                            <td style={tdStyle}>{item.total_kg}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Col>
+
+                {/* Rejoined Cards */}
+                <Col xs={24} sm={12} md={12}>
+                  <div
+                    style={{
+                      backgroundColor: "rgba(22, 160, 133, 1)",
+                      borderRadius: 10,
+                      padding: "14px 24px",
+                      color: "#000",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                    }}
+                  >
+                    <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>
+                      Rejoined Cards
+                    </div>
+                    <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "rgba(0, 0, 0, 0.85)", borderRadius: 10 }}>
+                      <thead>
+                        <tr>
+                          <th style={thStyle}>Line</th>
+                          <th style={thStyle}>Count</th>
+                          <th style={thStyle}>Total (kg)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rejoinedSuppliersSummery.map(item => (
+                          <tr key={item.line}>
+                            <td style={tdStyle}>{item.line}</td>
+                            <td style={tdStyle}>{item.arrayLength}</td>
+                            <td style={tdStyle}>{item.total_kg}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Col>
+
+              </Row>
+            </Card>
+          )
+        }
+
+
+
         {loading && <CircularLoader />}
 
 
@@ -780,3 +978,21 @@ const MissRejo = () => {
 };
 
 export default MissRejo;
+
+const thStyle = {
+  padding: "8px",
+  textAlign: "center",
+  backgroundColor: "rgba(0,0,0,0.1)",
+  color: "#fff",
+  fontWeight: 600,
+  fontSize: 16,
+  borderBottom: "1px solid #ccc"
+};
+
+const tdStyle = {
+  padding: "8px",
+  textAlign: "center",
+  fontSize: 14, color: "#fff",
+
+  borderBottom: "1px solid #ddd"
+};

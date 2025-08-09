@@ -15,7 +15,7 @@ import { ReloadOutlined } from "@ant-design/icons";
 import { SearchRounded } from "@mui/icons-material";
 import dayjs from "dayjs";
 import CircularLoader from "../components/CircularLoader";
-import lineIdCodeMap from "../data/lineIdCodeMap.json";
+import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
 import bankIdCodes from "../data/bankIdCodes.json";
 import { API_KEY } from "../api/api";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
@@ -93,7 +93,7 @@ const SupplierInfo = () => {
 
 
   const lineIdToCodeMap = (id) => {
-    const record = lineIdCodeMap.find(item => parseInt(item.lineId) === id);
+    const record = lineIdCodeMapForAll.find(item => parseInt(item.lineId) === id);
     return record?.lineCode || "Unknown";
   };
 

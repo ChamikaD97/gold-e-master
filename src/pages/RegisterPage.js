@@ -23,16 +23,11 @@ const RegisterPage = () => {
   useEffect(() => {
     setTimeout(() => setVisible(true), 100);
 
-    import("../data/users/users.json")
-      .then((module) => {
-        const users = module.default || [];
-        localStorage.setItem("users", JSON.stringify(users));
-      })
-      .catch((err) => {
-        console.error("Failed to load users.json", err);
-        setError("Could not load initial user data.");
-      });
+
+    
   }, []);
+
+  
   const handleRegister = async () => {
     try {
       const values = await form.validateFields();

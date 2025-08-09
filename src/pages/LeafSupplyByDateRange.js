@@ -7,7 +7,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import { API_KEY } from "../api/api";
 import dayjs from "dayjs";
-import lineIdCodeMap from "../data/lineIdCodeMap.json";
+import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
+
 import CountUp from "react-countup";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Search, SearchOff, SearchOffOutlined, SearchOffRounded, SearchRounded } from "@mui/icons-material";
@@ -36,7 +37,7 @@ const LeafSupplyByDateRange = () => {
     line: "Select Line",
   });
 
-  const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMap.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
+  const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMapForAll.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
   const officerLineMap = useSelector((state) => state.officerLine?.officerLineMap || {});
 
   const [lineWiseSummary, setLineWiseSummary] = useState([]);
@@ -127,7 +128,7 @@ const LeafSupplyByDateRange = () => {
   };
 
   const getOfficerByLineId = (lineId) => {
-    const match = lineIdCodeMap.find((line) => line.lineId === lineId);
+    const match = lineIdCodeMapForAll.find((line) => line.lineId === lineId);
     return match ? match.officer : null;
   };
 
@@ -176,7 +177,7 @@ const LeafSupplyByDateRange = () => {
               style={selectStyle}
               dropdownStyle={{ backgroundColor: "#1e1e1e" }}
             >
-              {lineIdCodeMap.map(l => (
+              {lineIdCodeMapForAll.map(l => (
                 <Option key={l.lineId} value={l.lineId}>{l.lineCode}</Option>
               ))}
             </Select>
