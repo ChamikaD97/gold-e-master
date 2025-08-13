@@ -71,7 +71,6 @@ const LoginPage = () => {
             <div style={{ fontWeight: "bold", color: "#fff", fontSize: 18 }}>SUPER LEAF MONITORING SYSTEM</div>
             <div style={{ fontSize: 14, color: "#ccc" }}>GREENHOUSE PLANTATION (PVT) LTD</div>
           </div>
-          newServer
         </div>
 
         <Form layout="horizontal" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }} colon={false}>
