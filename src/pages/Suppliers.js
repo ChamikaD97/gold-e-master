@@ -6,7 +6,7 @@ import {
   Tag
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
+import lineIdCodeMapForAll from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import { Pagination } from "antd"; // ✅ make sure to import this
 import { useDispatch } from "react-redux";

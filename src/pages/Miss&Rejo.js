@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Row, Button, Table, Select, DatePicker } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
+import lineIdCodeMapForAll from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";

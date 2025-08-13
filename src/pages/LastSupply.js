@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import CircularLoader from "../components/CircularLoader";
-import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
+import lineIdCodeMapForAll from "../data/SummeryData.json";
 import { API_KEY } from "../api/api";
 import { showLoader, hideLoader } from "../redux/loaderSlice";
 

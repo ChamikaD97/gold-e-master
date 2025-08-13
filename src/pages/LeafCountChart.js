@@ -4,7 +4,7 @@ import {
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import '../App.css';
-import lineIdCodeMapForAll from "../data/lineIdCodeMapForAll.json";
+import lineIdCodeMapForAll from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import SupplierLeafModal from "../components/SupplierLeafModal";
 import { useDispatch, useSelector } from "react-redux";
