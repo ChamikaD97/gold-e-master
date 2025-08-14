@@ -94,7 +94,7 @@ const Users = () => {
       cancelText: "Cancel",
       onOk: async () => {
         try {
-           await deleteUser(id);
+          await deleteUser(id);
           message.success("User deleted successfully");
           await fetchData(); // Refresh the user list
         } catch (err) {
@@ -261,19 +261,29 @@ const Users = () => {
           {userList.length > 0 && (
 
 
-            <Table
-              className="sup-bordered-table"
-              dataSource={
-                userList
-                  .filter(user =>
-                    user.username?.toLowerCase().includes(searchText.toLowerCase())
-                  )
-                  .map((item, index) => ({ ...item, key: index }))
-              }
-              columns={userColumns}
-              pagination={false}
-              size="middle"
-            />
+
+            <Card
+
+
+
+              style={cardStyle}
+              headStyle={{ color: "#fff" }}
+            >
+              <Table
+                className="sup-bordered-table"
+                dataSource={
+                  userList
+                    .filter(user =>
+                      user.username?.toLowerCase().includes(searchText.toLowerCase())
+                    )
+                    .map((item, index) => ({ ...item, key: index }))
+                }
+                columns={userColumns}
+                pagination={false}
+                size="middle"
+              />
+            </Card>
+
 
 
           )}

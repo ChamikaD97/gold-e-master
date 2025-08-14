@@ -163,7 +163,7 @@ const HeaderComponent = () => {
                 {
                   role === 'Super Admin' && (
 
-                    <Menu.Item key="targets" >
+                    <Menu.Item key="masterData" >
                       <Link to="/targets">Targets</Link>
                     </Menu.Item>
 
