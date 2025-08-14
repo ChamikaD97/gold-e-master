@@ -101,6 +101,7 @@ const Officers = () => {
 
   // Handle update line
   const handleUpdateOfficer = async () => {
+
     if (!officer || !nic || !joinedDate) {
       message.warning("Please fill all fields");
       return;
@@ -109,7 +110,7 @@ const Officers = () => {
 
     try {
       setLoading(true);
-      await updateOfficer(nic, { officer, nic, joinedDate });
+      await updateOfficer(editingOfficer.id,{officer, nic, joinedDate });
       message.success("Officer updated successfully");
       setEditModalOpen(false);
       setEditingOfficer(null);
@@ -151,11 +152,11 @@ const Officers = () => {
 
     try {
       setLoading(true);
-      await deleteOfficer(id.nic);
+      await deleteOfficer(id);
       message.success("Officer deleted");
       getOfficers();
     } catch (err) {
-      message.error("Failed to delete line");
+      message.error("Failed to delete officer");
       console.error(err);
     } finally {
       setLoading(false);
@@ -367,7 +368,7 @@ const Officers = () => {
 
         {/* Edit Modal */}
         <Modal
-          title={`Edit Officer - ${editingOfficer?.nic || ""}`}
+          title={`Edit Officer - ${editingOfficer?.name || ""}`}
           open={isEditModalOpen}
           onCancel={() => {
             setEditModalOpen(false);

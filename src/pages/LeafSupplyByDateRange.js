@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card, Col, Row, Select, Typography, Button, message,
   DatePicker
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { API_KEY } from "../api/api";
+import { API_KEY, fetchLines } from "../api/api";
 import dayjs from "dayjs";
 
 import CountUp from "react-countup";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Search, SearchOff, SearchOffOutlined, SearchOffRounded, SearchRounded } from "@mui/icons-material";
 import CircularLoader from "../components/CircularLoader";
+import { setAllLines } from "../redux/officerLineSlice";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -46,7 +47,19 @@ const LeafSupplyByDateRange = () => {
   const dispatch = useDispatch();
   const monthMap = useSelector((state) => state.commonData?.monthMap);
   const { isLoading } = useSelector((state) => state.loader);
+  const getLines = async () => {
+    try {
+      const data = await fetchLines();
+      dispatch(setAllLines(data));
+    } catch (err) {
+      message.error("Failed to fetch lines");
+      console.error(err);
+    }
+  };
 
+  useEffect(() => {
+    getLines();
+  }, []);
   const cardStyle = {
     background: "rgba(0, 0, 0, 0.6)",
     color: "#fff",

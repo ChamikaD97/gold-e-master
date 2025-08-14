@@ -429,11 +429,11 @@ export async function createOfficer(officerData) {
 }
 
 // Delete officer by id
-export async function deleteOfficer(id) {
+export async function deleteOfficer(officer) {
   try {
-    await axios.delete(`${API_BASE}/officers/${id}`);
+    await axios.delete(`${API_BASE}/officers/${officer.id}`);
   } catch (error) {
-    console.error(`Failed to delete officer id=${id}`, error);
+    console.error(`Failed to delete officer id=${officer.id}`, error);
     throw error;
   }
 }
@@ -473,12 +473,17 @@ export async function updateLine(lineCode, lineId, updateData) {
   }
 }
 
-export async function updateOfficer(lineCode, lineId, updateData) {
+export async function updateOfficer(id,updateData) {
   try {    
-    const response = await axios.put(`${API_BASE}/lines/${lineCode}/${lineId}`, updateData);
+        const data = {
+      name: updateData.officer,
+      nic: updateData.nic, 
+      joinedDate: updateData.joinedDate
+    };   
+    const response = await axios.put(`${API_BASE}/officers/${id}`, data);
     return response.data;
   } catch (error) {
-    console.error("Failed to update line", error);
+    console.error("Failed to update officer", error);
     throw error;
   }
 }

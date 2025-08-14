@@ -1,11 +1,11 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import { Card, Col, Row, Button, Select, Input, Table, InputNumber } from "antd";
 import { DatePicker } from "antd";
 import { ReloadOutlined, DeleteOutlined } from "@ant-design/icons";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { deleteLeafCount, createOrUpdateLeafCount, getAllLeafCounts, getLeafCountByLineMonthYear, getLeafCountsByMonthYear } from "../api/api";
+import { deleteLeafCount, createOrUpdateLeafCount, getAllLeafCounts, getLeafCountByLineMonthYear, getLeafCountsByMonthYear, fetchLines } from "../api/api";
 import dayjs from "dayjs";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -13,6 +13,7 @@ import { SearchRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { Modal } from "antd";
 import CustomConfirmationModal from "../components/CustomConfirmationModal";
+import { setAllLines } from "../redux/officerLineSlice";
 const { confirm } = Modal;
 const { Option } = Select;
 const LeafCount = () => {
@@ -27,7 +28,18 @@ const LeafCount = () => {
 
   const [filters, setFilters] = useState({ year: "Select Year", month: "Select Month", search: '', officer: "All", line: "Select Line", lineCode: '', officer: '' });
   const monthMap = useSelector((state) => state.commonData?.monthMap);
+  const getLines = async () => {
+    try {
+      const data = await fetchLines();
+      dispatch(setAllLines(data));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
+  useEffect(() => {
+    getLines();
+  }, []);
   const allMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
   const filteredData = Array.isArray(lineLeafCounts.current)
     ? lineLeafCounts.current

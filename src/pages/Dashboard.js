@@ -39,12 +39,12 @@ const Dashboard = () => {
     getLines();
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     if (lines.length === 0) {
       message.warning("No lines available. Please add lines to continue.");
     } else {
       console.log("Lines fetched successfully:", lines);
-      
+
       message.success("Lines fetched successfully.");
     }
   }, [lines]);
