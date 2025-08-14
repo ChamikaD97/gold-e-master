@@ -14,7 +14,7 @@ import {
 import SettingsModal from "../components/SettingsModal";
 
 import icon from "../images/logo.ico";
-import { CardTravelSharp, SummarizeRounded, TableBar, TurnSharpRightTwoTone } from "@mui/icons-material";
+import { CardTravelSharp, RouteOutlined, RouteSharp, SummarizeRounded, TableBar, TurnSharpRightTwoTone } from "@mui/icons-material";
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
@@ -162,12 +162,19 @@ const HeaderComponent = () => {
             )}
 
 
+   {
+            role === 'Super Admin' && (
+              <Menu.Item key="lines" icon={<RouteOutlined />}>
+                <Link to="/lines">Lines</Link>
+              </Menu.Item>
+
+            )}
 
 
 
           {
             role === 'Super Admin' && (
-              <Menu.Item key="users" icon={<CardTravelSharp />}>
+              <Menu.Item key="users" icon={<UserOutlined />}>
                 <Link to="/users">Users</Link>
               </Menu.Item>
 

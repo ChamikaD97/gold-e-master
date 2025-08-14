@@ -444,7 +444,7 @@ const LeafCount = () => {
     <>
       <CustomConfirmationModal
         open={confirmOpen}
-        title="Delete Record"
+        title="Delete Leaf Record"
         message="Are you sure you want to delete this item? This action cannot be undone."
         confirmText="Delete"
         cancelText="Cancel"

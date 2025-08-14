@@ -6,17 +6,11 @@ export const BASE_URL = "http://newserver:46597/quiX/ControllerV1";
 
 const API_BASE = "http://localhost:8000"; // Update for production
 
-// src/api.js
 
-//const API_BASE9 = "/api"; // Update for production
-
-
-// 📥 Create or update a single leaf count (avg if exists)
 export const createOrUpdateLeafCount = (payload) => {
   return axios.post(`${API_BASE}/leaf-count`, payload);
 };
 
-// 📤 Get all records
 export const getAllLeafCounts = async () => {
 
   try {
@@ -395,3 +389,92 @@ export const updateUserRole = async (id, role) => {
     throw err;
   }
 };
+
+
+export async function fetchOfficers() {
+  try {
+    const response = await axios.get(`${API_BASE}/officers`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch officers', error);
+    throw error;
+  }
+}
+
+// Get one officer by id
+export async function fetchOfficerById(id) {
+  try {
+    const response = await axios.get(`${API_BASE}/officers/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch officer id=${id}`, error);
+    throw error;
+  }
+}
+
+// Create new officer
+export async function createOfficer(officerData) {
+  try {
+    const response = await axios.post(`${API_BASE}/officers`, officerData);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to create officer', error);
+    throw error;
+  }
+}
+
+// Delete officer by id
+export async function deleteOfficer(id) {
+  try {
+    await axios.delete(`${API_BASE}/officers/${id}`);
+  } catch (error) {
+    console.error(`Failed to delete officer id=${id}`, error);
+    throw error;
+  }
+}
+
+// Get all lines
+export async function fetchLines() {
+  try {
+    const response = await axios.get(`${API_BASE}/lines`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch lines", error);
+    throw error;
+  }
+}
+
+// Create a new line
+export async function createLine(lineData) {
+  try {
+    const response = await axios.post(`${API_BASE}/lines`, lineData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to create line", error);
+    throw error;
+  }
+}
+
+// Update a line by composite keys: lineCode and lineId
+export async function updateLine(lineCode, lineId, updateData) {
+  try {
+    console.log( updateData);
+    
+    const response = await axios.put(`${API_BASE}/lines/${lineCode}/${lineId}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update line", error);
+    throw error;
+  }
+}
+
+// Delete a line by lineCode and lineId
+export async function deleteLine(lineCode, lineId) {
+  try {
+    const response = await axios.delete(`${API_BASE}/lines/${lineCode}/${lineId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete line", error);
+    throw error;
+  }
+}

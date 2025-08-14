@@ -26,7 +26,7 @@ import RegisterPage from "./pages/RegisterPage.js";
 import Targets from "./pages/Targets.js";
 import LeafCount from "./pages/LeafCounts.js";
 import Users from "./pages/Users.js";
-
+import Lines from "./pages/Lines.js";
 // ✅ Session check
 export const isSessionValid = () => {
 
@@ -119,6 +119,7 @@ const App = () => {
 
             <Route path="/leaf/count" element={<PrivateRoute element={<LeafCount />} />} />
             <Route path="/users" element={<PrivateRoute element={<Users />} />} />
+             <Route path="/lines" element={<PrivateRoute element={<Lines />} />} />
             {/* 404 */}
             <Route path="/404" element={<div>404 - Page Not Found</div>} />
             <Route path="*" element={<Navigate to="/404" replace />} />
