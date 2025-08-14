@@ -415,7 +415,12 @@ export async function fetchOfficerById(id) {
 // Create new officer
 export async function createOfficer(officerData) {
   try {
-    const response = await axios.post(`${API_BASE}/officers`, officerData);
+    const data = {
+      name: officerData.officer,
+      nic: officerData.nic, 
+      joinedDate: officerData.joinedDate
+    };    
+    const response = await axios.post(`${API_BASE}/officers`, data);
     return response.data;
   } catch (error) {
     console.error('Failed to create officer', error);
@@ -467,6 +472,17 @@ export async function updateLine(lineCode, lineId, updateData) {
     throw error;
   }
 }
+
+export async function updateOfficer(lineCode, lineId, updateData) {
+  try {    
+    const response = await axios.put(`${API_BASE}/lines/${lineCode}/${lineId}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update line", error);
+    throw error;
+  }
+}
+
 
 // Delete a line by lineCode and lineId
 export async function deleteLine(lineCode, lineId) {

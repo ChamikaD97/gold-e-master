@@ -105,8 +105,8 @@ const HeaderComponent = () => {
 
 
           <SubMenu key="factory-targets" icon={<FileOutlined />} title="Targets & Achievements">
-           
-           
+
+
             {
               role !== 'User' && (
                 <Menu.Item key="target-prediction">
@@ -169,24 +169,30 @@ const HeaderComponent = () => {
 
                   )}
 
-          {
-            role === 'Super Admin' && (
-              <Menu.Item key="lines" >
-                <Link to="/lines">Lines</Link>
-              </Menu.Item>
+                {
+                  role === 'Super Admin' && (
+                    <Menu.Item key="lines" >
+                      <Link to="/lines">Lines</Link>
+                    </Menu.Item>
 
-            )}
+                  )}
 
 
 
-          {
-            role === 'Super Admin' && (
-              <Menu.Item key="users">
-                <Link to="/users">Users</Link>
-              </Menu.Item>
+                {
+                  role === 'Super Admin' && (
+                    <Menu.Item key="users">
+                      <Link to="/users">Users</Link>
+                    </Menu.Item>
 
-            )}
+                  )}
+{
+                  role === 'Super Admin' && (
+                    <Menu.Item key="officers" >
+                      <Link to="/officers">Officers</Link>
+                    </Menu.Item>
 
+                  )}
               </SubMenu>
             )}
         </Menu>

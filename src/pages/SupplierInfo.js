@@ -15,7 +15,6 @@ import { ReloadOutlined } from "@ant-design/icons";
 import { SearchRounded } from "@mui/icons-material";
 import dayjs from "dayjs";
 import CircularLoader from "../components/CircularLoader";
-import lineIdCodeMapForAll from "../data/SummeryData.json";
 import bankIdCodes from "../data/bankIdCodes.json";
 import { API_KEY } from "../api/api";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
@@ -35,6 +34,8 @@ const SupplierInfo = () => {
   const [filters, setFilters] = useState({
     searchById: "",
   });
+    const lineIdCodeMapForAll = useSelector((state) => state.officerLine.allLines);
+  
   const [data, setData] = useState([]);
   const dispatch = useDispatch();
   const supplierId = useSelector((state) => state.commonData?.selectedSupplierId);

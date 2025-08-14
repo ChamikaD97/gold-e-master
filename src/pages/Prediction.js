@@ -5,7 +5,6 @@ import {
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import '../App.css';
-import lineIdCodeMap from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import SupplierLeafModal from "../components/SupplierLeafModal";
 import { useDispatch, useSelector } from "react-redux";
@@ -37,6 +36,7 @@ const Prediction = () => {
 
 
   
+  const lineIdCodeMap = useSelector((state) => state.officerLine.allLines);
 
   const handleTargetSearch = async () => {
     try {

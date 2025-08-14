@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Card, Col, Row, Button, Select, Input, Table, Modal, InputNumber } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMap from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
@@ -23,6 +22,7 @@ const Targets = () => {
   const [newTargets, setNewTargets] = useState([{ lineCode: "", target: 0 }]);
   const [newYear, setNewYear] = useState(currentYear);
   const [newMonth, setNewMonth] = useState(currentMonth);
+  const lineIdCodeMap = useSelector((state) => state.officerLine.allLines);
 
   const [filters, setFilters] = useState({ year: "Select Year", month: "Select Month", search: '', officer: "All", line: "Select Line", lineCode: '', officer: '' });
   const monthMap = useSelector((state) => state.commonData?.monthMap);

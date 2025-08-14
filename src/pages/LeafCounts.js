@@ -12,7 +12,6 @@ import autoTable from "jspdf-autotable";
 import { SearchRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { Modal } from "antd";
-import lineIdCodeMap from "../data/SummeryData.json";
 import CustomConfirmationModal from "../components/CustomConfirmationModal";
 const { confirm } = Modal;
 const { Option } = Select;
@@ -24,6 +23,7 @@ const LeafCount = () => {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
+  const lineIdCodeMap = useSelector((state) => state.officerLine.allLines);
 
   const [filters, setFilters] = useState({ year: "Select Year", month: "Select Month", search: '', officer: "All", line: "Select Line", lineCode: '', officer: '' });
   const monthMap = useSelector((state) => state.commonData?.monthMap);

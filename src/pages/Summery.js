@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Card, Col, Row, Button, Select, Progress } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMap from "../data/SummeryData.json";
+
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
@@ -17,7 +17,7 @@ const Summary = () => {
 
   const dispatch = useDispatch();
   const [routeSummary, setRouteSummary] = useState([]);
-
+  const lineIdCodeMap = useSelector((state) => state.officerLine.allLines);
   const [finalTotal, setFinalTotal] = useState([]);
   const [summery, setSummery] = useState([])
   const [lastRow, setLastRow] = useState([]);

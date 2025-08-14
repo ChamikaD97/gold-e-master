@@ -6,10 +6,9 @@ import {
   Tag
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import lineIdCodeMapForAll from "../data/SummeryData.json";
 import CircularLoader from "../components/CircularLoader";
 import { Pagination } from "antd"; // ✅ make sure to import this
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setSelectedSupplier } from "../redux/commonDataSlice";
 import { useNavigate } from "react-router-dom";
 import { showLoader } from "../redux/loaderSlice";
@@ -23,6 +22,7 @@ import { SearchOutlined, SearchRounded } from "@mui/icons-material";
 import CountUp from "react-countup";
 
 const Suppliers = () => {
+  const lineIdCodeMapForAll = useSelector((state) => state.officerLine.allLines);
 
   const { Option } = Select;
   const { Text } = Typography;

@@ -163,26 +163,26 @@ const Lines = () => {
         {
             title: "Officer",
             dataIndex: "officer",
-            key: "officer",render: text => (
-        <span
-          style={{
-            color: "#fff",
-            padding: "6px 12px",
-            borderRadius: "24px",
-            fontWeight: 400,
-            fontSize: 15,
-            display: "inline-block",
-            minWidth: "60px",
-            textAlign: "center",
-            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
-            transition: "transform 0.2s",
-          }}
+            key: "officer", render: text => (
+                <span
+                    style={{
+                        color: "#fff",
+                        padding: "6px 12px",
+                        borderRadius: "24px",
+                        fontWeight: 400,
+                        fontSize: 15,
+                        display: "inline-block",
+                        minWidth: "60px",
+                        textAlign: "center",
+                        boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+                        transition: "transform 0.2s",
+                    }}
 
-      
-        >
-          Mr. {text}
-        </span>
-      )
+
+                >
+                    Mr. {text}
+                </span>
+            )
         },
         {
             title: "Line Code",
@@ -214,28 +214,28 @@ const Lines = () => {
         {
             title: "Line ID",
             dataIndex: "lineId",
-            key: "lineId",render: text => (
-        <span
-          style={{
-            background: "#005f8bff",
-            color: "#fff",
-            padding: "6px 12px",
-            borderRadius: "24px",
-            fontWeight: 400,
-            fontSize: 15,
-            display: "inline-block",
-            minWidth: "60px",
-            textAlign: "center",
-            boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
-            transition: "transform 0.2s",
-          }}
+            key: "lineId", render: text => (
+                <span
+                    style={{
+                        background: "#005f8bff",
+                        color: "#fff",
+                        padding: "6px 12px",
+                        borderRadius: "24px",
+                        fontWeight: 400,
+                        fontSize: 15,
+                        display: "inline-block",
+                        minWidth: "60px",
+                        textAlign: "center",
+                        boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+                        transition: "transform 0.2s",
+                    }}
 
-         
-          
-        >
-          {text}
-        </span>
-      )
+
+
+                >
+                    {text}
+                </span>
+            )
         },
         // {
         //     title: "Started Date",

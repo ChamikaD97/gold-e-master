@@ -1,13 +1,12 @@
-import React, {  useState } from "react";
-import { Card, Col, Row, Typography, Input, Button } from "antd";
+import React, { useEffect, useState } from "react";
+import { Card, Col, Row, Typography, Input, Button, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import icon from "../images/logo.ico";
 import "./Dashboard.css";
-import { SearchRounded } from "@mui/icons-material";
-import { useDispatch } from "react-redux";
-import { setSelectedSupplier } from "../redux/commonDataSlice";
-import { showLoader } from "../redux/loaderSlice";
+import { useDispatch, useSelector } from "react-redux";
 import Clock from "../components/dashboardCards/Clock";
+import { fetchLines, login } from "../api/api";
+import { setAllLines } from "../redux/officerLineSlice";
 
 const { Text, Title } = Typography;
 
@@ -21,9 +20,34 @@ const cardStyle = {
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const lines = useSelector((state) => state.officerLine.allLines);
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
+  // Fetch lines from backend
+  const getLines = async () => {
+    try {
+      const data = await fetchLines();
+      dispatch(setAllLines(data));
+    } catch (err) {
+      message.error("Failed to fetch lines");
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    getLines();
+  }, []);
+
+useEffect(() => {
+    if (lines.length === 0) {
+      message.warning("No lines available. Please add lines to continue.");
+    } else {
+      console.log("Lines fetched successfully:", lines);
+      
+      message.success("Lines fetched successfully.");
+    }
+  }, [lines]);
 
   return (
     <div style={{ padding: 10 }}>
@@ -53,7 +77,7 @@ const Dashboard = () => {
       </Card>
 
       {/* Chart 1 | Chart 2 | Search Supplier by ID */}
-      
+
 
 
 

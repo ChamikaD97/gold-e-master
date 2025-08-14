@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import { API_KEY } from "../api/api";
 import dayjs from "dayjs";
-import lineIdCodeMapForAll from "../data/SummeryData.json";
 
 import CountUp from "react-countup";
 import { ReloadOutlined } from "@ant-design/icons";
@@ -36,6 +35,7 @@ const LeafSupplyByDateRange = () => {
     toDay: currentDay,
     line: "Select Line",
   });
+  const lineIdCodeMapForAll = useSelector((state) => state.officerLine.allLines);
 
   const uniqueLines = [{ label: "All", value: "All" }, ...lineIdCodeMapForAll.map(l => ({ label: l.lineCode, value: l.lineId, officer: l.officer }))];
   const officerLineMap = useSelector((state) => state.officerLine?.officerLineMap || {});

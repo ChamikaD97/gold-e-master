@@ -6,7 +6,6 @@ import {
 import { ReloadOutlined } from "@ant-design/icons";
 import { Modal, Progress } from "antd";
 
-import lineIdCodeMapForAll from "../data/SummeryData.json";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import dayjs from "dayjs";
@@ -22,6 +21,7 @@ const TodaySuppliersOfficer = () => {
   const { Option } = Select;
   const dispatch = useDispatch();
 
+  const lineIdCodeMapForAll = useSelector((state) => state.officerLine.allLines);
 
 
 
