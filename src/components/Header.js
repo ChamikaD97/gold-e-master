@@ -14,7 +14,7 @@ import {
 import SettingsModal from "../components/SettingsModal";
 
 import icon from "../images/logo.ico";
-import { CardTravelSharp, RouteOutlined, RouteSharp, SummarizeRounded, TableBar, TurnSharpRightTwoTone } from "@mui/icons-material";
+import { CardTravelSharp, RouteOutlined, RouteSharp, SummarizeRounded, Superscript, SuperscriptOutlined, TableBar, TurnSharpRightTwoTone } from "@mui/icons-material";
 
 const { Header } = Layout;
 const { SubMenu } = Menu;
@@ -105,14 +105,8 @@ const HeaderComponent = () => {
 
 
           <SubMenu key="factory-targets" icon={<FileOutlined />} title="Targets & Achievements">
-            {
-              role === 'Super Admin' && (
-
-                <Menu.Item key="targets" >
-                  <Link to="/targets">Manage Targets</Link>
-                </Menu.Item>
-
-              )}
+           
+           
             {
               role !== 'User' && (
                 <Menu.Item key="target-prediction">
@@ -162,9 +156,22 @@ const HeaderComponent = () => {
             )}
 
 
-   {
+          {
             role === 'Super Admin' && (
-              <Menu.Item key="lines" icon={<RouteOutlined />}>
+
+              <SubMenu key="masterData" icon={<SuperscriptOutlined />} title="Master Data">
+                {
+                  role === 'Super Admin' && (
+
+                    <Menu.Item key="targets" >
+                      <Link to="/targets">Targets</Link>
+                    </Menu.Item>
+
+                  )}
+
+          {
+            role === 'Super Admin' && (
+              <Menu.Item key="lines" >
                 <Link to="/lines">Lines</Link>
               </Menu.Item>
 
@@ -174,12 +181,14 @@ const HeaderComponent = () => {
 
           {
             role === 'Super Admin' && (
-              <Menu.Item key="users" icon={<UserOutlined />}>
+              <Menu.Item key="users">
                 <Link to="/users">Users</Link>
               </Menu.Item>
 
             )}
 
+              </SubMenu>
+            )}
         </Menu>
         <Avatar style={{ backgroundColor: '#206b00ff' }} icon={<UserOutlined />} />
         <Tooltip title="Logged in user">
