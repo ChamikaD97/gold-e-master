@@ -1,17 +1,18 @@
-import React, { useRef, useState } from "react";
-import { Card, Col, Row, Button, Select, Progress } from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { Card, Col, Row, Button, Select, Progress, message } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 
 import CircularLoader from "../components/CircularLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
-import { API_KEY, fetchMonthlyTargets, getMonthDateRangeFromParts } from "../api/api";
+import { API_KEY, fetchLines, fetchMonthlyTargets, fetchOfficers, getMonthDateRangeFromParts } from "../api/api";
 import dayjs from "dayjs";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SearchRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import CountUp from "react-countup";
+import { setAllLines, setOfficers } from "../redux/officerLineSlice";
 const { Option } = Select;
 const Summary = () => {
 
@@ -47,7 +48,9 @@ const Summary = () => {
     .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
   const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
 
-  const officerOrder = ["Ajith", "Udayanga", "Udara", "Gamini", "Chamod", "Other"];
+
+  const [officerpOrder, setOfficerOrder] = useState([]);
+  const officerOrder = ["Mr. Ajith", "Mr. Udayanga", "Mr. Udara", "Mr. Gamini", "Mr. Chamod", "Other"];
 
 
   const customLineCodeOrder = [
@@ -57,6 +60,55 @@ const Summary = () => {
     "J", "T", "SELF 02", "TK", "HA", "D",
     "SLF", "DG", "ML", "MV"
   ];
+
+
+
+
+  const getLines = async () => {
+    try {
+      const data = await fetchLines();
+      dispatch(setAllLines(data));
+      const filteredOfficers = data
+        .map(item => item.officer)
+      console.log("Fetched Lines:", data);
+
+
+      const uniqueOfficers = [...new Set(
+        data
+          .map(item => item.officer)
+          .filter(officer => officerpOrder.includes(officer))
+      )];
+uniqueOfficers.push("Other");
+      setOfficerOrder(uniqueOfficers);
+      console.log("Officer Order:", uniqueOfficers);
+
+
+
+
+    } catch (err) {
+      message.error("Failed to fetch lines");
+      console.error(err);
+    }
+  };
+  const getOfficers = async () => {
+    try {
+      const data = await fetchOfficers();
+      dispatch(setOfficers(data));
+
+
+    } catch (err) {
+      message.error("Failed to fetch Officers");
+      console.error(err);
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    getOfficers();
+
+    getLines();
+  }, []);
+
 
   const today = new Date();
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -176,7 +228,7 @@ const Summary = () => {
 
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
-    doc.text(`Leaf Summary by Mr. ${title} on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
+    doc.text(`Leaf Summary by ${title} on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
     doc.line(14, 50, 196, 50);
 
     let startY = 56;
@@ -188,7 +240,7 @@ const Summary = () => {
       if (officer == 'Other') {
         doc.text(`${officer} Summary`, 14, startY);
       } else {
-        doc.text(`Mr. ${officer} Summary`, 14, startY);
+        doc.text(`${officer} Summary`, 14, startY);
       } doc.setFont(undefined, 'normal');
       startY = renderTable(data, startY + 9);
     }
@@ -202,7 +254,7 @@ const Summary = () => {
     doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
     doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-    doc.save(`Leaf Summary by Mr. ${title} on Date: ${yesterday.toLocaleDateString()}.pdf`);
+    doc.save(`Leaf Summary by ${title} on Date: ${yesterday.toLocaleDateString()}.pdf`);
   };
 
   const exportToPDF = (pdfData, title) => {
@@ -462,7 +514,7 @@ const Summary = () => {
 
       doc.setFont(undefined, 'bold');
       doc.setFontSize(10);
-      doc.text(officer === 'Other' ? `${officer} Summary` : `Mr. ${officer} Summary`, 14, startY);
+      doc.text(officer === 'Other' ? `${officer} Summary` : `${officer} Summary`, 14, startY);
       doc.setFont(undefined, 'normal');
 
       startY = renderTable(data, startY + 9);

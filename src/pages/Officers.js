@@ -345,7 +345,9 @@ const Officers = () => {
           cancelText="Cancel"
         >
           <Input
-            placeholder="OfficerName"
+                        className="input"
+
+            placeholder="Officer Name"
             value={officer}
             onChange={e => setOfficer(e.target.value)}
             style={{ marginBottom: 10 }}
@@ -353,6 +355,8 @@ const Officers = () => {
           <Input
             placeholder="NIC"
             value={nic}
+                          className="input"
+
             onChange={e => setOfficerNIC(e.target.value)}
             style={{ marginBottom: 10 }}
           />
@@ -362,6 +366,8 @@ const Officers = () => {
             type="date"
             placeholder="Joinned Date"
             value={joinedDate}
+                          className="input"
+
             onChange={e => setjoinedDate(e.target.value)}
           />
         </Modal>

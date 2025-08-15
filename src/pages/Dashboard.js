@@ -5,8 +5,8 @@ import icon from "../images/logo.ico";
 import "./Dashboard.css";
 import { useDispatch, useSelector } from "react-redux";
 import Clock from "../components/dashboardCards/Clock";
-import { fetchLines, login } from "../api/api";
-import { setAllLines } from "../redux/officerLineSlice";
+import { fetchLines, fetchOfficers, login } from "../api/api";
+import { setAllLines, setOfficers } from "../redux/officerLineSlice";
 
 const { Text, Title } = Typography;
 
@@ -34,8 +34,22 @@ const Dashboard = () => {
       console.error(err);
     }
   };
+  const getOfficers = async () => {
+    try {
+      const data = await fetchOfficers();
+      dispatch(setOfficers(data));
+
+
+    } catch (err) {
+      message.error("Failed to fetch Officers");
+      console.error(err);
+    } finally {
+    }
+  };
 
   useEffect(() => {
+    getOfficers();
+
     getLines();
   }, []);
 

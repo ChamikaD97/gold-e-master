@@ -364,3 +364,23 @@ input::placeholder {
   cursor: pointer;
   color: #ffffff;
 }
+
+
+
+.input::placeholder {
+  color: rgba(0, 0, 0, 0.829); /* light grey for dark theme */
+}
+
+.custom-select .ant-select-selection-item {
+  color: black !important; /* selected value text */
+}
+
+.custom-select .ant-select-selector {
+  background-color: white !important; /* dropdown input background */
+}
+
+
+.custom-select .ant-select-selection-placeholder {
+  color: black !important; /* placeholder text color */
+  opacity: 0.6; /* optional: make it slightly lighter */
+}

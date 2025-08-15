@@ -3,15 +3,19 @@ import { Card, Col, Row, Button, Input, Table, Modal, Select, message } from "an
 import { ReloadOutlined } from "@ant-design/icons";
 import { SearchOutlined } from "@ant-design/icons";
 import CircularLoader from "../components/CircularLoader";
-import { fetchLines, createLine, updateLine, deleteLine } from "../api/api"; // you'll create these API functions
+import { fetchLines, createLine, updateLine, deleteLine, fetchOfficers } from "../api/api"; // you'll create these API functions
 import CustomConfirmationModal from "../components/CustomConfirmationModal";
+import { useSelector, useDispatch } from "react-redux";
+import { setAllLines, setOfficers } from "../redux/officerLineSlice";
 const { Option } = Select;
 
 const Lines = () => {
     const linesRef = useRef([]);
+    const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
     const [filteredLines, setFilteredLines] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const officers = useSelector((state) => state.officerLine.officers);
 
     const [isAddModalOpen, setAddModalOpen] = useState(false);
     const [isEditModalOpen, setEditModalOpen] = useState(false);
@@ -22,7 +26,7 @@ const Lines = () => {
         color: "#fff",
         borderRadius: 12,
         marginBottom: 6,
-    }; const [officer, setOfficer] = useState("");
+    }; const [officer, setOfficer] = useState("Select Officer");
     const [lineCode, setLineCode] = useState("");
     const [lineId, setLineId] = useState("");
     const [startedDate, setStartedDate] = useState("");
@@ -33,6 +37,8 @@ const Lines = () => {
         try {
             const data = await fetchLines();
             linesRef.current = data;
+
+
             setFilteredLines(data);
         } catch (err) {
             message.error("Failed to fetch lines");
@@ -41,8 +47,26 @@ const Lines = () => {
             setLoading(false);
         }
     };
+    const getOfficers = async () => {
+        try {
+            const data = await fetchOfficers();
+            dispatch(setOfficers(data));
+
+
+        } catch (err) {
+            message.error("Failed to fetch Officers");
+            console.error(err);
+        } finally {
+        }
+    }
 
     useEffect(() => {
+        getOfficers();
+    }, []);
+
+    useEffect(() => {
+        console.log("Officer Lines Page Loaded", officers);
+
         getLines();
     }, []);
 
@@ -180,7 +204,7 @@ const Lines = () => {
 
 
                 >
-                    Mr. {text}
+                    {text}
                 </span>
             )
         },
@@ -370,25 +394,38 @@ const Lines = () => {
                     okText="Add"
                     cancelText="Cancel"
                 >
-                    <Input
-                        placeholder="Officer"
+
+                    <Select
+                        placeholder="Select Officer"
                         value={officer}
-                        onChange={e => setOfficer(e.target.value)}
-                        style={{ marginBottom: 10 }}
+                        className="custom-select"
+                        onChange={(value) => setOfficer(value)}
+                        style={{ width: "100%", marginBottom: 10 }}
+                        options={officers.map((o) => ({
+                            value: o.name,  // fixed typo from o.íd → o.id
+                            label: o.name,
+                        }))}
                     />
+
                     <Input
+                        className="input"
+
                         placeholder="Line Code"
                         value={lineCode}
                         onChange={e => setLineCode(e.target.value)}
                         style={{ marginBottom: 10 }}
                     />
                     <Input
+                        className="input"
+
                         placeholder="Line ID"
                         value={lineId}
                         onChange={e => setLineId(e.target.value)}
                         style={{ marginBottom: 10 }}
                     />
                     <Input
+                        className="input"
+
                         type="date"
                         placeholder="Started Date"
                         value={startedDate}
@@ -409,11 +446,17 @@ const Lines = () => {
                     okText="Update"
                     cancelText="Cancel"
                 >
-                    <Input
-                        placeholder="Officer"
+                   
+                      <Select
+                        placeholder="Select Officer"
                         value={officer}
-                        onChange={e => setOfficer(e.target.value)}
-                        style={{ marginBottom: 10 }}
+                        className="custom-select"
+                        onChange={(value) => setOfficer(value)}
+                        style={{ width: "100%", marginBottom: 10 }}
+                        options={officers.map((o) => ({
+                            value: o.name,  // fixed typo from o.íd → o.id
+                            label: o.name,
+                        }))}
                     />
                     <Input
                         placeholder="Line Code"
