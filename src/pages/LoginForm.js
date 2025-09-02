@@ -49,7 +49,7 @@ const LoginPage = () => {
       <Card
         bordered={false}
         style={{
-          background: "rgba(0, 0, 0, 0.6)",
+          background: "rgba(0, 0, 0, 0.8)",
           borderRadius: 12,
           padding: 14,
           width: 460,

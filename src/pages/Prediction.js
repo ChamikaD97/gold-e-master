@@ -356,7 +356,7 @@ const Prediction = () => {
     .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
 
   const cardStyle = {
-    background: "rgba(0, 0, 0, 0.6)", color: "#fff", borderRadius: 12, marginBottom: 6
+    background: "rgba(0, 0, 0, 0.8)", color: "#fff", borderRadius: 12, marginBottom: 6
   };
 
 
@@ -657,7 +657,7 @@ const Prediction = () => {
                     const matchedOfficer = officerMatch ? officerMatch[0] : "All";
                     setFilters(f => ({ ...f, officer: val.officer, line: val, lineCode: selectedLine?.label || "", officer: matchedOfficer, month: "Select Month" }));
                   }}
-                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
                   dropdownStyle={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
                   bordered={false}
                   optionFilterProp="children"
@@ -670,7 +670,7 @@ const Prediction = () => {
               </Col>
               <Col md={3}>
                 <Select showSearch
-                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
                   value={filters.year}
                   bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
@@ -692,7 +692,7 @@ const Prediction = () => {
 
                   value={filters.month}
                   onChange={val => setFilters(prev => ({ ...prev, month: val }))}
-                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
                   bordered={false}
                 >
                   {filteredMonths.map(m => (

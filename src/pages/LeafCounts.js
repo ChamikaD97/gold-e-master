@@ -328,7 +328,7 @@ const LeafCount = () => {
 
 
   const cardStyle = {
-    background: "rgba(0, 0, 0, 0.6)",
+    background: "rgba(0, 0, 0, 0.8)",
     color: "#fff",
     borderRadius: 12,
     marginBottom: 6,
@@ -719,7 +719,7 @@ const LeafCount = () => {
                   </Col>
                   <Col md={3}>
                     <Select showSearch
-                      style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                      style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
                       value={filters.year}
                       bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
@@ -742,7 +742,7 @@ const LeafCount = () => {
                       showSearch
                       value={filters.month}
                       onChange={val => setFilters(prev => ({ ...prev, month: val }))}
-                      style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                      style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
                       bordered={false}
                     >
                       {allMonths.map(m => (

@@ -61,7 +61,7 @@ const LeafSupplyByDateRange = () => {
     getLines();
   }, []);
   const cardStyle = {
-    background: "rgba(0, 0, 0, 0.6)",
+    background: "rgba(0, 0, 0, 0.8)",
     color: "#fff",
     borderRadius: 12,
     marginBottom: 6,
@@ -71,7 +71,7 @@ const LeafSupplyByDateRange = () => {
 
   const selectStyle = {
     width: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     color: "#fff",
     border: "1px solid #333",
     borderRadius: 6

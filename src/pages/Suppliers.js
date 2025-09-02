@@ -69,6 +69,7 @@ const Suppliers = () => {
     } finally {
       setLoading(false);
     }
+
   };
   const handleDelete = () => {
     if (filteredData.length === 0) {
@@ -330,16 +331,22 @@ const Suppliers = () => {
 
 
   const cardStyle = {
-    background: "rgba(0, 0, 0, 0.6)",
+    background: "rgba(0, 0, 0, 0.8)",
     color: "#fff",
     borderRadius: 12,
     marginBottom: 6
+  };
+  const cardStyleInfoF = {
+    backgroundColor: "#28a745",
+    color: "#000000ff",
+    borderRadius: 12,
+    marginBottom: 2,
   };
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
 
-      <Row gutter={[8, 8]} justify="center">
+      <Row gutter={[8, 8]} justify="space-evenly">
         <Col md={18}>
           <Card bordered={false} style={cardStyle}>
             <Row gutter={[8, 8]} align="middle">
@@ -368,7 +375,7 @@ const Suppliers = () => {
                   onChange={val => setFilters(prev => ({ ...prev, line: val }))}
                   style={{
                     width: "100%",
-                    backgroundColor: "rgba(0, 0, 0, 0.6)",
+                    backgroundColor: "rgba(0, 0, 0, 0.8)",
                     color: "#fff",
                     border: "1px solid #333",
                     borderRadius: 6
@@ -409,7 +416,7 @@ const Suppliers = () => {
                   placeholder="Enter object-related keyword"
                   style={{
                     width: "100%",
-                    backgroundColor: "rgba(0, 0, 0, 0.6)",
+                    backgroundColor: "rgba(0, 0, 0, 0.8)",
                     color: "#fff",
                     border: "1px solid #333",
                     borderRadius: 6,
@@ -432,16 +439,29 @@ const Suppliers = () => {
             </Row>
           </Card>
         </Col>
-        <Col md={6}>
-          <Card
-            bordered={false}
-            style={{ ...cardStyle, textAlign: "center" }}
-          >
-            <span style={{ fontSize: 20, fontWeight: '600', color: '#fff' }}>
-              <CountUp end={filteredData.length} duration={0.5} separator="," /> Suppliers
-            </span>
+
+        {!loading && filteredData.length > 0 && (
+
+
+
+
+
+          <Card bordered={false} style={cardStyleInfoF}>
+
+
+            <Col md={24}   >
+
+
+
+              <div style={{ fontWeight: 'normal', fontSize: 20 }}>
+
+                <CountUp end={filteredData.length} duration={0.5} separator="," />  Suppliers
+              </div>
+            </Col>
           </Card>
-        </Col>
+
+
+        )}
 
       </Row>
 
@@ -498,7 +518,7 @@ const Suppliers = () => {
             bordered={false}
             style={{
               marginTop: 12,
-              background: "rgba(0, 0, 0, 0.6)",
+              background: "rgba(0, 0, 0, 0.8)",
               borderRadius: 16
             }}
             bodyStyle={{ padding: 0 }}

@@ -391,7 +391,7 @@ const TodaySuppliers = () => {
 
 
   const cardStyle = {
-    background: "rgba(0, 0, 0, 0.6)",
+    background: "rgba(0, 0, 0, 0.8)",
     color: "#fff",
     borderRadius: 12,
     marginBottom: 16

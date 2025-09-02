@@ -244,11 +244,35 @@ const Targets = () => {
 
 
   const cardStyle = {
-    background: "rgba(0, 0, 0, 0.6)",
+    background: "rgba(0, 0, 0, 0.8)",
     color: "#fff",
     borderRadius: 12,
     marginBottom: 6,
   };
+
+
+  const cardStyleT = {
+    backgroundColor: "#ffa347",
+    color: "#000000ff",
+    borderRadius: 12,
+    marginBottom: 6,
+  };
+
+  const cardStyleInfoF = {
+    backgroundColor: "#28a745",
+    color: "#000000ff",
+    borderRadius: 12,
+    marginBottom: 6,
+  };
+
+  const cardStyleInfo = {
+    backgroundColor: "#47a3ff",
+    color: "#000000ff",
+    borderRadius: 12,
+    marginBottom: 6,
+  };
+
+
   const handleSubmitNewTargets = async () => {
     try {
       dispatch(showLoader());
@@ -537,7 +561,7 @@ const Targets = () => {
                       </Col>
                       <Col md={6}>
                         <Select showSearch
-                          style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                          style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
                           value={filters.year}
                           bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
@@ -560,7 +584,7 @@ const Targets = () => {
                           showSearch
                           value={filters.month}
                           onChange={val => setFilters(prev => ({ ...prev, month: val }))}
-                          style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                          style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
                           bordered={false}
                         >
                           {allMonths.map(m => (
@@ -597,29 +621,66 @@ const Targets = () => {
           </Row>
 
           {totalTarget > 0 && (
-            <Card bordered={false} style={cardStyle}>
-              <div style={{ marginTop: 6 }}>
-                <CountUp end={totalTarget} decimals={1} duration={0.6} />%
-              </div>
-              <Row justify="space-evenly" gutter={[16, 16]}>
-                <Col span={24}>
-                  <Row gutter={[16, 16]}>
+
+            <Row gutter={[16, 16]} justify="space-evenly" style={{ marginTop: 10, marginBottom: 10 }}>
+
+              <Card bordered={false} style={cardStyleInfo} className="fade-in">
 
 
-                    <Col md={12}>
-                      <div style={{ fontWeight: 'normal', fontSize: 20 }}>
-                        Targets for {filters.year} {monthMap[filters.month] || filters.month}    {totalTarget} - {malinduwa}
-                      </div>
-                    </Col>
+                <Col md={24}   > <div style={{ fontWeight: '500', fontSize: 15 }}>
+                  Targets
+                </div>
 
+                  <div style={{ fontWeight: 'bold', fontSize: 25 }}>
 
-
-
-                  </Row>
+                    {filters.year} {monthMap[filters.month] || filters.month}
+                  </div>
                 </Col>
-              </Row>
+              </Card>
 
-            </Card>
+              <Card bordered={false} style={cardStyleInfoF} className="fade-in">
+
+
+                <Col md={24}   >
+
+                  <div style={{ fontWeight: '500', fontSize: 15 }}>
+                    Factory
+                  </div>
+                  <div style={{ fontWeight: 'bold', fontSize: 25 }}>
+
+                    {totalTarget - malinduwa} kg
+                  </div>
+                </Col>
+              </Card>
+
+              <Card bordered={false} style={cardStyleInfoF} className="fade-in">
+
+
+                <Col md={24}   >
+                  <div style={{ fontWeight: '500', fontSize: 15 }}>
+                    Malinduwa
+                  </div>
+
+                  <div style={{ fontWeight: 'bold', fontSize: 25 }}>
+                    {malinduwa} kg
+                  </div>
+                </Col>
+              </Card>
+              <Card bordered={false} style={cardStyleT} className="fade-in">
+
+
+                <Col md={24}   >   <div style={{ fontWeight: '500', fontSize: 15 }}>
+                  Grand Total
+                </div>
+                  <div style={{ fontWeight: 'bold', fontSize: 25 }}>
+
+
+                    {totalTarget} kg
+                  </div>
+                </Col>
+              </Card>
+            </Row>
+
           )}
 
 
@@ -631,7 +692,8 @@ const Targets = () => {
 
 
               style={cardStyle}
-              headStyle={{ color: "#fff" }}
+              headStyle={{ color: "#fff" }} 
+            className="fade-in"
             >
               <Table
                 className="sup-bordered-table"

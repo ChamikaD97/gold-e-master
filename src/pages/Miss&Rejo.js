@@ -580,179 +580,180 @@ const MissRejo = () => {
 
 
   const cardStyle = {
-    background: "rgba(0, 0, 0, 0.6)",
+    background: "rgba(0, 0, 0, 0.8)",
     color: "#fff",
     borderRadius: 12,
     marginBottom: 6,
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <div style={{ flex: "0 0 auto", marginBottom: 16 }} className="fade-in">
-        <Card bordered={false} style={cardStyle}>
-
-
-          <Row justify="space-between" gutter={[16, 16]}>
-            <Col span={24}>
-              <Row gutter={[16, 16]}>
-                <Col md={1}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
 
 
 
-                  <Button
-                    icon={<ReloadOutlined />}
-                    type="primary"
-                    danger
-                    block
-                    onClick={() => {
-                      setSelectedOfficer({ name: "Select Officer", line: "All" })
-                      setMissedSuppliers([]);
-                      setRejoinedSuppliers([]);
+      <Row gutter={[8, 8]} justify="space-evenly">
+        <Col md={24}>
+          <Card bordered={false} style={cardStyle}>
+            <Row gutter={[8, 8]} align="middle" justify="space-evenly">
+              <Col md={1}>
 
-                      setMissedTotal(0);
-                      setRejoinedTotal(0);
-                      setFilters({
-                        year: "Select Year",
-                        month: "Select Month",
-                        officer: "All",
-                        line: "Select Line",
-                        lineCode: '',
-                        officer: ''
-                      });
-                    }}
-                  >
 
-                  </Button>
 
-                </Col>
-                <Col md={3} style={{ display: "flex", alignItems: "center", height: "100%" }}>
-                  <Select
-                    placeholder="Select Officer"
-                    style={{
-                      width: "100%",
-                      backgroundColor: "rgb(0, 0, 0)",
-                      color: "#000",
-                      border: "1px solid #333",
-                      borderRadius: 6
-                    }}
-                    bordered={false}
-                    value={selectedOfficer?.name}
-                    onChange={(value) => {
-                      setFilters(
-                        { year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: '', officer: '' }
+                <Button
+                  icon={<ReloadOutlined />}
+                  type="primary"
+                  danger
+                  block
+                  onClick={() => {
+                    setSelectedOfficer({ name: "Select Officer", line: "All" })
+                    setMissedSuppliers([]);
+                    setRejoinedSuppliers([]);
 
-                      )
-                      const officer = officerList.find(o => o.name === value);
-                      setSelectedOfficer(officer);
-                      setSelectedLine(null);
-                    }}
-                  >
-                    {officerList.map((officer) => (
-                      <Option key={officer.name} value={officer.name}>
-                        Mr. {officer.name}
-                      </Option>
-                    ))}
-                  </Select>
-                </Col>
-                <Col md={3}>
-                  <Select
-                    showSearch
-                    placeholder="Select Line"
-                    value={filters.line}
-                    onChange={val => {
-                      if (val === "Select Line") {
-                        setFilters(f => ({
-                          ...f,
-                          line: val, // Only update the selected line
-                        }));
-                        return;
-                      }
+                    setMissedTotal(0);
+                    setRejoinedTotal(0);
+                    setFilters({
+                      year: "Select Year",
+                      month: "Select Month",
+                      officer: "All",
+                      line: "Select Line",
+                      lineCode: '',
+                      officer: ''
+                    });
+                  }}
+                >
 
-                      const selectedLineObj = uniqueLines.find(line => line.value === val);
-                      const matchedOfficer = selectedLineObj?.officer || "All";
+                </Button>
 
+              </Col>
+              <Col md={3} style={{ display: "flex", alignItems: "center", height: "100%" }}>
+                <Select
+                  placeholder="Select Officer"
+                  style={{
+                    width: "100%",
+                    backgroundColor: "rgb(0, 0, 0)",
+                    color: "#000",
+                    border: "1px solid #333",
+                    borderRadius: 6
+                  }}
+                  bordered={false}
+                  value={selectedOfficer?.name}
+                  onChange={(value) => {
+                    setFilters(
+                      { year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: '', officer: '' }
+
+                    )
+                    const officer = officerList.find(o => o.name === value);
+                    setSelectedOfficer(officer);
+                    setSelectedLine(null);
+                  }}
+                >
+                  {officerList.map((officer) => (
+                    <Option key={officer.name} value={officer.name}>
+                      Mr. {officer.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Col>
+              <Col md={3}>
+                <Select
+                  showSearch
+                  placeholder="Select Line"
+                  value={filters.line}
+                  onChange={val => {
+                    if (val === "Select Line") {
                       setFilters(f => ({
                         ...f,
-                        line: val,
-                        lineCode: selectedLineObj?.label || "",
-                        officer: matchedOfficer,
-                        month: "Select Month"
+                        line: val, // Only update the selected line
                       }));
-                    }}
+                      return;
+                    }
+
+                    const selectedLineObj = uniqueLines.find(line => line.value === val);
+                    const matchedOfficer = selectedLineObj?.officer || "All";
+
+                    setFilters(f => ({
+                      ...f,
+                      line: val,
+                      lineCode: selectedLineObj?.label || "",
+                      officer: matchedOfficer,
+                      month: "Select Month"
+                    }));
+                  }}
 
 
 
-                    style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
-                    dropdownStyle={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
-                    bordered={false}
-                    optionFilterProp="children"
-                    filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                  >
-                    {filteredLines.map(line => (
-                      <Option key={line.value} value={line.value}>{line.label}</Option>
-                    ))}
-                  </Select>
+                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                  dropdownStyle={{ backgroundColor: "rgba(0, 0, 0, 0.9)" }}
+                  bordered={false}
+                  optionFilterProp="children"
+                  filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                >
+                  {filteredLines.map(line => (
+                    <Option key={line.value} value={line.value}>{line.label}</Option>
+                  ))}
+                </Select>
 
-                </Col>
-                <Col md={3}>
-                  <Select showSearch
-                    style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+              </Col>
+              <Col md={3}>
+                <Select showSearch
+                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
-                    value={filters.year}
-                    bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
+                  value={filters.year}
+                  bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
 
-                    {[...Array(5)].map((_, i) => {
-                      const year = new Date().getFullYear() - i;
-                      return (
-                        <Option key={year} value={year}>
-                          {year}
-                        </Option>
-                      );
-                    })}
-
-
-                  </Select>
-                </Col>
-
-                <Col md={3}>
-                  <Select
-                    showSearch
-                    value={filters.month}
-                    onChange={val => setFilters(prev => ({ ...prev, month: val }))}
-                    style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
-                    bordered={false}
-                  >
-                    {filteredMonths.map(m => (
-                      <Option key={m} value={m}>{monthMap[m]}</Option>
-                    ))}
-                  </Select>
-                </Col>
-                <Col md={1}>
-
-                  <Button
-                    icon={<SearchRounded />}
-                    type="primary"
-                    onClick={() => getLeafRecordsByDates()}
-                  />
-                </Col>
+                  {[...Array(5)].map((_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return (
+                      <Option key={year} value={year}>
+                        {year}
+                      </Option>
+                    );
+                  })}
 
 
+                </Select>
+              </Col>
 
-                {missedSuppliers.length > 0 && (
+              <Col md={3}>
+                <Select
+                  showSearch
+                  value={filters.month}
+                  onChange={val => setFilters(prev => ({ ...prev, month: val }))}
+                  style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                  bordered={false}
+                >
+                  {filteredMonths.map(m => (
+                    <Option key={m} value={m}>{monthMap[m]}</Option>
+                  ))}
+                </Select>
+              </Col>
+              <Col md={1}>
 
-                  <>
+                <Button
+                  icon={<SearchRounded />}
+                  type="primary"
+                  onClick={() => getLeafRecordsByDates()}
+                />
+              </Col>
 
-                    <Col md={3}>
+
+
+              {missedSuppliers.length > 0 && (
+
+                <>
+                  {filters.line !== "Select Line" && (
+
+                    <Col >
                       <Button
                         type="primary"
                         style={{ marginLeft: 8 }}
                         onClick={() => exportToPDF()}
-                        disabled={filters.line == "Select Line"}
                       >
                         All
                       </Button>
                     </Col>
 
+                  )}
 
 
 
@@ -763,98 +764,104 @@ const MissRejo = () => {
 
 
 
-                    <Col md={3}>
-                      <Button
-                        type="primary"
-                        style={{ marginLeft: 8 }}
-                        onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(missedSuppliers, "Missed") : exportLineSummaryPDF(missedSuppliers, "Missed")}
-                      >
-                        Missed
-                      </Button>
-                    </Col>
-                    <Col md={4}>
-                      <Button
-                        type="primary"
-                        style={{ marginLeft: 8 }}
-                        onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(rejoinedSuppliers, "Rejoined") : exportLineSummaryPDF(rejoinedSuppliers, "Rejoined")}
-
-                      >
-                        Rejoined
-                      </Button>
-                    </Col>
-                  </>
-
-                )}
 
 
 
+                  <Col >
 
+                    <Button
+                      type="primary"
+                      style={{ marginLeft: 8 }}
+                      onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(missedSuppliers, "Missed") : exportLineSummaryPDF(missedSuppliers, "Missed")}
+                    >
+                      Missed
+                    </Button>
+                  </Col>
 
+                  <Col >
 
-              </Row>
-            </Col>
-          </Row>
+                    <Button
+                      type="primary"
+                      style={{ marginLeft: 8 }}
+                      onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(rejoinedSuppliers, "Rejoined") : exportLineSummaryPDF(rejoinedSuppliers, "Rejoined")}
 
+                    >
+                      Rejoined
+                    </Button>
+                  </Col>
+                </>
 
-
-
-        </Card>
-
-
-
-        {
-          filters.month !== "Select Month" && filters.line !== "Select Line" && missedSuppliers.length > 0 && (
-
-            <Card bordered={false} style={cardStyle}>
-
-              <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} md={12}>
-                  <div
-                    style={{
-                      backgroundColor: "rgba(255, 102, 102, 1)",
-                      borderRadius: 10,
-                      padding: "14px 24px",
-                      textAlign: "center",
-                      fontWeight: 600,
-                      color: "#000",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                    }}
-                  >
-                    Missing Cards<br />
-
-                    {/* Format: 5 / 2,646 kg */}
-                    <span style={{ fontSize: 30 }}>
-                      {missedSuppliers.length} / <CountUp end={missedTotal} duration={0} separator="," /> kg
-                    </span>
-                  </div>
-                </Col>
+              )}
 
 
 
 
 
 
+            </Row>
+          </Card>
+        </Col>
+      </Row>
 
-                <Col xs={24} sm={12} md={12}>
-                  <div
-                    style={{
-                      backgroundColor: "rgba(22, 160, 133, 1)",
-                      borderRadius: 10,
-                      padding: "14px 24px",
-                      textAlign: "center",
-                      fontWeight: 600,
-                      color: "#000",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                    }}
-                  >
-                    Rejoined Cards<br />
-                    <span style={{ fontSize: 30 }}>
-                      {rejoinedSuppliers.length} / <CountUp end={rejoinedTotal} duration={0} separator="," /> kg
-                    </span>
-                  </div>
-                </Col>
-              </Row>
-              {/* 
+
+
+      {
+        filters.month !== "Select Month" && filters.line !== "Select Line" && missedSuppliers.length > 0 && (
+
+          <Card bordered={false} style={cardStyle}>
+
+            <Row gutter={[16, 16]}>
+              <Col xs={24} sm={12} md={12}>
+                <div
+                  style={{
+                    backgroundColor: "rgba(255, 102, 102, 1)",
+                    borderRadius: 10,
+                    padding: "14px 24px",
+                    textAlign: "center",
+                    fontWeight: 600,
+                    color: "#000",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+
+                  }
+
+
+                  }
+                  className="fade-in">
+                  Missing Cards<br />
+
+                  {/* Format: 5 / 2,646 kg */}
+                  <span style={{ fontSize: 30 }}>
+                    {missedSuppliers.length} / <CountUp end={missedTotal} duration={0} separator="," /> kg
+                  </span>
+                </div>
+              </Col>
+
+
+
+
+
+
+
+              <Col xs={24} sm={12} md={12}>
+                <div
+                  style={{
+                    backgroundColor: "rgba(22, 160, 133, 1)",
+                    borderRadius: 10,
+                    padding: "14px 24px",
+                    textAlign: "center",
+                    fontWeight: 600,
+                    color: "#000",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                  }}
+                 className="fade-in">
+                  Rejoined Cards<br />
+                  <span style={{ fontSize: 30 }}>
+                    {rejoinedSuppliers.length} / <CountUp end={rejoinedTotal} duration={0} separator="," /> kg
+                  </span>
+                </div>
+              </Col>
+            </Row>
+            {/* 
               <Row gutter={[16, 16]} style={{ marginTop: 32 }}>
                 <Col span={12}>
                   <Card bordered={false} style={cardStyle}>
@@ -883,97 +890,98 @@ const MissRejo = () => {
               </Row> */}
 
 
-            </Card>
-          )
-        }
+          </Card>
+        )
+      }
 
-        {
-          filters.month !== "Select Month" && filters.line === "Select Line" && missedSuppliers.length > 0 && (
-            <Card bordered={false} style={cardStyle}>
-              <Row gutter={[16, 16]}>
+      {
+        filters.month !== "Select Month" && filters.line === "Select Line" && missedSuppliers.length > 0 && (
+          <Card bordered={false} style={cardStyle}>
+            <Row gutter={[16, 16]}>
 
-                {/* Missing Cards */}
-                <Col xs={24} sm={12} md={12}>
-                  <div
-                    style={{
-                      backgroundColor: "rgba(255, 102, 102, 1)",
-                      borderRadius: 10,
-                      padding: "14px 24px",
-                      color: "#000",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                    }}
-                  >
-                    <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>
-                      Missing Cards
-                    </div>
-                    <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "rgba(0, 0, 0, 0.85)", borderRadius: 10 }}>
-                      <thead>
-                        <tr>
-                          <th style={thStyle}>Line</th>
-                          <th style={thStyle}>Count</th>
-                          <th style={thStyle}>Total (kg)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {missedSuppliersSummery.map(item => (
-                          <tr key={item.line}>
-                            <td style={tdStyle}>{item.line}</td>
-                            <td style={tdStyle}>{item.arrayLength}</td>
-                            <td style={tdStyle}>{item.total_kg}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+              {/* Missing Cards */}
+              <Col xs={24} sm={12} md={12}>
+                <div
+                  style={{
+                    backgroundColor: "rgba(255, 102, 102, 1)",
+                    borderRadius: 10,
+                    padding: "14px 24px",
+                    color: "#000",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                  }}
+               className="fade-in">
+                  <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>
+                    Missing Cards
                   </div>
-                </Col>
-
-                {/* Rejoined Cards */}
-                <Col xs={24} sm={12} md={12}>
-                  <div
-                    style={{
-                      backgroundColor: "rgba(22, 160, 133, 1)",
-                      borderRadius: 10,
-                      padding: "14px 24px",
-                      color: "#000",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                    }}
-                  >
-                    <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>
-                      Rejoined Cards
-                    </div>
-                    <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "rgba(0, 0, 0, 0.85)", borderRadius: 10 }}>
-                      <thead>
-                        <tr>
-                          <th style={thStyle}>Line</th>
-                          <th style={thStyle}>Count</th>
-                          <th style={thStyle}>Total (kg)</th>
+                  <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "rgba(0, 0, 0, 0.85)", borderRadius: 10 }}>
+                    <thead>
+                      <tr>
+                        <th style={thStyle}>Line</th>
+                        <th style={thStyle}>Count</th>
+                        <th style={thStyle}>Total (kg)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {missedSuppliersSummery.map(item => (
+                        <tr key={item.line}>
+                          <td style={tdStyle}>{item.line}</td>
+                          <td style={tdStyle}>{item.arrayLength}</td>
+                          <td style={tdStyle}>{item.total_kg}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {rejoinedSuppliersSummery.map(item => (
-                          <tr key={item.line}>
-                            <td style={tdStyle}>{item.line}</td>
-                            <td style={tdStyle}>{item.arrayLength}</td>
-                            <td style={tdStyle}>{item.total_kg}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Col>
+
+              {/* Rejoined Cards */}
+              <Col xs={24} sm={12} md={12}>
+                <div
+                  style={{
+                    backgroundColor: "rgba(22, 160, 133, 1)",
+                    borderRadius: 10,
+                    padding: "14px 24px",
+                    color: "#000",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
+                  }}
+               className="fade-in">
+                  <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>
+                    Rejoined Cards
                   </div>
-                </Col>
+                  <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "rgba(0, 0, 0, 0.85)", borderRadius: 10 }}>
+                    <thead>
+                      <tr>
+                        <th style={thStyle}>Line</th>
+                        <th style={thStyle}>Count</th>
+                        <th style={thStyle}>Total (kg)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rejoinedSuppliersSummery.map(item => (
+                        <tr key={item.line}>
+                          <td style={tdStyle}>{item.line}</td>
+                          <td style={tdStyle}>{item.arrayLength}</td>
+                          <td style={tdStyle}>{item.total_kg}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Col>
 
-              </Row>
-            </Card>
-          )
-        }
+            </Row>
+          </Card>
+        )
+      }
 
 
 
-        {loading && <CircularLoader />}
+      {loading && <CircularLoader />}
 
 
-      </div >
+
     </div >
+
   );
 };
 

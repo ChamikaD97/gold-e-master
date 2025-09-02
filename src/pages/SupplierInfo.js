@@ -163,7 +163,7 @@ const SupplierInfo = () => {
 
 
   const cardStyle = {
-    background: "rgba(0, 0, 0, 0.65)",
+    background: "rgba(0, 0, 0, 0.85)",
     color: "#fff",
     borderRadius: 12,
     marginBottom: 16,

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Card, Col, Row, Button, Select, Progress, message } from "antd";
+import { Card, Col, Row, Button, Select, Progress, Typography, message } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 
 import CircularLoader from "../components/CircularLoader";
@@ -43,7 +43,12 @@ const Summary = () => {
   const currentMonth = String(currentDate.getMonth() + 1).padStart(2, "0");
 
   const [filters, setFilters] = useState({ year: "Select Year", month: "Select Month", officer: "All", line: "Select Line", lineCode: '', officer: '' });
-  const monthMap = useSelector((state) => state.commonData?.monthMap);
+  const monthMap =
+  {
+    "01": "January", "02": "February", "03": "March", "04": "April",
+    "05": "May", "06": "June", "07": "July", "08": "August",
+    "09": "September", "10": "October", "11": "November", "12": "December"
+  }
   const filteredMonths = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
     .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
   const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
@@ -78,7 +83,7 @@ const Summary = () => {
           .map(item => item.officer)
           .filter(officer => officerpOrder.includes(officer))
       )];
-uniqueOfficers.push("Other");
+      uniqueOfficers.push("Other");
       setOfficerOrder(uniqueOfficers);
       console.log("Officer Order:", uniqueOfficers);
 
@@ -115,36 +120,88 @@ uniqueOfficers.push("Other");
   const daysRemaining = endOfMonth.getDate() - today.getDate() + 1;
   const exportToPDFOfficer = (pdfData, title, key) => {
     const doc = new jsPDF();
+
+    // --- Month helpers ---
+    const monthMap = {
+      "01": "January", "02": "February", "03": "March", "04": "April",
+      "05": "May", "06": "June", "07": "July", "08": "August",
+      "09": "September", "10": "October", "11": "November", "12": "December"
+    };
+    const pad2 = (v) => String(v).padStart(2, "0");
+    const getMonthName = (num) => monthMap[pad2(num)] || monthMap[num] || "";
+
+    // --- Current / Selected month-year ---
+    const now = new Date();
+    const currentMonthNum = now.getMonth() + 1; // 1..12
+    const currentYear = now.getFullYear();
+    const currentMonthName = getMonthName(currentMonthNum);
+
+    // filters must be in scope (or pass them in)
+    const selectedMonthNum = Number(filters?.month ?? currentMonthNum);
+    const selectedYear = Number(filters?.year ?? currentYear);
+    const selectedMonthName = getMonthName(selectedMonthNum);
+
+    const isCurrentMonth =
+      selectedMonthNum === currentMonthNum && selectedYear === currentYear;
+
+    if (!isCurrentMonth) {
+      console.log(
+        `[NOT CURRENT MONTH] Selected: ${selectedMonthName} ${selectedYear} — Current: ${currentMonthName} ${currentYear}`
+      );
+      // message.info?.(`Showing data for ${selectedMonthName} ${selectedYear} (not current month).`);
+    }
+
+    // --- Yesterday (for header label) ---
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
-    const renderTable = (data, startY) => {
-      const tableData = data.map((row, index) => {
+    // --- Days remaining for "Per Day" (only for current month) ---
+    const daysInSelectedMonth = new Date(selectedYear, selectedMonthNum, 0).getDate();
+    const daysRemaining = isCurrentMonth
+      ? Math.max(0, daysInSelectedMonth - yesterday.getDate())
+      : 0;
+
+    // --- Table renderer ---
+    const renderTable = (rows, startY) => {
+      const tableData = rows.map((row, index) => {
+        const safeLine = typeof row.line === "string" ? row.line : String(row.line ?? "");
         let lineCode = "";
         if (row.isTotal) {
           lineCode = "Total";
-        } else if (row.line.includes("(")) {
-          const [code] = row.line.split("(");
+        } else if (safeLine.includes("(")) {
+          const [code] = safeLine.split("(");
           lineCode = code.trim();
         } else {
-          lineCode = row.line;
+          lineCode = safeLine;
         }
+
+        const target = Number(row.target ?? 0);
+        const total = Number(row.total ?? 0);
+        const difference = Number(row.difference ?? 0);
+        const superKg = Number(row.super ?? 0);
+
+        const pctTarget = target > 0 ? ((total / target) * 100).toFixed(0) + "%" : "-";
+        const pctSuper = superKg > 0 && total > 0 ? ((superKg / total) * 100).toFixed(0) + "%" : "-";
+        const perDay =
+          difference > 0 && daysRemaining > 0
+            ? Math.round(difference / daysRemaining).toLocaleString()
+            : "-";
 
         return [
           row.isTotal ? "" : index + 1,
           lineCode,
-          row.target.toLocaleString(),
-          row.total.toLocaleString(),
-          row.difference.toLocaleString(),
-          row.target > 0 ? ((row.total / row.target) * 100).toFixed(0) + "%" : "-",
-          row.super.toLocaleString(),
-          row.super > 0 ? ((row.super / row.total) * 100).toFixed(0) + "%" : "-",
-          row.difference > 0 && daysRemaining > 0 ? Math.round(row.difference / daysRemaining).toLocaleString() : "-"
+          target.toLocaleString(),
+          total.toLocaleString(),
+          difference.toLocaleString(),
+          pctTarget,
+          superKg.toLocaleString(),
+          pctSuper,
+          perDay,
         ];
       });
 
       autoTable(doc, {
-        startY: startY,
+        startY,
         head: [["#", "Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
         body: tableData,
         styles: {
@@ -170,43 +227,51 @@ uniqueOfficers.push("Other");
           const rowIndex = data.row.index;
           const lastIndex = data.table.body.length - 1;
 
-          if (data.section === 'body') {
-            if (columnIndex === 1 && cellValue !== "Total" && rowIndex !== lastIndex) {
-              data.cell.styles.fillColor = [255, 255, 153];
-            }
+          if (data.section !== "body") return;
 
-            if (rowIndex === lastIndex && data.row.cells[1].raw === "Total") {
-              data.cell.styles.fillColor = [255, 192, 203];
-              data.cell.styles.fontStyle = "bold";
-              data.cell.styles.textColor = [0, 0, 0];
-            }
+          // Highlight line cells (non-total rows)
+          if (columnIndex === 1 && cellValue !== "Total" && rowIndex !== lastIndex) {
+            data.cell.styles.fillColor = [255, 255, 153]; // light yellow
+          }
 
-            if (columnIndex === 5 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
-              const percent = parseFloat(cellValue.replace('%', ''));
+          // Totals row styling
+          if (rowIndex === lastIndex && data.row.cells[1]?.raw === "Total") {
+            data.cell.styles.fillColor = [255, 192, 203]; // pink
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.textColor = [0, 0, 0];
+          }
+
+          // % of target column (index 5)
+          if (columnIndex === 5 && typeof cellValue === "string" && cellValue.endsWith("%")) {
+            const percent = parseFloat(cellValue.replace("%", ""));
+            if (!isNaN(percent)) {
               if (percent >= 100) {
                 data.cell.raw = `${cellValue} ✅ Done`;
-                data.cell.styles.fillColor = [0, 255, 127];
+                data.cell.styles.fillColor = [0, 255, 127]; // spring green
               } else if (percent >= 70) {
-                data.cell.styles.fillColor = [153, 255, 153];
+                data.cell.styles.fillColor = [153, 255, 153]; // light green
               } else if (percent >= 50) {
-                data.cell.styles.fillColor = [255, 204, 102];
+                data.cell.styles.fillColor = [255, 204, 102]; // light orange
               } else if (percent >= 20) {
-                data.cell.styles.fillColor = [255, 255, 153];
+                data.cell.styles.fillColor = [255, 255, 153]; // light yellow
               } else {
-                data.cell.styles.fillColor = [255, 102, 102];
+                data.cell.styles.fillColor = [255, 102, 102]; // light red
               }
               data.cell.styles.fontStyle = "bold";
               data.cell.styles.textColor = [0, 0, 0];
             }
+          }
 
-            if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
-              const percent = parseFloat(cellValue.replace('%', ''));
+          // % Super column (index 7)
+          if (columnIndex === 7 && typeof cellValue === "string" && cellValue.endsWith("%")) {
+            const percent = parseFloat(cellValue.replace("%", ""));
+            if (!isNaN(percent)) {
               data.cell.styles.fillColor = percent > 50 ? [153, 255, 153] : [255, 102, 102];
               data.cell.styles.fontStyle = "bold";
               data.cell.styles.textColor = [0, 0, 0];
             }
           }
-        }
+        },
       });
 
       return doc.lastAutoTable.finalY + 10;
@@ -216,82 +281,119 @@ uniqueOfficers.push("Other");
     doc.setFontSize(14);
     doc.setTextColor(0);
     doc.line(14, 12, 196, 12);
-    doc.setFont(undefined, 'bold');
+    doc.setFont(undefined, "bold");
     doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 18, { align: "center" });
 
     doc.setFontSize(9);
     doc.line(14, 22, 196, 22);
-    doc.setFont(undefined, 'normal');
+    doc.setFont(undefined, "normal");
     doc.text("Factory: Panakaduwa, Rotumba.", 14, 30);
     doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
     doc.line(14, 39, 196, 39);
 
     doc.setFontSize(11);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Leaf Summary by ${title} on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
-    doc.line(14, 50, 196, 50);
-
-    let startY = 56;
-    const officer = officerOrder[key];
-    const data = pdfData.filter(row => row.officer === officer);
-    if (data.length > 0) {
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(10);
-      if (officer == 'Other') {
-        doc.text(`${officer} Summary`, 14, startY);
-      } else {
-        doc.text(`${officer} Summary`, 14, startY);
-      } doc.setFont(undefined, 'normal');
-      startY = renderTable(data, startY + 9);
+    doc.setFont(undefined, "normal");
+    if (isCurrentMonth) {
+      doc.text(`Leaf Summary by ${title} on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
+    } else {
+      doc.text(`Leaf Summary by ${title} for ${selectedMonthName} ${selectedYear}`, 14, 46);
     }
 
+
+    //doc.text(`Leaf Summary by ${title} on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
+    doc.line(14, 50, 196, 50);
+
+    // === Content ===
+    let startY = 56;
+    const officer = officerOrder?.[key] ?? title; // officerOrder must be in scope
+    const dataForOfficer = (pdfData || []).filter((row) => row.officer === officer);
+
+    if (dataForOfficer.length > 0) {
+      doc.setFont(undefined, "bold");
+      doc.setFontSize(10);
+      doc.text(`${officer} Summary`, 14, startY);
+      doc.setFont(undefined, "normal");
+      startY = renderTable(dataForOfficer, startY + 9);
+    } else {
+      doc.setFontSize(10);
+      doc.text(`No data available for ${officer}`, 14, startY);
+      startY += 8;
+    }
+
+    // === Footer ===
     const pageCount = doc.internal.getNumberOfPages();
     doc.setPage(pageCount);
     doc.line(14, 275, 196, 275);
     doc.setFontSize(8);
     doc.setTextColor(5);
-    doc.setFont(undefined, 'normal');
+    doc.setFont(undefined, "normal");
     doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
     doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-    doc.save(`Leaf Summary by ${title} on Date: ${yesterday.toLocaleDateString()}.pdf`);
+    // === Save ===
+    const fileDate = yesterday.toLocaleDateString().replaceAll("/", "-");
+    doc.save(`Leaf Summary by ${title} on Date ${fileDate}.pdf`);
   };
+
 
   const exportToPDF = (pdfData, title) => {
     const doc = new jsPDF();
+
+    // --- Dates & daysRemaining (used for "Per Day") ---
+    const now = new Date();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
-    const renderTable = (data, startY) => {
+    const currentMonthNum = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
 
-      const tableData = data.map((row, index) => {
+    const selectedMonthNum = Number(filters?.month ?? currentMonthNum);
+    const selectedYear = Number(filters?.year ?? currentYear);
+
+    const isCurrentMonth =
+      selectedMonthNum === currentMonthNum && selectedYear === currentYear;
+
+    const daysInSelectedMonth = new Date(selectedYear, selectedMonthNum, 0).getDate();
+    const daysRemaining = isCurrentMonth
+      ? Math.max(0, daysInSelectedMonth - yesterday.getDate())
+      : 0;
+
+    // --- Table renderers ---
+    const renderTable = (rows, startY) => {
+      const tableData = rows.map((row, index) => {
+        const safeLine = typeof row.line === "string" ? row.line : String(row.line ?? "");
         let lineCode = "";
         if (row.isTotal) {
           lineCode = "Total";
-        } else if (row.line.includes("(")) {
-          const [code] = row.line.split("(");
+        } else if (safeLine.includes("(")) {
+          const [code] = safeLine.split("(");
           lineCode = code.trim();
         } else {
-          lineCode = row.line;
+          lineCode = safeLine;
         }
+
+        const target = Number(row.target ?? 0);
+        const total = Number(row.total ?? 0);
+        const difference = Number(row.difference ?? 0);
+        const superKg = Number(row.super ?? 0);
 
         return [
           row.isTotal ? "" : index + 1,
           lineCode,
-          row.target.toLocaleString(),
-          row.total.toLocaleString(),
-          row.difference.toLocaleString(),
-          row.target > 0 ? ((row.total / row.target) * 100).toFixed(0) + "%" : "-",
-          row.super.toLocaleString(),
-          row.super > 0 ? ((row.super / row.total) * 100).toFixed(0) + "%" : "-",
-          row.difference > 0 && daysRemaining > 0
-            ? Math.round(row.difference / daysRemaining).toLocaleString()
-            : "-"
+          target.toLocaleString(),
+          total.toLocaleString(),
+          difference.toLocaleString(),
+          target > 0 ? ((total / target) * 100).toFixed(0) + "%" : "-",
+          superKg.toLocaleString(),
+          total > 0 ? ((superKg / total) * 100).toFixed(0) + "%" : "-",
+          difference > 0 && daysRemaining > 0
+            ? Math.round(difference / daysRemaining).toLocaleString()
+            : "-",
         ];
       });
 
       autoTable(doc, {
-        startY: startY,
+        startY,
         head: [["#", "Line", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
         body: tableData,
         styles: {
@@ -306,32 +408,34 @@ uniqueOfficers.push("Other");
           halign: "center",
           valign: "middle",
         },
-        bodyStyles: {
-          halign: "center",
-          valign: "middle",
-        },
+        bodyStyles: { halign: "center", valign: "middle" },
         margin: { left: 14, right: 14 },
         didParseCell: function (data) {
-          const columnIndex = data.column.index;
-          const cellValue = data.cell.raw;
+          const col = data.column.index;
+          const raw = data.cell.raw;
           const rowIndex = data.row.index;
           const lastIndex = data.table.body.length - 1;
 
-          if (data.section === 'body') {
-            if (columnIndex === 1 && cellValue !== "Total" && rowIndex !== lastIndex) {
-              data.cell.styles.fillColor = [255, 255, 153];
-            }
+          if (data.section !== "body") return;
 
-            if (rowIndex === lastIndex && data.row.cells[1].raw === "Total") {
-              data.cell.styles.fillColor = [255, 192, 203];
-              data.cell.styles.fontStyle = "bold";
-              data.cell.styles.textColor = [0, 0, 0];
-            }
+          // Highlight line cells (non-total rows)
+          if (col === 1 && raw !== "Total" && rowIndex !== lastIndex) {
+            data.cell.styles.fillColor = [255, 255, 153];
+          }
 
-            if (columnIndex === 5 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
-              const percent = parseFloat(cellValue.replace('%', ''));
+          // Totals row styling
+          if (rowIndex === lastIndex && data.row.cells[1]?.raw === "Total") {
+            data.cell.styles.fillColor = [255, 192, 203];
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.textColor = [0, 0, 0];
+          }
+
+          // Achievement % color banding
+          if (col === 5 && typeof raw === "string" && raw.endsWith("%")) {
+            const percent = parseFloat(raw.replace("%", ""));
+            if (!isNaN(percent)) {
               if (percent >= 100) {
-                data.cell.raw = `${cellValue} ✅ Done`;
+                data.cell.raw = `${raw} ✅ Done`;
                 data.cell.styles.fillColor = [0, 255, 127];
               } else if (percent >= 70) {
                 data.cell.styles.fillColor = [153, 255, 153];
@@ -345,41 +449,47 @@ uniqueOfficers.push("Other");
               data.cell.styles.fontStyle = "bold";
               data.cell.styles.textColor = [0, 0, 0];
             }
+          }
 
-            if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
-              const percent = parseFloat(cellValue.replace('%', ''));
+          // Super % color
+          if (col === 7 && typeof raw === "string" && raw.endsWith("%")) {
+            const percent = parseFloat(raw.replace("%", ""));
+            if (!isNaN(percent)) {
               data.cell.styles.fillColor = percent >= 50 ? [153, 255, 153] : [255, 102, 102];
               data.cell.styles.fontStyle = "bold";
               data.cell.styles.textColor = [0, 0, 0];
             }
           }
-        }
+        },
       });
 
       return doc.lastAutoTable.finalY + 10;
     };
 
+    const renderTableLast = (rows, startY) => {
+      const tableData = rows.map((row, index) => {
+        const target = Number(row.target ?? 0);
+        const total = Number(row.total ?? 0);
+        const difference = Number(row.difference ?? 0);
+        const superKg = Number(row.super ?? 0);
 
-    const renderTableLast = (data, startY) => {
-      const tableData = data.map((row, index) => {
         return [
           index + 1,
-
-          row.officer,
-          row.target.toLocaleString(),
-          row.total.toLocaleString(),
-          row.difference.toLocaleString(),
-          row.target > 0 ? ((row.total / row.target) * 100).toFixed(0) + "%" : "-",
-          row.super.toLocaleString(),
-          row.total > 0 ? ((row.super / row.total) * 100).toFixed(0) + "%" : "-",
-          row.difference > 0 && daysRemaining > 0
-            ? Math.round(row.difference / daysRemaining).toLocaleString()
-            : "-"
+          row.officer ?? "",
+          target.toLocaleString(),
+          total.toLocaleString(),
+          difference.toLocaleString(),
+          target > 0 ? ((total / target) * 100).toFixed(0) + "%" : "-",
+          superKg.toLocaleString(),
+          total > 0 ? ((superKg / total) * 100).toFixed(0) + "%" : "-",
+          difference > 0 && daysRemaining > 0
+            ? Math.round(difference / daysRemaining).toLocaleString()
+            : "-",
         ];
       });
 
       autoTable(doc, {
-        startY: startY,
+        startY,
         head: [["#", "Officer", "Target", "Received", "Difference", "%", "Super", "%", "Per Day"]],
         body: tableData,
         styles: {
@@ -394,35 +504,34 @@ uniqueOfficers.push("Other");
           halign: "center",
           valign: "middle",
         },
-        bodyStyles: {
-          halign: "center",
-          valign: "middle",
-        },
+        bodyStyles: { halign: "center", valign: "middle" },
         margin: { left: 14, right: 14 },
         didParseCell: function (data) {
-          const columnIndex = data.column.index;
-          const cellValue = data.cell.raw;
+          const col = data.column.index;
+          const raw = data.cell.raw;
           const rowIndex = data.row.index;
           const lastIndex = data.table.body.length - 1;
 
-          if (data.section === 'body') {
-            // Highlight officer name column
-            if (columnIndex === 1 && cellValue !== "" && rowIndex !== lastIndex) {
-              data.cell.styles.fillColor = [255, 255, 153];
-            }
+          if (data.section !== "body") return;
 
-            // Highlight final total row
-            if (rowIndex === lastIndex) {
-              data.cell.styles.fillColor = [255, 192, 203];
-              data.cell.styles.fontStyle = "bold";
-              data.cell.styles.textColor = [0, 0, 0];
-            }
+          // officer column highlight (not last row)
+          if (col === 1 && raw !== "" && rowIndex !== lastIndex) {
+            data.cell.styles.fillColor = [255, 255, 153];
+          }
 
-            // Achievement %
-            if (columnIndex === 5 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
-              const percent = parseFloat(cellValue.replace('%', ''));
+          // final total row highlight
+          if (rowIndex === lastIndex) {
+            data.cell.styles.fillColor = [255, 192, 203];
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.textColor = [0, 0, 0];
+          }
+
+          // Achievement %
+          if (col === 5 && typeof raw === "string" && raw.endsWith("%")) {
+            const percent = parseFloat(raw.replace("%", ""));
+            if (!isNaN(percent)) {
               if (percent >= 100) {
-                data.cell.raw = `${cellValue} ✅ Done`;
+                data.cell.raw = `${raw} ✅ Done`;
                 data.cell.styles.fillColor = [0, 255, 127];
               } else if (percent >= 70) {
                 data.cell.styles.fillColor = [153, 255, 153];
@@ -436,56 +545,75 @@ uniqueOfficers.push("Other");
               data.cell.styles.fontStyle = "bold";
               data.cell.styles.textColor = [0, 0, 0];
             }
+          }
 
-            // Super % color
-            if (columnIndex === 7 && typeof cellValue === 'string' && cellValue.endsWith('%')) {
-              const percent = parseFloat(cellValue.replace('%', ''));
+          // Super %
+          if (col === 7 && typeof raw === "string" && raw.endsWith("%")) {
+            const percent = parseFloat(raw.replace("%", ""));
+            if (!isNaN(percent)) {
               data.cell.styles.fillColor = percent >= 50 ? [153, 255, 153] : [255, 102, 102];
               data.cell.styles.fontStyle = "bold";
               data.cell.styles.textColor = [0, 0, 0];
             }
           }
-        }
+        },
       });
 
       return doc.lastAutoTable.finalY + 10;
     };
 
-
     // === Header ===
     doc.setFontSize(14);
     doc.setTextColor(0);
     doc.line(14, 12, 196, 12);
-    doc.setFont(undefined, 'bold');
+    doc.setFont(undefined, "bold");
     doc.text("GREEN HOUSE PLANTATION (PVT) LIMITED", 105, 18, { align: "center" });
 
     doc.setFontSize(9);
     doc.line(14, 22, 196, 22);
-    doc.setFont(undefined, 'normal');
+    doc.setFont(undefined, "normal");
     doc.text("Factory: Panakaduwa, Rotumba.", 14, 30);
     doc.text("Email: gtgreenhouse9@gmail.com | Tele: +94 77 2004609", 14, 35);
     doc.line(14, 39, 196, 39);
 
     // === Title ===
     doc.setFontSize(11);
-    doc.setFont(undefined, 'normal');
-    const summaryTitle = title === 'Full Summery'
-      ? `Leaf Summary on Date: ${yesterday.toLocaleDateString()}`
-      : title;
-    doc.text(summaryTitle, 14, 46);
+    doc.setFont(undefined, "normal");
+
+    const monthMap = {
+      "01": "January", "02": "February", "03": "March", "04": "April",
+      "05": "May", "06": "June", "07": "July", "08": "August",
+      "09": "September", "10": "October", "11": "November", "12": "December"
+    };
+    const pad2 = (v) => String(v).padStart(2, "0");
+
+    if (isCurrentMonth) {
+      const summaryTitle =
+        title === "Full Summery"
+          ? `Leaf Summary on Date: ${yesterday.toLocaleDateString()}`
+          : title;
+      doc.text(summaryTitle, 14, 46);
+      // doc.text(`Leaf Summary on Date: ${yesterday.toLocaleDateString()}`, 14, 46);
+    }
+    else {
+      const monthName = monthMap[pad2(selectedMonthNum)] || "";
+      doc.text(`Leaf Summary for ${monthName} ${selectedYear}`, 14, 46);
+    }
+    //
+
     doc.line(14, 50, 196, 50);
 
     let startY = 56;
 
     // === Prepare final summary data ===
-    const finalD = finalTotal
-      .filter(row => row.isTotal)
-      .map(row => ({
+    const finalD = (finalTotal || [])
+      .filter((row) => row.isTotal)
+      .map((row) => ({
         ...row,
-        target: Number(row.target),
-        total: Number(row.total),
-        super: Number(row.super),
-        difference: Number(row.difference)
+        target: Number(row.target ?? 0),
+        total: Number(row.total ?? 0),
+        super: Number(row.super ?? 0),
+        difference: Number(row.difference ?? 0),
       }));
 
     const allButLast = finalD.slice(0, -1);
@@ -494,39 +622,43 @@ uniqueOfficers.push("Other");
       officer: "Total",
       line: "Total",
       lineCode: "",
-      super: allButLast.reduce((sum, row) => sum + row.super, 0),
-      total: allButLast.reduce((sum, row) => sum + row.total, 0),
-      target: allButLast.reduce((sum, row) => sum + row.target, 0),
-      difference: allButLast.reduce((sum, row) => sum + row.difference, 0),
+      super: allButLast.reduce((sum, r) => sum + r.super, 0),
+      total: allButLast.reduce((sum, r) => sum + r.total, 0),
+      target: allButLast.reduce((sum, r) => sum + r.target, 0),
+      difference: allButLast.reduce((sum, r) => sum + r.difference, 0),
       officerRowSpan: 0,
-      isTotal: true
+      isTotal: true,
     };
-
     const updatedFinalD = [...allButLast, totalRow];
 
-    // === Render Officer Summaries ===
-    officerOrder.forEach((officer, i) => {
-      const data = pdfData.filter(row => row.officer === officer);
-      if (!data.length) return;
+    // === Officer pages ===
 
-      if (i === 2 || i === 5) doc.addPage();
-      if (i === 2 || i === 5) startY = 20;
+    
+    (officerOrder || []).forEach((officer, i) => {
+      const dataForOfficer = (pdfData || []).filter((row) => row.officer === officer);
+      if (!dataForOfficer.length) return;
 
-      doc.setFont(undefined, 'bold');
+      if (i > 0) {
+        doc.addPage();
+        startY = 20;
+      }
+
+      doc.setFont(undefined, "bold");
       doc.setFontSize(10);
-      doc.text(officer === 'Other' ? `${officer} Summary` : `${officer} Summary`, 14, startY);
-      doc.setFont(undefined, 'normal');
+      doc.text(`${officer} Summary`, 14, startY);
+      doc.setFont(undefined, "normal");
 
-      startY = renderTable(data, startY + 9);
+      startY = renderTable(dataForOfficer, startY + 9);
     });
 
-    // === Render Full Summary Page ===
+    // === Full Summary page ===
+    doc.addPage();
     startY = 70;
 
-    doc.setFont(undefined, 'bold');
+    doc.setFont(undefined, "bold");
     doc.setFontSize(10);
     doc.text("Full Summary", 14, startY);
-    doc.setFont(undefined, 'normal');
+    doc.setFont(undefined, "normal");
 
     startY = renderTableLast(updatedFinalD, startY + 9);
 
@@ -536,13 +668,14 @@ uniqueOfficers.push("Other");
     doc.line(14, 275, 196, 275);
     doc.setFontSize(8);
     doc.setTextColor(5);
-    doc.setFont(undefined, 'normal');
+    doc.setFont(undefined, "normal");
     doc.text("Green House Plantation SLMS | DA Engineer | ACD Jayasinghe", 14, 280);
     doc.text("0718553224 | deshjayasingha@gmail.com", 14, 285);
 
-    doc.save("GreenHouse_Summary.pdf");
+    // === Save ===
+    const fileDate = yesterday.toLocaleDateString().replaceAll("/", "-");
+    doc.save(`GreenHouse_Summary_${fileDate}.pdf`);
   };
-
 
 
 
@@ -584,7 +717,8 @@ uniqueOfficers.push("Other");
   const getLeafRecordsByDates = async () => {
     const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
 
-
+   
+    
     const ids = Array.from({ length: 170 }, (_, i) => i + 1).join(",");
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${dateRange}`;
 
@@ -1021,10 +1155,75 @@ uniqueOfficers.push("Other");
 
 
   const cardStyle = {
-    background: "rgba(0, 0, 0, 0.6)",
+    background: "rgba(0, 0, 0, 0.8)",
     color: "#fff",
     borderRadius: 12,
     marginBottom: 6,
+  };
+
+
+
+  // Palette (same theme)
+  const palette = {
+    bgCard: "rgba(0, 0, 0, 0.65)",
+    gold: "#FFD700",
+    super: "#ffa347",
+    normal: "#47a3ff",
+    total: "#28a745",
+  };
+
+  // Upgrade your cardStyle (optional: replace your current one)
+
+  // KPI tile styles (same colors, nicer finish)
+  const kpiTile = {
+    base: {
+      borderRadius: 12,
+      padding: "14px 22px",
+      textAlign: "center",
+      fontWeight: 600,
+      color: "#000",
+      boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+      border: "1px solid rgba(0,0,0,0.15)",
+      transition: "transform 200ms ease, box-shadow 200ms ease",
+    },
+    hover: {
+      transform: "translateY(-2px)",
+      boxShadow: "0 12px 24px rgba(0,0,0,0.35)",
+    },
+    super: { backgroundColor: palette.super },
+    normal: { backgroundColor: palette.normal },
+    total: {
+      backgroundColor: palette.total,
+      textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
+      boxShadow: "0 6px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.35)",
+    },
+  };
+
+  // Typographic tweaks
+  const headerTitleStyle = {
+    color: "#fff",
+    textAlign: "center",
+    marginBottom: 12,
+    letterSpacing: 0.3,
+    textShadow: "0 2px 6px rgba(0,0,0,0.4), 0 0 8px rgba(255,215,0,0.25)",
+  };
+
+  const kpiLabelStyle = {
+    fontSize: 13,
+    letterSpacing: 0.3,
+    opacity: 0.95,
+  };
+
+  const kpiValueStyle = {
+    fontSize: 32,
+    lineHeight: 1.1,
+    margin: 0,
+  };
+
+  const unitStyle = {
+    fontSize: 12,
+    opacity: 0.9,
+    marginLeft: 6,
   };
 
   return (
@@ -1060,7 +1259,7 @@ uniqueOfficers.push("Other");
                 </Col>
                 <Col md={3}>
                   <Select showSearch
-                    style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                    style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
 
                     value={filters.year}
                     bordered={false} onChange={val => setFilters(f => ({ ...f, year: val, month: "Select Month" }))}>
@@ -1083,7 +1282,7 @@ uniqueOfficers.push("Other");
                     showSearch
                     value={filters.month}
                     onChange={val => setFilters(prev => ({ ...prev, month: val }))}
-                    style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.6)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
+                    style={{ width: "100%", backgroundColor: "rgba(0, 0, 0, 0.8)", color: "#000", border: "1px solid #333", borderRadius: 6 }}
                     bordered={false}
                   >
                     {filteredMonths.map(m => (
@@ -1162,98 +1361,79 @@ uniqueOfficers.push("Other");
               const officerData = routeSummary.filter((row) => row.officer === officer);
               if (!officerData.length) return null;
 
-              const lastOfficerRow = officerData[officerData.length - 1]; // 🔁 Renamed
+              const lastOfficerRow = officerData[officerData.length - 1];
               const { super: superKg, total, target } = lastOfficerRow;
-              const achievementPercent = target > 0 ? ((total / target) * 100).toFixed(0) : "0.0";
-              const superLeafPercent = total > 0 ? ((superKg / total) * 100).toFixed(0) : "0.0";
-              const normal = total - superKg;
+              const achievementPercent = target > 0 ? Math.round((total / target) * 100) : 0;
+              const normal = Math.max(0, total - superKg);
 
               return (
                 <Col key={officer} xs={24} sm={12} md={24}>
-                  <div
-                    style={{
-                      backgroundColor: "rgba(0, 0, 0, 0.6)",
-                      borderRadius: 10,
-                      padding: "16px 24px",
-                      fontWeight: 500,
-                      color: "#fff",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                    }}
-                  >
-                    <h3 style={{ color: "#FFD700", textAlign: "center", marginBottom: 12 }}>
+                  <Card bordered={false} style={cardStyle}>
+                    <Typography.Title level={3} style={headerTitleStyle}>
                       {officer} Summary
-                    </h3>
+                    </Typography.Title>
+
                     <Row gutter={[16, 16]} justify="center">
                       <Col xs={24} sm={12} md={8}>
                         <div
-                          style={{
-                            backgroundColor: "#ffa347",
-                            borderRadius: 10,
-                            padding: "14px 24px",
-                            textAlign: "center",
-                            fontWeight: 600,
-                            color: "#000",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                          }}
+                          style={{ ...kpiTile.base, ...kpiTile.super }}
+                          onMouseEnter={(e) => Object.assign(e.currentTarget.style, kpiTile.hover)}
+                          onMouseLeave={(e) => Object.assign(e.currentTarget.style, kpiTile.base, kpiTile.super)}
                         >
-                          Super Total<br />
-                          <CountUp style={{ fontSize: 30 }} end={Math.round(superKg)} duration={0.5} separator="," /> kg<br />
+                          <div style={kpiLabelStyle}>Super Total</div>
+                          <Typography.Title level={3} style={{ ...kpiValueStyle, color: "#000" }}>
+                            {Math.round(superKg).toLocaleString()}
+                            <span style={unitStyle}>kg</span>
+                          </Typography.Title>
                         </div>
                       </Col>
+
                       <Col xs={24} sm={12} md={8}>
                         <div
-                          style={{
-                            backgroundColor: "#47a3ff",
-                            borderRadius: 15,
-                            padding: "14px 24px",
-                            textAlign: "center",
-                            fontWeight: 600,
-                            color: "#000",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                          }}
+                          style={{ ...kpiTile.base, ...kpiTile.normal }}
+                          onMouseEnter={(e) => Object.assign(e.currentTarget.style, kpiTile.hover)}
+                          onMouseLeave={(e) => Object.assign(e.currentTarget.style, kpiTile.base, kpiTile.normal)}
                         >
-                          Normal Total<br />
-                          <CountUp style={{ fontSize: 30 }} end={Math.round(normal)} duration={0.5} separator="," /> kg
+                          <div style={kpiLabelStyle}>Normal Total</div>
+                          <Typography.Title level={3} style={{ ...kpiValueStyle, color: "#000" }}>
+                            {Math.round(normal).toLocaleString()}
+                            <span style={unitStyle}>kg</span>
+                          </Typography.Title>
                         </div>
                       </Col>
+
                       <Col xs={24} sm={24} md={8}>
                         <div
-                          style={{
-                            backgroundColor: "#28a745",
-                            borderRadius: 10,
-                            padding: "14px 24px",
-                            textAlign: "center",
-                            fontWeight: 600,
-                            color: "#000",
-                            textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
-                            boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)",
-                          }}
+                          style={{ ...kpiTile.base, ...kpiTile.total }}
+                          onMouseEnter={(e) => Object.assign(e.currentTarget.style, kpiTile.hover, kpiTile.total)}
+                          onMouseLeave={(e) => Object.assign(e.currentTarget.style, kpiTile.base, kpiTile.total)}
                         >
-                          Overall Total<br />
-                          <CountUp style={{ fontSize: 30 }} end={Math.round(total)} duration={0.5} separator="," /> kg<br />
+                          <div style={{ ...kpiLabelStyle, color: "#00330f" }}>Overall Total</div>
+                          <Typography.Title level={3} style={{ ...kpiValueStyle, color: "#000" }}>
+                            {Math.round(total).toLocaleString()}
+                            <span style={unitStyle}>kg</span>
+                          </Typography.Title>
                         </div>
                       </Col>
                     </Row>
 
-                    <br />
+                    <div style={{ height: 8 }} />
 
                     <Row gutter={[16, 16]} justify="center">
                       <Col xs={24} sm={24} md={22}>
                         <Progress
-                          percent={parseFloat(achievementPercent)}
+                          percent={achievementPercent}
                           status="active"
-                          strokeColor={{
-                            from: "#ff1818ff",
-                            to: "#52c41a",
-                          }}
+                          strokeColor={{ from: "#ff1818ff", to: "#52c41a" }}
+                          trailColor="rgba(255,255,255,0.12)"
                           strokeWidth={14}
                           style={{
-                            marginTop: 12,
-                            borderRadius: 8,
-                            boxShadow: "inset 0 1px 3px rgba(0, 0, 0, 0.1)",
+                            marginTop: 6,
+                            borderRadius: 10,
+                            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
                           }}
                           format={(percent) => (
-                            <span style={{ fontSize: 25, fontWeight: "bold", color: "#fff" }}>
+                            <span style={{ fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: 0.4 }}>
                               {percent}%
                             </span>
                           )}
@@ -1261,22 +1441,25 @@ uniqueOfficers.push("Other");
                       </Col>
                     </Row>
 
-                    <br />
-
-                    <Row gutter={[16, 16]} justify="end">
+                    <Row gutter={[16, 16]} justify="end" style={{ marginTop: 10 }}>
                       <Button
                         type="primary"
-                        style={{ marginLeft: 8 }}
+                        style={{
+                          borderRadius: 10,
+                          boxShadow: "0 6px 16px rgba(71,163,255,0.35)",
+                        }}
                         onClick={() => exportToPDFOfficer(routeSummary, officer, key)}
                       >
                         Download
                       </Button>
                     </Row>
-                  </div>
+                  </Card>
                 </Col>
+
               );
             })}
         </Row>
+
 
 
 

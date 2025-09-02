@@ -166,7 +166,7 @@ const LastSupply = () => {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }} className="fade-in">
-      <Card bordered={false} style={{ background: "rgba(0, 0, 0, 0.6)", color: "#fff", borderRadius: 12, marginBottom: 16 }}>
+      <Card bordered={false} style={{ background: "rgba(0, 0, 0, 0.8)", color: "#fff", borderRadius: 12, marginBottom: 16 }}>
         <Row gutter={[16, 16]}>
           <Col md={1}>
             <Button
@@ -189,7 +189,7 @@ const LastSupply = () => {
               onChange={val => setFilters(prev => ({ ...prev, line: val }))}
               style={{
                 width: "100%",
-                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
                 color: "#fff",
                 border: "1px solid #333",
                 borderRadius: 6
@@ -232,7 +232,7 @@ const LastSupply = () => {
       </Card>
 
       {!isLoading && allSuppliers.length > 0 && (
-        <Card size="small" style={{ marginTop: 12, background: "rgba(0, 0, 0, 0.6)", borderRadius: 16 }} bodyStyle={{ padding: 0 }}>
+        <Card size="small" style={{ marginTop: 12, background: "rgba(0, 0, 0, 0.8)", borderRadius: 16 }} bodyStyle={{ padding: 0 }}>
           <Table
             className="sup-bordered-table"
             columns={lastSupplyColumns}
