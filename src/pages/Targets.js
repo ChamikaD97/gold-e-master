@@ -598,6 +598,9 @@ const Targets = () => {
 
           {totalTarget > 0 && (
             <Card bordered={false} style={cardStyle}>
+              <div style={{ marginTop: 6 }}>
+                <CountUp end={totalTarget} decimals={1} duration={0.6} />%
+              </div>
               <Row justify="space-evenly" gutter={[16, 16]}>
                 <Col span={24}>
                   <Row gutter={[16, 16]}>
