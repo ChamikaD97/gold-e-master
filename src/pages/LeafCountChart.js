@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  Card, Col, Row, Select, Typography, Button, Table, Input, Modal
+  Card, Col, Row, Select, Typography, Button, Table, Input, Modal, Divider
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import '../App.css';
@@ -11,12 +11,11 @@ import { hideLoader, showLoader } from "../redux/loaderSlice";
 import { API_KEY, getMonthDateRangeFromParts } from "../api/api";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import CountUp from "react-countup";
 import { toast } from "react-toastify";
 
 
 const { Option } = Select;
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 const LeafSupply = () => {
   const [data, setData] = useState([]);
@@ -911,89 +910,49 @@ const LeafSupply = () => {
                                 textShadow: "1px 1px 2px rgba(0,0,0,0.5)",
                               }}
                             >
-                              Mr. {getOfficerByLineId(filters.line) || "Officer"} –  {filters.lineCode} Line - {monthMap[filters.month]} {filters.year}
+                             {getOfficerByLineId(filters.line) || "Officer"} –  {filters.lineCode} Line - {monthMap[filters.month]} {filters.year}
                             </span>
                           </div>
 
 
                           {/* 3-column row for Super, Normal, and Total */}
-                          <Row gutter={[16, 16]} justify="center">
+                  
+                  
                             {/* Super Total */}
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly", flexWrap: "wrap", marginTop: 5 }}>
+                              <div style={{ textAlign: "center", margin: 10 }}>
+                                <Text style={{ color: "#ff0000ff", fontSize: 16 }}>Suppliers</Text>
+                                <Title level={2} style={{ color: "#ff0000ff", margin: 0 }}>{allSuppliers.length} kg</Title>
 
-                            <Col xs={24} sm={12} md={6}>
-                              <div
-                                style={{
-                                  backgroundColor: "#ff000e",
-                                  borderRadius: 10,
-                                  padding: "14px 24px",
-                                  textAlign: "center",
-                                  fontWeight: 600,
-                                  color: "#fff",
-                                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                                }}
-                              >
-                                Suppliers<br />
-
-                                <CountUp style={{ fontSize: 30 }} end={Math.round(allSuppliers.length)} duration={0.5} separator="," /> <br />
 
                               </div>
-                            </Col>
+                              <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
 
-                            <Col xs={24} sm={12} md={6}>
-                              <div
-                                style={{
-                                  backgroundColor: "#ffa347",
-                                  borderRadius: 10,
-                                  padding: "14px 24px",
-                                  textAlign: "center",
-                                  fontWeight: 600,
-                                  color: "#000",
-                                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                                }}
-                              >
-                                Super Total<br />
-                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={0.5} separator="," /> kg<br />
+                              <div style={{ textAlign: "center", margin: 10 }}>
+                                <Text style={{ color: "#ff9800", fontSize: 16 }}>Super Leaf</Text>
+                                <Title level={2} style={{ color: "#ff9800", margin: 0 }}>{totals.super} kg</Title>
+
 
                               </div>
-                            </Col>
+                              <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
 
-                            {/* Normal Total */}
-                            <Col xs={24} sm={12} md={6}>
-                              <div
-                                style={{
-                                  backgroundColor: "#47a3ff",
-                                  borderRadius: 15,
-                                  padding: "14px 24px",
-                                  textAlign: "center",
-                                  fontWeight: 600,
-                                  color: "#000",
-                                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                                }}
-                              >
-                                Normal Total<br />
-                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={0.5} separator="," /> kg
-                              </div>
-                            </Col>
+                              <div style={{ textAlign: "center", margin: 10 }}>
+                                <Text style={{ color: "#47a3ff", fontSize: 16 }}>Normal Leaf</Text>
+                                <Title level={2} style={{ color: "#47a3ff", margin: 0 }}>{totals.normal} kg</Title>
 
-                            {/* Overall Total */}
-                            <Col xs={24} sm={24} md={6}>
-                              <div
-                                style={{
-                                  backgroundColor: "#28a745",
-                                  borderRadius: 10,
-                                  padding: "14px 24px",
-                                  textAlign: "center",
-                                  fontWeight: 600,
-                                  color: "#000",
-                                  textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
-                                  boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)",
-                                }}
-                              >
-                                Overall Total<br />                        <CountUp style={{ fontSize: 30 }} end={Math.round(totals.overall)} duration={0.5} separator="," /> kg<br />
 
                               </div>
-                            </Col>
-                          </Row>
+                              <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                              <div style={{ textAlign: "center", margin: 10 }}>
+                                <Text style={{ color: "#4caf50", fontSize: 16 }}>Total Collected</Text>
+                                <Title level={2} style={{ color: "#4caf50", margin: 0 }}>{totals.super + totals.normal} kg</Title>
+                              </div>
+                            </div>
+                          
+                          
+                         
+                         
                         </Col>
                       ))}
                     </Row>

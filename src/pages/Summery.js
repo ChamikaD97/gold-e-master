@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Card, Col, Row, Button, Select, Progress, Typography, message } from "antd";
+import { Card, Col, Row, Button, Select, Progress, Typography, message, Divider } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 
 import CircularLoader from "../components/CircularLoader";
@@ -13,7 +13,18 @@ import { SearchRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import CountUp from "react-countup";
 import { setAllLines, setOfficers } from "../redux/officerLineSlice";
+
+
+const conicColors = {
+  '0%': '#ff0000ff',
+  '50%': '#a76c45ff',
+  '100%': '#00ff37ff',
+};
 const { Option } = Select;
+
+
+const { Text, Title } = Typography;
+
 const Summary = () => {
 
   const dispatch = useDispatch();
@@ -53,9 +64,9 @@ const Summary = () => {
     .filter(m => parseInt(filters.year) < currentYear || m <= currentMonth);
   const { week1Target, week2Target, week3Target, week4Target } = useSelector((state) => state.commonData);
 
+  const officers = useSelector((state) => state.officerLine.officers);
 
-  const [officerpOrder, setOfficerOrder] = useState([]);
-  const officerOrder = ["Mr. Ajith", "Mr. Udayanga", "Mr. Udara", "Mr. Gamini", "Mr. Chamod", "Other"];
+  const [officerOrder, setOfficerOrder] = useState(officers.map(item => item.name));
 
 
   const customLineCodeOrder = [
@@ -69,25 +80,13 @@ const Summary = () => {
 
 
 
+
   const getLines = async () => {
     try {
       const data = await fetchLines();
       dispatch(setAllLines(data));
       const filteredOfficers = data
         .map(item => item.officer)
-      console.log("Fetched Lines:", data);
-
-
-      const uniqueOfficers = [...new Set(
-        data
-          .map(item => item.officer)
-          .filter(officer => officerpOrder.includes(officer))
-      )];
-      uniqueOfficers.push("Other");
-      setOfficerOrder(uniqueOfficers);
-      console.log("Officer Order:", uniqueOfficers);
-
-
 
 
     } catch (err) {
@@ -98,9 +97,11 @@ const Summary = () => {
   const getOfficers = async () => {
     try {
       const data = await fetchOfficers();
+      const officerNames = data.map(item => item.name);
+
+      setOfficerOrder(officerNames);
+
       dispatch(setOfficers(data));
-
-
     } catch (err) {
       message.error("Failed to fetch Officers");
       console.error(err);
@@ -118,6 +119,7 @@ const Summary = () => {
   const today = new Date();
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const daysRemaining = endOfMonth.getDate() - today.getDate() + 1;
+
   const exportToPDFOfficer = (pdfData, title, key) => {
     const doc = new jsPDF();
 
@@ -633,7 +635,7 @@ const Summary = () => {
 
     // === Officer pages ===
 
-    
+
     (officerOrder || []).forEach((officer, i) => {
       const dataForOfficer = (pdfData || []).filter((row) => row.officer === officer);
       if (!dataForOfficer.length) return;
@@ -652,7 +654,7 @@ const Summary = () => {
     });
 
     // === Full Summary page ===
-    doc.addPage();
+    //doc.addPage();
     startY = 70;
 
     doc.setFont(undefined, "bold");
@@ -717,8 +719,8 @@ const Summary = () => {
   const getLeafRecordsByDates = async () => {
     const dateRange = getMonthDateRangeFromParts(filters.year, filters.month);
 
-   
-    
+
+
     const ids = Array.from({ length: 170 }, (_, i) => i + 1).join(",");
     const url = `/quiX/ControllerV1/glfdata?k=${API_KEY}&r=${ids}&d=${dateRange}`;
 
@@ -916,6 +918,7 @@ const Summary = () => {
 
 
       console.log(finalD);
+      console.log(finalTableData);
 
       setFinalTotal(finalD);
       setRouteSummary(finalTableData);
@@ -1367,81 +1370,62 @@ const Summary = () => {
               const normal = Math.max(0, total - superKg);
 
               return (
-                <Col key={officer} xs={24} sm={12} md={24}>
+
+                <Col key={officer} xs={24} sm={12} md={12}>
                   <Card bordered={false} style={cardStyle}>
-                    <Typography.Title level={3} style={headerTitleStyle}>
+
+                    <Title level={4} style={{ color: "#fff", margin: 0 }}>
                       {officer} Summary
-                    </Typography.Title>
 
-                    <Row gutter={[16, 16]} justify="center">
-                      <Col xs={24} sm={12} md={8}>
-                        <div
-                          style={{ ...kpiTile.base, ...kpiTile.super }}
-                          onMouseEnter={(e) => Object.assign(e.currentTarget.style, kpiTile.hover)}
-                          onMouseLeave={(e) => Object.assign(e.currentTarget.style, kpiTile.base, kpiTile.super)}
-                        >
-                          <div style={kpiLabelStyle}>Super Total</div>
-                          <Typography.Title level={3} style={{ ...kpiValueStyle, color: "#000" }}>
-                            {Math.round(superKg).toLocaleString()}
-                            <span style={unitStyle}>kg</span>
-                          </Typography.Title>
-                        </div>
-                      </Col>
+                    </Title>
 
-                      <Col xs={24} sm={12} md={8}>
-                        <div
-                          style={{ ...kpiTile.base, ...kpiTile.normal }}
-                          onMouseEnter={(e) => Object.assign(e.currentTarget.style, kpiTile.hover)}
-                          onMouseLeave={(e) => Object.assign(e.currentTarget.style, kpiTile.base, kpiTile.normal)}
-                        >
-                          <div style={kpiLabelStyle}>Normal Total</div>
-                          <Typography.Title level={3} style={{ ...kpiValueStyle, color: "#000" }}>
-                            {Math.round(normal).toLocaleString()}
-                            <span style={unitStyle}>kg</span>
-                          </Typography.Title>
-                        </div>
-                      </Col>
 
-                      <Col xs={24} sm={24} md={8}>
-                        <div
-                          style={{ ...kpiTile.base, ...kpiTile.total }}
-                          onMouseEnter={(e) => Object.assign(e.currentTarget.style, kpiTile.hover, kpiTile.total)}
-                          onMouseLeave={(e) => Object.assign(e.currentTarget.style, kpiTile.base, kpiTile.total)}
-                        >
-                          <div style={{ ...kpiLabelStyle, color: "#00330f" }}>Overall Total</div>
-                          <Typography.Title level={3} style={{ ...kpiValueStyle, color: "#000" }}>
-                            {Math.round(total).toLocaleString()}
-                            <span style={unitStyle}>kg</span>
-                          </Typography.Title>
-                        </div>
-                      </Col>
-                    </Row>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly", gap: 16, flexWrap: "wrap" }} className="fade-in">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, flexWrap: "wrap", marginTop: 12 }}>
+                        {(() => {
 
-                    <div style={{ height: 8 }} />
 
-                    <Row gutter={[16, 16]} justify="center">
-                      <Col xs={24} sm={24} md={22}>
-                        <Progress
-                          percent={achievementPercent}
-                          status="active"
-                          strokeColor={{ from: "#ff1818ff", to: "#52c41a" }}
-                          trailColor="rgba(255,255,255,0.12)"
-                          strokeWidth={14}
-                          style={{
-                            marginTop: 6,
-                            borderRadius: 10,
-                            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
-                          }}
-                          format={(percent) => (
-                            <span style={{ fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: 0.4 }}>
-                              {percent}%
-                            </span>
-                          )}
-                        />
-                      </Col>
-                    </Row>
 
-                    <Row gutter={[16, 16]} justify="end" style={{ marginTop: 10 }}>
+                          return (
+                            <>
+                              <div style={{ textAlign: "center", margin: 20 }} className="fade-in ">
+                                <Text style={{ color: "#ff9800", fontSize: 16 }}>Super Leaf</Text>
+                                <Title level={3} style={{ color: "#ff9800", margin: 0 }}>     {Math.round(superKg).toLocaleString()}
+                                  <span style={unitStyle}>kg</span></Title>
+
+
+                              </div>
+                              <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                              <div style={{ textAlign: "center", margin: 20 }}>
+                                <Text style={{ color: "#47a3ff", fontSize: 16 }}>Normal Leaf</Text>
+                                <Title level={3} style={{ color: "#47a3ff", margin: 0 }}>
+
+
+                                  {Math.round(normal).toLocaleString()}
+                                  <span style={unitStyle}>kg</span>
+                                </Title>
+
+
+                              </div>
+                              <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                              <div style={{ textAlign: "center", margin: 20 }}>
+                                <Text style={{ color: "#4caf50", fontSize: 16 }}>Total Collected</Text>
+                                <Title level={3} style={{ color: "#4caf50", margin: 0 }}>  {Math.round(total).toLocaleString()}kg</Title>
+                              </div>
+
+                              <Progress strokeColor={conicColors} format={(p) => (
+                                <span style={{ color: "#ffffffff", fontWeight: 200 }}>{p}%</span>
+                              )} type="circle" percent={achievementPercent} />
+
+                            </>
+                          );
+                        })()}
+                      </div>
+
+                    </div>
+                    <Row gutter={[16, 16]} justify="end" style={{ marginTop: 20 }}>
                       <Button
                         type="primary"
                         style={{
@@ -1454,7 +1438,96 @@ const Summary = () => {
                       </Button>
                     </Row>
                   </Card>
+
                 </Col>
+                // <Col key={officer} xs={24} sm={12} md={24}>
+                //   <Card bordered={false} style={cardStyle}>
+                //     <Typography.Title level={3} style={headerTitleStyle}>
+                //       {officer} Summary
+                //     </Typography.Title>
+
+                //     <Row gutter={[16, 16]} justify="center">
+                //       <Col xs={24} sm={12} md={8}>
+                //         <div
+                //           style={{ ...kpiTile.base, ...kpiTile.super }}
+                //           onMouseEnter={(e) => Object.assign(e.currentTarget.style, kpiTile.hover)}
+                //           onMouseLeave={(e) => Object.assign(e.currentTarget.style, kpiTile.base, kpiTile.super)}
+                //         >
+                //           <div style={kpiLabelStyle}>Super Total</div>
+                //           <Typography.Title level={3} style={{ ...kpiValueStyle, color: "#000" }}>
+                //             {Math.round(superKg).toLocaleString()}
+                //             <span style={unitStyle}>kg</span>
+                //           </Typography.Title>
+                //         </div>
+                //       </Col>
+
+                //       <Col xs={24} sm={12} md={8}>
+                //         <div
+                //           style={{ ...kpiTile.base, ...kpiTile.normal }}
+                //           onMouseEnter={(e) => Object.assign(e.currentTarget.style, kpiTile.hover)}
+                //           onMouseLeave={(e) => Object.assign(e.currentTarget.style, kpiTile.base, kpiTile.normal)}
+                //         >
+                //           <div style={kpiLabelStyle}>Normal Total</div>
+                //           <Typography.Title level={3} style={{ ...kpiValueStyle, color: "#000" }}>
+                //             {Math.round(normal).toLocaleString()}
+                //             <span style={unitStyle}>kg</span>
+                //           </Typography.Title>
+                //         </div>
+                //       </Col>
+
+                //       <Col xs={24} sm={24} md={8}>
+                //         <div
+                //           style={{ ...kpiTile.base, ...kpiTile.total }}
+                //           onMouseEnter={(e) => Object.assign(e.currentTarget.style, kpiTile.hover, kpiTile.total)}
+                //           onMouseLeave={(e) => Object.assign(e.currentTarget.style, kpiTile.base, kpiTile.total)}
+                //         >
+                //           <div style={{ ...kpiLabelStyle, color: "#00330f" }}>Overall Total</div>
+                //           <Typography.Title level={3} style={{ ...kpiValueStyle, color: "#000" }}>
+                //             {Math.round(total).toLocaleString()}
+                //             <span style={unitStyle}>kg</span>
+                //           </Typography.Title>
+                //         </div>
+                //       </Col>
+                //     </Row>
+
+                //     <div style={{ height: 8 }} />
+
+                //     <Row gutter={[16, 16]} justify="center">
+                //       <Col xs={24} sm={24} md={22}>
+                //         <Progress
+                //           percent={achievementPercent}
+                //           status="active"
+                //           strokeColor={{ from: "#ff1818ff", to: "#52c41a" }}
+                //           trailColor="rgba(255,255,255,0.12)"
+                //           strokeWidth={14}
+                //           style={{
+                //             marginTop: 6,
+                //             borderRadius: 10,
+                //             boxShadow: "inset 0 1px 2px rgba(0,0,0,0.2)",
+                //           }}
+                //           format={(percent) => (
+                //             <span style={{ fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: 0.4 }}>
+                //               {percent}%
+                //             </span>
+                //           )}
+                //         />
+                //       </Col>
+                //     </Row>
+
+                //     <Row gutter={[16, 16]} justify="end" style={{ marginTop: 10 }}>
+                //       <Button
+                //         type="primary"
+                //         style={{
+                //           borderRadius: 10,
+                //           boxShadow: "0 6px 16px rgba(71,163,255,0.35)",
+                //         }}
+                //         onClick={() => exportToPDFOfficer(routeSummary, officer, key)}
+                //       >
+                //         Download
+                //       </Button>
+                //     </Row>
+                //   </Card>
+                // </Col>
 
               );
             })}

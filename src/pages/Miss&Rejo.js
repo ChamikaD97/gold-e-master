@@ -82,7 +82,7 @@ const MissRejo = () => {
     const match = lineIdCodeMapForAll.find((line) => line.lineId === lineId);
     return match ? match.officer : null;
   };
-  const exportLineSummaryPDF = (suppliers, title = "Line Summary") => {
+  const exportLineSummaryPDF = (suppliers, title = "Line Summary", officer) => {
     const doc = new jsPDF("p", "mm", "a4");
     const grouped = groupByLine(suppliers);
     let startY = 46;
@@ -105,7 +105,7 @@ const MissRejo = () => {
     doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
 
-    doc.text(`${title} Cards on: ${filters.year} - ${monthMap[filters.month]}`, 14, startY);
+    doc.text(`Mr. ${officer} - ${title} Cards on: ${filters.year} - ${monthMap[filters.month]}`, 14, startY);
     doc.line(14, startY + 4, 196, startY + 4);
     startY += 12;
 
@@ -772,7 +772,7 @@ const MissRejo = () => {
                     <Button
                       type="primary"
                       style={{ marginLeft: 8 }}
-                      onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(missedSuppliers, "Missed") : exportLineSummaryPDF(missedSuppliers, "Missed")}
+                      onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(missedSuppliers, "Missed") : exportLineSummaryPDF(missedSuppliers, "Missed", selectedOfficer.name)}
                     >
                       Missed
                     </Button>
@@ -783,7 +783,7 @@ const MissRejo = () => {
                     <Button
                       type="primary"
                       style={{ marginLeft: 8 }}
-                      onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(rejoinedSuppliers, "Rejoined") : exportLineSummaryPDF(rejoinedSuppliers, "Rejoined")}
+                      onClick={() => filters.line !== "Select Line" ? exportGroupedPDF(rejoinedSuppliers, "Rejoined") : exportLineSummaryPDF(rejoinedSuppliers, "Rejoined", selectedOfficer.name)}
 
                     >
                       Rejoined
@@ -853,7 +853,7 @@ const MissRejo = () => {
                     color: "#000",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                   }}
-                 className="fade-in">
+                  className="fade-in">
                   Rejoined Cards<br />
                   <span style={{ fontSize: 30 }}>
                     {rejoinedSuppliers.length} / <CountUp end={rejoinedTotal} duration={0} separator="," /> kg
@@ -909,7 +909,7 @@ const MissRejo = () => {
                     color: "#000",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                   }}
-               className="fade-in">
+                  className="fade-in">
                   <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>
                     Missing Cards
                   </div>
@@ -944,7 +944,7 @@ const MissRejo = () => {
                     color: "#000",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
                   }}
-               className="fade-in">
+                  className="fade-in">
                   <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 10, textAlign: "center" }}>
                     Rejoined Cards
                   </div>

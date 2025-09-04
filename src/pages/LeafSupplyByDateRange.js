@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from "react";
 import {
   Card, Col, Row, Select, Typography, Button, message,
-  DatePicker
+  DatePicker,
+  Divider
 } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { hideLoader, showLoader } from "../redux/loaderSlice";
 import { API_KEY, fetchLines } from "../api/api";
 import dayjs from "dayjs";
-
-import CountUp from "react-countup";
 import { ReloadOutlined } from "@ant-design/icons";
 import { Search, SearchOff, SearchOffOutlined, SearchOffRounded, SearchRounded } from "@mui/icons-material";
 import CircularLoader from "../components/CircularLoader";
 import { setAllLines } from "../redux/officerLineSlice";
 
 const { Option } = Select;
-const { Text } = Typography;
+const { Text, Title } = Typography;
 const { RangePicker } = DatePicker;
 
 const LeafSupplyByDateRange = () => {
@@ -276,36 +275,42 @@ const LeafSupplyByDateRange = () => {
 
 
       {/* Display Totals */}
-      {lineWiseSummary.length > 0 && (
+      {lineWiseSummary.length > 0 && !
+      isLoading && (
+        
         <Card bordered={false} style={{ ...cardStyle, marginTop: 12 }}>
           <Row gutter={[16, 16]} justify="center" style={{ marginTop: 1 }}>
             {lineWiseSummary.map((line) => (
               <Col xs={24} sm={24} md={24} key={line.lineCode}>
                 <div style={{ margin: "16px 0", textAlign: "center", borderRadius: 10 }}>
                   <span style={{ fontSize: 18, fontWeight: "bold", color: "#fff", textShadow: "1px 1px 2px rgba(0,0,0,0.5)" }}>
-                    Mr. {getOfficerByLineId(filters.line) || "Officer"} –  {filters.lineCode} Line
+                    {getOfficerByLineId(filters.line) || "Officer"} –  {filters.lineCode} Line
                   </span>
                 </div>
-                <Row gutter={[16, 16]} justify="center">
-                  <Col xs={24} sm={12} md={8}>
-                    <div style={{ backgroundColor: "#ffa347", borderRadius: 10, padding: "14px 24px", textAlign: "center", fontWeight: 600, color: "#000", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
-                      Super Total<br />
-                      <CountUp style={{ fontSize: 30 }} end={Math.round(line.Super)} duration={0.5} separator="," /> kg
-                    </div>
-                  </Col>
-                  <Col xs={24} sm={12} md={8}>
-                    <div style={{ backgroundColor: "#47a3ff", borderRadius: 15, padding: "14px 24px", textAlign: "center", fontWeight: 600, color: "#000", boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }}>
-                      Normal Total<br />
-                      <CountUp style={{ fontSize: 30 }} end={Math.round(line.Normal)} duration={0.5} separator="," /> kg
-                    </div>
-                  </Col>
-                  <Col xs={24} sm={24} md={8}>
-                    <div style={{ backgroundColor: "#28a745", borderRadius: 10, padding: "14px 24px", textAlign: "center", fontWeight: 600, color: "#000", textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)", boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)" }}>
-                      Overall Total<br />
-                      <CountUp style={{ fontSize: 30 }} end={Math.round(line.Super + line.Normal)} duration={0.5} separator="," /> kg
-                    </div>
-                  </Col>
-                </Row>
+
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly", flexWrap: "wrap", marginTop: 5 }}>
+
+                  <div style={{ textAlign: "center", margin: 10 }}>
+                    <Text style={{ color: "#ff9800", fontSize: 16 }}>Super Leaf</Text>
+                    <Title level={2} style={{ color: "#ff9800", margin: 0 }}>{line.Super} kg</Title>
+
+
+                  </div>
+                  <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                  <div style={{ textAlign: "center", margin: 10 }}>
+                    <Text style={{ color: "#47a3ff", fontSize: 16 }}>Normal Leaf</Text>
+                    <Title level={2} style={{ color: "#47a3ff", margin: 0 }}>{line.Normal} kg</Title>
+
+
+                  </div>
+                  <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                  <div style={{ textAlign: "center", margin: 10 }}>
+                    <Text style={{ color: "#4caf50", fontSize: 16 }}>Total Collected</Text>
+                    <Title level={2} style={{ color: "#4caf50", margin: 0 }}>{line.Super + line.Normal} kg</Title>
+                  </div>
+                </div>
               </Col>
             ))}
           </Row>

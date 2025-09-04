@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Typography, Input, Button, message } from "antd";
+import { Card, Col, Row, Typography, Input, Button, message, Divider } from "antd";
 import { useNavigate } from "react-router-dom";
 import icon from "../images/logo.ico";
 import "./Dashboard.css";
@@ -255,19 +255,22 @@ const Dashboard = () => {
 
                   return (
                     <>
-                      <div style={{ textAlign: "center", margin: 20 }}>
+                      <div style={{ textAlign: "center", margin: 10 }}>
                         <Text style={{ color: "#ff9800", fontSize: 16 }}>Super Leaf</Text>
                         <Title level={3} style={{ color: "#ff9800", margin: 0 }}>{fmtKg(mtdSuper)} kg</Title>
-                        <div style={{ color: "#bbb", fontSize: 14 }}>{pct(mtdSuper, mtdTotal)}%</div>
-                      </div>
 
-                      <div style={{ textAlign: "center", margin: 20 }}>
+
+                      </div>
+                              <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                      <div style={{ textAlign: "center", margin: 10 }}>
                         <Text style={{ color: "#47a3ff", fontSize: 16 }}>Normal Leaf</Text>
                         <Title level={3} style={{ color: "#47a3ff", margin: 0 }}>{fmtKg(mtdNormal)} kg</Title>
-                        <div style={{ color: "#bbb", fontSize: 14 }}>{pct(mtdNormal, mtdTotal)}%</div>
-                      </div>
 
-                      <div style={{ textAlign: "center", margin: 20 }}>
+                      </div>
+                              <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                      <div style={{ textAlign: "center", margin: 10 }}>
                         <Text style={{ color: "#4caf50", fontSize: 16 }}>Total Collected</Text>
                         <Title level={3} style={{ color: "#4caf50", margin: 0 }}>{fmtKg(mtdTotal)} kg</Title>
                       </div>
@@ -286,7 +289,7 @@ const Dashboard = () => {
 
             <Title level={4} style={{ color: "#fff", margin: 0 }}>
               Leaf Collected Yesterday - {dayjs().subtract(1, "day").format("YYYY/MM/DD")}
-              
+
             </Title>
 
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly", gap: 16, flexWrap: "wrap" }} className="fade-in">
@@ -298,19 +301,23 @@ const Dashboard = () => {
 
                   return (
                     <>
-                      <div style={{ textAlign: "center", margin: 20 }}>
+                      <div style={{ textAlign: "center", margin: 10 }}>
                         <Text style={{ color: "#ff9800", fontSize: 16 }}>Super Leaf</Text>
                         <Title level={3} style={{ color: "#ff9800", margin: 0 }}>{fmtKg(ySuper)} kg</Title>
-                        <div style={{ color: "#bbb", fontSize: 14 }}>{pct(ySuper, yTotal)}%</div>
-                      </div>
 
-                      <div style={{ textAlign: "center", margin: 20 }}>
+
+                      </div>
+                              <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                      <div style={{ textAlign: "center", margin: 10 }}>
                         <Text style={{ color: "#47a3ff", fontSize: 16 }}>Normal Leaf</Text>
                         <Title level={3} style={{ color: "#47a3ff", margin: 0 }}>{fmtKg(yNormal)} kg</Title>
-                        <div style={{ color: "#bbb", fontSize: 14 }}>{pct(yNormal, yTotal)}%</div>
-                      </div>
 
-                      <div style={{ textAlign: "center", margin: 20 }}>
+
+                      </div>
+                              <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                      <div style={{ textAlign: "center", margin: 10 }}>
                         <Text style={{ color: "#4caf50", fontSize: 16 }}>Total Collected</Text>
                         <Title level={3} style={{ color: "#4caf50", margin: 0 }}>{fmtKg(yTotal)} kg</Title>
                       </div>

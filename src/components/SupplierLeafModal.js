@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Modal, Calendar, Alert, Card, Button, Row, Col, message, Select } from "antd";
+import { Modal, Calendar, Alert, Card, Button, Row, Col, message, Select, Divider, Typography } from "antd";
 import dayjs from "dayjs";
 import CircularLoader from "../components/CircularLoader";
 import { API_KEY, getMonthDateRangeFromParts } from "../api/api";
@@ -11,6 +11,7 @@ import { hideLoader, showLoader } from "../redux/loaderSlice";
 import './DarkCalendar.css';
 import { ArrowLeft, ArrowRight, BackHand, NextWeek } from "@mui/icons-material";
 const { Option } = Select;
+const { Text, Title } = Typography;
 
 const SupplierLeafModal = ({ open, onClose, filters, supplierId }) => {
     const [leafData, setLeafData] = useState([]);
@@ -93,7 +94,7 @@ const SupplierLeafModal = ({ open, onClose, filters, supplierId }) => {
 
     const handleNextMonth = () => {
         const { year, month } = filteredData.current;
-       
+
 
         if (month === 12) {
             filteredData.current = { year: year + 1, month: 1 };
@@ -474,62 +475,39 @@ const SupplierLeafModal = ({ open, onClose, filters, supplierId }) => {
                                 border: "1px solid #444",
                             }}
                         >
-                            <Row gutter={[16, 16]} justify="center">
-                                {/* Super Total */}
-                                <Col xs={24} sm={12} md={8}>
-                                    <div
-                                        style={{
-                                            backgroundColor: "#ffa347",
-                                            padding: "14px 24px",
-                                            borderRadius: 10,
-                                            color: "#000",
-                                            fontWeight: 600,
-                                            textAlign: "center",
-                                            boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-                                        }}
-                                    >
-                                        Super Total<br />
-                                        <strong style={{ fontSize: 20 }}>{Math.round(superKg)} kg</strong>
-                                    </div>
-                                </Col>
+                            
 
-                                {/* Normal Total */}
-                                <Col xs={24} sm={12} md={8}>
-                                    <div
-                                        style={{
-                                            backgroundColor: "#47a3ff",
-                                            padding: "14px 24px",
-                                            borderRadius: 10,
-                                            color: "#000",
-                                            fontWeight: 600,
-                                            textAlign: "center",
-                                            boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-                                        }}
-                                    >
-                                        Normal Total<br />
-                                        <strong style={{ fontSize: 20 }}>{Math.round(normalKg)} kg</strong>
-                                    </div>
-                                </Col>
 
-                                {/* Overall Total */}
-                                <Col xs={24} sm={24} md={8}>
-                                    <div
-                                        style={{
-                                            backgroundColor: "#28a745",
-                                            padding: "14px 24px",
-                                            borderRadius: 10,
-                                            color: "#000",
-                                            fontWeight: 600,
-                                            textAlign: "center",
-                                            boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-                                            textShadow: "0 1px 1px rgba(0,0,0,0.4)",
-                                        }}
-                                    >
-                                        Overall Total<br />
-                                        <strong style={{ fontSize: 20 }}>{Math.round(superKg + normalKg)} kg</strong>
+
+
+
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly", flexWrap: "wrap", marginTop: 5 }}>
+
+                                    <div style={{ textAlign: "center", margin: 10 }}>
+                                        <Text style={{ color: "#ff9800", fontSize: 16 }}>Super Leaf</Text>
+                                        <Title level={2} style={{ color: "#ff9800", margin: 0 }}>{superKg} kg</Title>
+
+
                                     </div>
-                                </Col>
-                            </Row>
+                                    <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                                    <div style={{ textAlign: "center", margin: 10 }}>
+                                        <Text style={{ color: "#47a3ff", fontSize: 16 }}>Normal Leaf</Text>
+                                        <Title level={2} style={{ color: "#47a3ff", margin: 0 }}>{normalKg} kg</Title>
+
+
+                                    </div>
+                                    <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                                    <div style={{ textAlign: "center", margin: 10 }}>
+                                        <Text style={{ color: "#4caf50", fontSize: 16 }}>Total Collected</Text>
+                                        <Title level={2} style={{ color: "#4caf50", margin: 0 }}>{normalKg + superKg} kg</Title>
+                                    </div>
+                                </div>
+
+
+
+
                         </div>
 
 

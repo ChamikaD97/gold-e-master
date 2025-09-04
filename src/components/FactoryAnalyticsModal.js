@@ -6,7 +6,8 @@ import {
     Select,
     Button,
     Row,
-    Col
+    Col,
+    Divider
 } from "antd";
 import { showLoader, hideLoader } from "../redux/loaderSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,7 +24,7 @@ import { toast } from "react-toastify";
 
 
 
-const { Title } = Typography;
+const { Text, Title } = Typography;
 const { Option } = Select;
 
 const FactoryAnalyticsModal = ({ visible, onClose }) => {
@@ -410,71 +411,40 @@ const FactoryAnalyticsModal = ({ visible, onClose }) => {
                                 fontWeight: "bold"
                             }}
                         >
-                            <Row gutter={[16, 16]} justify="center" >
-
-                                {!isLoading &&
 
 
-                                    <>
 
-                                        <Col xs={24} sm={12} md={8}>
-                                            <div
-                                                style={{
-                                                    backgroundColor: "#ffa347",
-                                                    borderRadius: 10,
-                                                    padding: "14px 24px",
-                                                    textAlign: "center",
-                                                    fontWeight: 600,
-                                                    color: "#000",
-                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                                }}
-                                            >
-                                                Super Total<br />
-                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super)} duration={0.5} separator="," /> kg
-                                            </div>
-                                        </Col>
-
-                                        <Col xs={24} sm={12} md={8}>
-                                            <div
-                                                style={{
-                                                    backgroundColor: "#47a3ff",
-                                                    borderRadius: 10,
-                                                    padding: "14px 24px",
-                                                    textAlign: "center",
-                                                    fontWeight: 600,
-                                                    color: "#000",
-                                                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
-                                                }}
-                                            >
-                                                Normal Total<br />
-
-                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.normal)} duration={0.5} separator="," /> kg
-
-                                            </div>
-                                        </Col>
-
-                                        <Col xs={24} sm={24} md={8}>
-                                            <div
-                                                style={{
-                                                    backgroundColor: "#28a745",
-                                                    borderRadius: 10,
-                                                    padding: "14px 24px",
-                                                    textAlign: "center",
-                                                    fontWeight: 600,
-                                                    color: "#000",
-                                                    textShadow: "0 1px 1px rgba(255, 255, 255, 0.3)",
-                                                    boxShadow: "0 2px 8px rgba(255, 255, 255, 0.3)"
-                                                }}
-                                            >
-                                                Overall Total<br />
-                                                <CountUp style={{ fontSize: 30 }} end={Math.round(totals.super + totals.normal)} duration={0.5} separator="," /> kg
+                            {!isLoading &&
 
 
-                                            </div>
-                                        </Col>
-                                    </>
-                                }
-                            </Row>
+
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-evenly", flexWrap: "wrap", marginTop: 5 }}>
+
+                                    <div style={{ textAlign: "center", margin: 10 }}>
+                                        <Text style={{ color: "#ff9800", fontSize: 16 }}>Super Leaf</Text>
+                                        <Title level={2} style={{ color: "#ff9800", margin: 0 }}>{totals.super} kg</Title>
+
+
+                                    </div>
+                                    <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                                    <div style={{ textAlign: "center", margin: 10 }}>
+                                        <Text style={{ color: "#47a3ff", fontSize: 16 }}>Normal Leaf</Text>
+                                        <Title level={2} style={{ color: "#47a3ff", margin: 0 }}>{totals.normal} kg</Title>
+
+
+                                    </div>
+                                    <Divider type="vertical" style={{ height: 75, borderInlineColor: "rgba(255,255,255,0.25)" }} />
+
+                                    <div style={{ textAlign: "center", margin: 10 }}>
+                                        <Text style={{ color: "#4caf50", fontSize: 16 }}>Total Collected</Text>
+                                        <Title level={2} style={{ color: "#4caf50", margin: 0 }}>{totals.super + totals.normal} kg</Title>
+                                    </div>
+                                </div>
+
+
+                            }
+
                         </div>
                         <div
                             style={{
