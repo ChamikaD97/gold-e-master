@@ -68,8 +68,6 @@ const Dashboard = () => {
     if (lines.length === 0) {
       message.warning("No lines available. Please add lines to continue.");
     } else {
-      console.log("Lines fetched successfully:", lines);
-
       message.success("Lines fetched successfully.");
     }
   }, [lines]);
@@ -79,10 +77,14 @@ const Dashboard = () => {
 
   const getLeafRecordsByDates = async (linesArg) => {
     // Prefer lines passed in (fresh from API); else use Redux state
-    const allLines = linesArg && linesArg.length ? linesArg : lines;
+    console.log(linesArg);
+       const data = await fetchLines();
+    const allLines = linesArg && linesArg.length ? linesArg : data;
 
     // If no lines, reset UI and exit
     if (!allLines || allLines.length === 0) {
+      console.log("no lines");
+      
       setTotals({ super: 0, normal: 0 });
       setData([]);
       setYesterdayData([]);
@@ -111,8 +113,11 @@ const Dashboard = () => {
     const r = getAllLineIdsCSV(allLines);
 
     if (!r) {
+      console.log(allLines);
+      
       setTotals({ super: 0, normal: 0 });
       setData([]);
+       console.log("no lines");
       setYesterdayData([]);
       setYTotals({ super: 0, normal: 0 });
       return;
