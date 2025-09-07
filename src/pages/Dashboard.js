@@ -213,7 +213,7 @@ const Dashboard = () => {
       .join(",");
 
   const fmtKg = (n) =>
-    Number(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    Number(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   return (
     <div style={{ padding: 10 }}>
       {/* Logo Header */}

@@ -42,7 +42,6 @@ export const getLeafCountByLineMonthYear = (lineCode, year, month) => {
 
 // 🗑️ Delete a record by lineCode, year, month
 export const deleteLeafCount = (lineCode, year, month) => {
-  console.log(`Deleting leaf count for ${lineCode} ${year}-${month}`);
   try {
     return axios.delete(`${API_BASE}/leaf-count/${lineCode}/${year}/${month}`);
 
@@ -463,7 +462,7 @@ export async function createLine(lineData) {
 // Update a line by composite keys: lineCode and lineId
 export async function updateLine(lineCode, lineId, updateData) {
   try {
-    console.log( updateData);
+   
     
     const response = await axios.put(`${API_BASE}/lines/${lineCode}/${lineId}`, updateData);
     return response.data;

@@ -12,7 +12,6 @@ const Clock = () => {
     return () => clearInterval(timer); // Cleanup on unmount
   }, []);
 
-  const formattedTime = time.toLocaleTimeString();
   const formattedDate = time.toLocaleDateString(undefined, {
     weekday: "short",
     year: "numeric",
@@ -35,9 +34,9 @@ const Clock = () => {
       bodyStyle={{ padding: 0 }}
     >
       <div style={{ fontWeight: "bold", color: "#fff", fontSize: 30 }}>
-        {formattedTime}            </div>
-      <div style={{ fontWeight: "normal", color: "#fff", fontSize: 18 }}>
-        {formattedDate}         </div>
+        {formattedDate}            </div>
+      
+      
 
 
 
